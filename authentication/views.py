@@ -6,61 +6,6 @@ import uuid
 from datetime import date
 from functools import wraps
 
-def set_search_path(schema="petclinic"):
-    """Set search path to specified schema"""
-    with connection.cursor() as cursor:
-        cursor.execute(f"SET search_path TO {schema}")
-
-def execute_query(query, params=None, fetch=True):
-    """
-    Utility function for executing database queries with error handling
-    
-    Args:
-        query (str): SQL query to execute
-        params (list or tuple, optional): Parameters for the query
-        fetch (bool, optional): Whether to fetch results (for SELECT queries)
-        
-    Returns:
-        tuple: (data, success)
-            - data: query results or error message
-            - success: boolean indicating if the query was successful
-    """
-    try:
-        with connection.cursor() as cursor:
-            # Set search path to petclinic schema
-            cursor.execute("SET search_path TO petclinic")
-            cursor.execute(query, params or [])
-            
-            if fetch and query.strip().lower().startswith('select'):
-                results = cursor.fetchall()
-                return results, True
-            return {"message": "Query executed successfully"}, True
-    except Exception as e:
-        # Ensure transaction is rolled back on error
-        connection.rollback()
-        return str(e), False
-
-def role_required(allowed_roles):
-    """
-    Decorator for views that checks if the user has the required role.
-    """
-    def decorator(view_func):
-        @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
-            # Check if user is logged in
-            if not request.session.get('user_email'):
-                messages.error(request, 'Please log in to access this page.')
-                return redirect('authentication:login')
-            
-            user_type = request.session.get('user_type')  
-            if user_type not in allowed_roles:
-                messages.error(request, 'You do not have permission to access this page.')
-                return redirect('authentication:pengguna')
-                
-            return view_func(request, *args, **kwargs)
-        return _wrapped_view
-    return decorator
-
 
 def get_user_data(request):
     """Helper function to get user data based on session"""
@@ -175,23 +120,7 @@ def get_user_data(request):
 
 
 def show_pengguna(request):
-    """View function to display the pengguna page."""
-    # Check if user is logged in via session
-    if not request.session.get('user_email'):
-        return redirect('authentication:login')
-    
-    # Get user data based on user type
-    user_data = get_user_data(request)
-    if not user_data:
-        # If user data not found, clear session and redirect to login
-        if 'user_email' in request.session:
-            del request.session['user_email']
-        if 'user_type' in request.session:
-            del request.session['user_type']
-        messages.error(request, 'User data not found. Please login again.')
-        return redirect('authentication:login')
-    
-    return render(request, 'pengguna.html', {'user_data': user_data})
+    return render(request, 'pengguna.html')
 
 
 def dashboard(request):
@@ -311,7 +240,7 @@ def logout_user(request):
     if 'user_type' in request.session:
         del request.session['user_type']
     
-    return redirect('authentication:login')
+    return redirect('authentication:pengguna')
 
 
 def register_user(request):
