@@ -1,0 +1,389 @@
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f8f8f8;
+    color: #333;
+    background-image: url('../images/bg_landing.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.auth-page {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f8f8f8;
+    color: #333;
+    background-image: url('../images/bg_landing.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Override base layout for auth pages */
+.auth-page .page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.auth-page .navbar {
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+/* Common card containers */
+.register-form, .auth-card {
+    width: 450px;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 15px rgba(0,0,0,0.07);
+    backdrop-filter: blur(5px);
+    margin: 0 auto;
+}
+
+.register-form {
+    margin-top: 20px;
+}
+
+/* Common form elements */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #222;
+    font-size: 14px;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background-color: #fafafa;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #333;
+    outline: none;
+    background-color: #fff;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+}
+
+/* Common titles and text */
+.form-title, .auth-title {
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    color: #222;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+}
+
+.form-subtitle, .auth-description {
+    color: #555;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Common button styles */
+.submit-btn, .option-button, .add-btn, .remove-btn, .auth-btn {
+    padding: 12px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+/* Primary button style */
+.submit-btn, .auth-btn-primary {
+    background-color: #333;
+    color: white;
+    width: 100%;
+    font-size: 15px;
+    text-transform: uppercase;
+}
+
+.submit-btn {
+    margin-top: 10px;
+}
+
+/* Common hover effects */
+.submit-btn:hover, .option-button:hover, .add-btn:hover, 
+.auth-btn-primary:hover, .auth-btn-secondary:hover {
+    background-color: #111;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Active state for all buttons */
+.submit-btn:active, .option-button:active, .add-btn:active, 
+.auth-btn:active {
+    transform: translateY(0);
+}
+
+/* Messages and notifications */
+.errorlist, .messages {
+    margin-bottom: 20px;
+    padding: 0;
+    font-size: 13px;
+}
+
+.errorlist {
+    color: #d32f2f;
+    list-style-type: none;
+    margin: 5px 0;
+}
+
+.messages {
+    padding: 12px;
+    background-color: #f0f0f0;
+    border-left: 4px solid #555;
+    border-radius: 2px;
+    color: #333;
+}
+
+/* Link styles */
+.back-link {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.back-link a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s;
+}
+
+.back-link a:hover {
+    border-bottom-color: #333;
+}
+
+/* Registration options */
+.registration-options {
+    margin-bottom: 30px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.registration-type {
+    width: 48%;
+    text-align: center;
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.registration-type:hover {
+    background-color: #fafafa;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.registration-type h3 {
+    margin-bottom: 15px;
+    color: #111;
+    font-size: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    font-weight: 600;
+}
+
+/* Button groups */
+.registration-buttons, .auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Center align buttons for auth pages */
+.auth-buttons {
+    align-items: center;
+}
+
+/* Secondary button styles */
+.option-button, .auth-btn-secondary {
+    font-size: 14px;
+    width: 100%;
+}
+
+.option-button {
+    padding: 10px 0;
+    margin: 0;
+    background-color: #444;
+    color: white;
+}
+
+.auth-btn-secondary {
+    background-color: white;
+    color: #333;
+    border: 1px solid #333;
+}
+
+.option-button:hover {
+    background-color: #222;
+}
+
+.auth-btn-secondary:hover {
+    background-color: #f5f5f5;
+}
+
+.option-button.active-button {
+    background-color: #222 !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.1) inset !important;
+}
+
+/* Form containers */
+.form-container {
+    display: none;
+}
+
+.form-container.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section headers */
+.section-header {
+    font-weight: 600;
+    margin-top: 25px;
+    margin-bottom: 18px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    color: #222;
+    font-size: 16px;
+}
+
+/* Entry containers */
+.certificate-entry, .jadwal-entry {
+    border: 1px solid #eee;
+    padding: 18px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    background-color: #fafafa;
+    transition: all 0.2s ease;
+}
+
+.certificate-entry:hover, .jadwal-entry:hover {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+}
+
+/* Action buttons */
+.add-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    background-color: #555;
+    color: white;
+}
+
+.add-icon {
+    margin-right: 5px;
+    font-weight: bold;
+}
+
+.remove-btn {
+    background-color: #777;
+    color: white;
+    font-size: 12px;
+    padding: 7px 12px;
+    margin-top: 10px;
+}
+
+.remove-btn:hover {
+    background-color: #555;
+}
+
+/* Date input styling */
+.date-input {
+    position: relative;
+}
+
+.date-input input {
+    padding-right: 30px;
+}
+
+.calendar-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #777;
+}
+
+/* Required field indicator */
+.required:after {
+    content: " *";
+    color: #ff0000;
+}
+
+/* Authentication page specific styles */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #f8f8f8;
+}
+
+/* Auth button styles - specific properties */
+.auth-btn {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    text-align: center;
+}
+
+/* Center login button */
+.auth-card .submit-btn {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}

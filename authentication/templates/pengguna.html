@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Authentication - Pet Clinic</title>
+<link rel="stylesheet" href="{% static 'css/css_auth.css' %}">
+{% endblock meta %}
+
+{% block content %}
+<div class="auth-card">
+    <h1 class="auth-title">Pet Clinic</h1>
+    <p class="auth-description">Welcome to our pet clinic system. Please login or register to continue.</p>
+    
+    <div class="auth-buttons">
+        <a href="{% url 'authentication:login' %}" class="auth-btn auth-btn-primary">
+            Login
+        </a>
+        
+        <a href="{% url 'authentication:register' %}" class="auth-btn auth-btn-secondary">
+            Register
+        </a>
+    </div>
+</div>
+{% endblock content %}

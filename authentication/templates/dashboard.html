@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+    <title>Dashboard - Pet Clinic</title>
+    <link rel="stylesheet" href="{% static 'css/css_auth.css' %}">
+   
+{% endblock meta %}
+
+{% block content %}
+<div class="container mx-auto my-10 px-4 flex justify-center">
+    <div class="w-full max-w-4xl">
+        {% if user_data.user_type == 'individu' %}
+            <!-- Dashboard Klien Individu -->
+            <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="bg-white/20 text-center">
+                    <h1 class="text-stone-900 text-2xl font-bold pt-5 py-5">PROFILE KLIEN</h1>
+                </div>
+                
+                <div class="flex justify-end p-4 bg-white/30 border-b border-gray-200">
+                    <a href="{% url 'authentication:update_password' %}" class="bg-stone-700 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Password</a>
+                    <a href="{% url 'authentication:update_profile' %}" class="bg-stone-800 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Profile</a>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Identitas</div>
+                        <div class="w-full md:w-7/10">{{ user_data.no_identitas }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Email</div>
+                        <div class="w-full md:w-7/10">{{ user_data.email }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nama</div>
+                        <div class="w-full md:w-7/10">{{ user_data.nama_depan }} {% if user_data.nama_tengah %}{{ user_data.nama_tengah }}{% endif %} {{ user_data.nama_belakang }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Tanggal Pendaftaran</div>
+                        <div class="w-full md:w-7/10">{{ user_data.tanggal_registrasi }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Alamat</div>
+                        <div class="w-full md:w-7/10">{{ user_data.alamat }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Telepon</div>
+                        <div class="w-full md:w-7/10">{{ user_data.nomor_telepon }}</div>
+                    </div>
+                </div>
+            </div>
+            
+        {% elif user_data.user_type == 'perusahaan' %}
+            <!-- Dashboard Klien Perusahaan -->
+            <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="bg-white/20 text-center">
+                    <h1 class="text-stone-900 text-2xl font-bold pt-5 py-5">PROFILE KLIEN</h1>
+                </div>
+                
+                <div class="flex justify-end p-4 bg-white/30 border-bborder-gray-200">
+                    <a href="{% url 'authentication:update_password' %}" class="bg-stone-700 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Password</a>
+                    <a href="{% url 'authentication:update_profile' %}" class="bg-stone-800 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Profile</a>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Identitas</div>
+                        <div class="w-full md:w-7/10">{{ user_data.no_identitas }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Email</div>
+                        <div class="w-full md:w-7/10">{{ user_data.email }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nama Perusahaan</div>
+                        <div class="w-full md:w-7/10">{{ user_data.nama_perusahaan }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Tanggal Pendaftaran</div>
+                        <div class="w-full md:w-7/10">{{ user_data.tanggal_registrasi }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Alamat</div>
+                        <div class="w-full md:w-7/10">{{ user_data.alamat }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Telepon</div>
+                        <div class="w-full md:w-7/10">{{ user_data.nomor_telepon }}</div>
+                    </div>
+                </div>
+            </div>
+            
+        {% elif user_data.user_type == 'front_desk' %}
+            <!-- Dashboard Front-Desk Officer -->
+            <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="bg-white/20 text-center">
+                    <h1 class="text-stone-900 text-2xl font-bold pt-5 py-5">PROFILE FRONT-DESK OFFICER</h1>
+                </div>
+                
+                <div class="flex justify-end p-4 bg-white/30 border-bborder-gray-200">
+                    <a href="{% url 'authentication:update_password' %}" class="bg-stone-700 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Password</a>
+                    <a href="{% url 'authentication:update_profile' %}" class="bg-stone-800 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Profile</a>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Identitas</div>
+                        <div class="w-full md:w-7/10">{{ user_data.no_pegawai }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Email</div>
+                        <div class="w-full md:w-7/10">{{ user_data.email }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Tanggal Diterima</div>
+                        <div class="w-full md:w-7/10">{{ user_data.tanggal_mulai_kerja }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Tanggal Akhir Kerja</div>
+                        <div class="w-full md:w-7/10">{{ user_data.tanggal_akhir_kerja|default:"-" }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Alamat</div>
+                        <div class="w-full md:w-7/10">{{ user_data.alamat }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Telepon</div>
+                        <div class="w-full md:w-7/10">{{ user_data.nomor_telepon }}</div>
+                    </div>
+                </div>
+            </div>
+            
+        {% elif user_data.user_type == 'dokter' %}
+            <!-- Dashboard Dokter Hewan -->
+            <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="bg-white/20 text-center">
+                    <h1 class="text-stone-900 text-2xl font-bold pt-5 py-5">PROFILE DOKTER</h1>
+                </div>
+                
+                <div class="flex justify-end p-4 bg-white/30 border-bborder-gray-200">
+                    <a href="{% url 'authentication:update_password' %}" class="bg-stone-700 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Password</a>
+                    <a href="{% url 'authentication:update_profile' %}" class="bg-stone-800 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Profile</a>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Identitas</div>
+                        <div class="w-full md:w-7/10">{{ user_data.no_pegawai }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Izin Praktik</div>
+                        <div class="w-full md:w-7/10">{{ user_data.no_izin_panggilan }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Email</div>
+                        <div class="w-full md:w-7/10">{{ user_data.email }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Tanggal Diterima</div>
+                        <div class="w-full md:w-7/10">{{ user_data.tanggal_mulai_kerja }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Tanggal Akhir Kerja</div>
+                        <div class="w-full md:w-7/10">{{ user_data.tanggal_akhir_kerja|default:"-" }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Alamat</div>
+                        <div class="w-full md:w-7/10">{{ user_data.alamat }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Telepon</div>
+                        <div class="w-full md:w-7/10">{{ user_data.nomor_telepon }}</div>
+                    </div>
+                    
+                    <!-- Sertifikat Dokter -->
+                    <h4 class="text-stone-800 font-semibold text-lg mt-6 mb-4 pb-2 border-b-2 border-stone-800">Daftar Sertifikat</h4>
+                    
+                    <div class="mb-6 overflow-x-auto">
+                        <table class="min-w-full border-collapse text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">No</th>
+                                    <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Nomor Sertifikat</th>
+                                    <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Nama Sertifikat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sertifikat in user_data.sertifikat %}
+                                <tr class="{% cycle '' 'bg-gray-50' %}">
+                                    <td class="border border-gray-300 p-3">{{ forloop.counter }}</td>
+                                    <td class="border border-gray-300 p-3">{{ sertifikat.no_sertifikat }}</td>
+                                    <td class="border border-gray-300 p-3">{{ sertifikat.nama_sertifikat }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Jadwal Praktik Dokter -->
+                    <h4 class="text-stone-800 font-semibold text-lg mt-6 mb-4 pb-2 border-b-2 border-stone-800">Daftar Jadwal Praktik</h4>
+                    
+                    <div class="mb-6 overflow-x-auto">
+                        <table class="min-w-full border-collapse text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">No</th>
+                                    <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Hari</th>
+                                    <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Jam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for jadwal in user_data.jadwal %}
+                                <tr class="{% cycle '' 'bg-gray-50' %}">
+                                    <td class="border border-gray-300 p-3">{{ forloop.counter }}</td>
+                                    <td class="border border-gray-300 p-3">{{ jadwal.hari }}</td>
+                                    <td class="border border-gray-300 p-3">{{ jadwal.jam }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+        {% elif user_data.user_type == 'perawat' %}
+            <!-- Dashboard Perawat Hewan -->
+            <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="bg-white/20 text-center">
+                    <h1 class="text-stone-900 text-2xl font-bold pt-5 py-5">PROFILE PERAWAT</h1>
+                </div>
+                
+                <div class="flex justify-end p-4 bg-white/30 border-bborder-gray-200">
+                    <a href="{% url 'authentication:update_password' %}" class="bg-stone-700 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Password</a>
+                    <a href="{% url 'authentication:update_profile' %}" class="bg-stone-800 text-white px-4 py-2 rounded text-sm ml-3 transition duration-300">Update Profile</a>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Identitas</div>
+                        <div class="w-full md:w-7/10">{{ user_data.no_pegawai }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Izin Praktik</div>
+                        <div class="w-full md:w-7/10">{{ user_data.no_izin_panggilan }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Email</div>
+                        <div class="w-full md:w-7/10">{{ user_data.email }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Tanggal Diterima</div>
+                        <div class="w-full md:w-7/10">{{ user_data.tanggal_mulai_kerja }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Tanggal Akhir Kerja</div>
+                        <div class="w-full md:w-7/10">{{ user_data.tanggal_akhir_kerja|default:"-" }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Alamat</div>
+                        <div class="w-full md:w-7/10">{{ user_data.alamat }}</div>
+                    </div>
+                    <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
+                        <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Telepon</div>
+                        <div class="w-full md:w-7/10">{{ user_data.nomor_telepon }}</div>
+                    </div>
+                    
+                    <!-- Sertifikat Perawat -->
+                    <h4 class="text-stone-800 font-semibold text-lg mt-6 mb-4 pb-2 border-b-2 border-stone-800">Daftar Sertifikat</h4>
+                    
+                    <div class="mb-6 overflow-x-auto">
+                        <table class="min-w-full border-collapse text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">No</th>
+                                    <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Nomor Sertifikat</th>
+                                    <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Nama Sertifikat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sertifikat in user_data.sertifikat %}
+                                <tr class="{% cycle '' 'bg-gray-50' %}">
+                                    <td class="border border-gray-300 p-3">{{ forloop.counter }}</td>
+                                    <td class="border border-gray-300 p-3">{{ sertifikat.no_sertifikat }}</td>
+                                    <td class="border border-gray-300 p-3">{{ sertifikat.nama_sertifikat }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

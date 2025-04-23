@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+    <title>Register - Pet Clinic</title>
+    <link rel="stylesheet" href="{% static 'css/css_auth.css' %}">
+{% endblock meta %}
+
+{% block content %}
+    <div class="register-form">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %} 
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <h2 class="form-title">REGISTRASI AKUN</h2>
+        <div class="registration-options">
+
+            <div class="registration-type">
+                <h3>Pegawai</h3>
+                <div class="registration-buttons">
+                    <button type="button" class="option-button" data-form="front-desk">Front-Desk Officer</button>
+                    <button type="button" class="option-button" data-form="dokter">Dokter Hewan</button>
+                    <button type="button" class="option-button" data-form="perawat">Perawat Hewan</button>
+                </div>
+            </div>
+            
+            <div class="registration-type">
+                <h3>Klien</h3>
+                <div class="registration-buttons">
+                    <button type="button" class="option-button" data-form="individu">Individu</button>
+                    <button type="button" class="option-button" data-form="perusahaan">Perusahaan</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Front-Desk Officer Form -->
+        <div id="front-desk-form" class="form-container">
+            <h2 class="form-title">FORM REGISTER</h2>
+            <h3 class="form-subtitle">Front-Desk Officer</h3>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="user_type" value="front_desk">
+                
+                <div class="form-group">
+                    <label for="email_front" class="required">Email</label>
+                    <input type="email" id="email_front" name="email" placeholder="Email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password_front" class="required">Password</label>
+                    <input type="password" id="password_front" name="password" placeholder="Password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomor_telepon_front" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon_front" name="nomor_telepon" placeholder="Nomor Telepon" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tanggal_mulai_kerja_front" class="required">Tanggal Diterima</label>
+                    <div class="date-input">
+                        <input type="date" id="tanggal_mulai_kerja_front" name="tanggal_mulai_kerja" placeholder="Tanggal Diterima" required>
+                        <span class="calendar-icon">📅</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="alamat_front" class="required">Alamat</label>
+                    <textarea id="alamat_front" name="alamat" placeholder="Alamat" rows="3" required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Register</button>
+            </form>
+        </div>
+        
+        <!-- Dokter Hewan Form -->
+        <div id="dokter-form" class="form-container">
+            <h2 class="form-title">FORM REGISTER</h2>
+            <h3 class="form-subtitle">Dokter Hewan</h3>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="user_type" value="dokter">
+                
+                <h4 class="section-header">Informasi Umum</h4>
+                
+                <div class="form-group">
+                    <label for="nomor_izin_praktik" class="required">Nomor Izin Praktik</label>
+                    <input type="text" id="nomor_izin_praktik" name="no_izin_panggilan" placeholder="Nomor Izin Praktik" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email_dokter" class="required">Email</label>
+                    <input type="email" id="email_dokter" name="email" placeholder="Email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password_dokter" class="required">Password</label>
+                    <input type="password" id="password_dokter" name="password" placeholder="Password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomor_telepon_dokter" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon_dokter" name="nomor_telepon" placeholder="Nomor Telepon" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tanggal_mulai_kerja_dokter" class="required">Tanggal Diterima</label>
+                    <div class="date-input">
+                        <input type="date" id="tanggal_mulai_kerja_dokter" name="tanggal_mulai_kerja" placeholder="Tanggal Diterima" required>
+                        <span class="calendar-icon"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="alamat_dokter" class="required">Alamat</label>
+                    <textarea id="alamat_dokter" name="alamat" placeholder="Alamat" rows="3" required></textarea>
+                </div>
+                
+                <h4 class="section-header">Kompetensi</h4>
+                
+                <div id="certificates-container">
+                    <div class="certificate-entry">
+                        <div class="form-group">
+                            <label for="no_sertifikat_kompetensi" class="required">Nomor Sertifikat</label>
+                            <input type="text" id="no_sertifikat_kompetensi" name="no_sertifikat_kompetensi[]" placeholder="Nomor Sertifikat" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="nama_sertifikat" class="required">Nama Sertifikat</label>
+                            <input type="text" id="nama_sertifikat" name="nama_sertifikat[]" placeholder="Nama Sertifikat" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" id="add-certificate-btn" class="add-btn">
+                        <span class="add-icon">+</span> Tambah Sertifikat
+                    </button>
+                </div>
+                
+                <h4 class="section-header">Jadwal Praktik</h4>
+                
+                <div id="jadwal-container">
+                    <div class="jadwal-entry">
+                        <div class="form-group">
+                            <label for="hari" class="required">Hari</label>
+                            <select id="hari" name="hari[]" required>
+                                <option value="">Pilih Hari</option>
+                                <option value="Senin">Senin</option>
+                                <option value="Selasa">Selasa</option>
+                                <option value="Rabu">Rabu</option>
+                                <option value="Kamis">Kamis</option>
+                                <option value="Jumat">Jumat</option>
+                                <option value="Sabtu">Sabtu</option>
+                                <option value="Minggu">Minggu</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="jam" class="required">Jam</label>
+                            <input type="text" id="jam" name="jam[]" placeholder="contoh: 09:00-12:00" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" id="add-jadwal-btn" class="add-btn">
+                        <span class="add-icon">+</span> Tambah Jadwal
+                    </button>
+                </div>
+                
+                <button type="submit" class="submit-btn">Register</button>
+            </form>
+            
+        </div>
+        
+        <!-- Perawat Hewan Form -->
+        <div id="perawat-form" class="form-container">
+            <h2 class="form-title">FORM REGISTER</h2>
+            <h3 class="form-subtitle">Perawat Hewan</h3>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="user_type" value="perawat">
+                
+                <h4 class="section-header">Informasi Umum</h4>
+                
+                <div class="form-group">
+                    <label for="nomor_izin_praktik_perawat" class="required">Nomor Izin Praktik</label>
+                    <input type="text" id="nomor_izin_praktik_perawat" name="no_izin_panggilan" placeholder="Nomor Izin Praktik" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email_perawat" class="required">Email</label>
+                    <input type="email" id="email_perawat" name="email" placeholder="Email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password_perawat" class="required">Password</label>
+                    <input type="password" id="password_perawat" name="password" placeholder="Password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomor_telepon_perawat" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon_perawat" name="nomor_telepon" placeholder="Nomor Telepon" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tanggal_mulai_kerja_perawat" class="required">Tanggal Diterima</label>
+                    <div class="date-input">
+                        <input type="date" id="tanggal_mulai_kerja_perawat" name="tanggal_mulai_kerja" placeholder="Tanggal Diterima" required>
+                        <span class="calendar-icon">📅</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="alamat_perawat" class="required">Alamat</label>
+                    <textarea id="alamat_perawat" name="alamat" placeholder="Alamat" rows="3" required></textarea>
+                </div>
+                
+                <h4 class="section-header">Kompetensi</h4>
+                
+                <div id="certificates-container-perawat">
+                    <div class="certificate-entry">
+                        <div class="form-group">
+                            <label for="no_sertifikat_kompetensi_perawat" class="required">Nomor Sertifikat</label>
+                            <input type="text" id="no_sertifikat_kompetensi_perawat" name="no_sertifikat_kompetensi[]" placeholder="Nomor Sertifikat" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="nama_sertifikat_perawat" class="required">Nama Sertifikat</label>
+                            <input type="text" id="nama_sertifikat_perawat" name="nama_sertifikat[]" placeholder="Nama Sertifikat" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" id="add-certificate-btn-perawat" class="add-btn">
+                        <span class="add-icon">+</span> Tambah Sertifikat
+                    </button>
+                </div>
+                
+                <button type="submit" class="submit-btn">Register</button>
+            </form>
+        </div>
+        
+        <!-- Individu Form -->
+        <div id="individu-form" class="form-container">
+            <h2 class="form-title">FORM REGISTER</h2>
+            <h3 class="form-subtitle">Klien - Individu</h3>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="user_type" value="individu">
+                
+                <div class="form-group">
+                    <label for="email_individu" class="required">Email</label>
+                    <input type="email" id="email_individu" name="email" placeholder="Email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nama_depan" class="required">Nama Depan</label>
+                    <input type="text" id="nama_depan" name="nama_depan" placeholder="Nama Depan" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nama_tengah">Nama Tengah</label>
+                    <input type="text" id="nama_tengah" name="nama_tengah" placeholder="Nama Tengah">
+                </div>
+                
+                <div class="form-group">
+                    <label for="nama_belakang" class="required">Nama Belakang</label>
+                    <input type="text" id="nama_belakang" name="nama_belakang" placeholder="Nama Belakang" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password_individu" class="required">Password</label>
+                    <input type="password" id="password_individu" name="password" placeholder="Password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomor_telepon_individu" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon_individu" name="nomor_telepon" placeholder="Nomor Telepon" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="alamat_individu" class="required">Alamat</label>
+                    <textarea id="alamat_individu" name="alamat" placeholder="Alamat" rows="3" required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Register</button>
+            </form>
+            
+        </div>
+        
+        <!-- Perusahaan Form -->
+        <div id="perusahaan-form" class="form-container">
+            <h2 class="form-title">FORM REGISTER</h3>
+            <h3 class="form-subtitle">Klien - Perusahaan</h3>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="user_type" value="perusahaan">
+                
+                <div class="form-group">
+                    <label for="email_perusahaan" class="required">Email</label>
+                    <input type="email" id="email_perusahaan" name="email" placeholder="Email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nama_perusahaan" class="required">Nama Perusahaan</label>
+                    <input type="text" id="nama_perusahaan" name="nama_perusahaan" placeholder="Nama Perusahaan" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password_perusahaan" class="required">Password</label>
+                    <input type="password" id="password_perusahaan" name="password" placeholder="Password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomor_telepon_perusahaan" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon_perusahaan" name="nomor_telepon" placeholder="Nomor Telepon" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="alamat_perusahaan" class="required">Alamat</label>
+                    <textarea id="alamat_perusahaan" name="alamat" placeholder="Alamat" rows="3" required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Register</button>
+            </form>
+        </div>
+        
+        <div class="back-link">
+            <p>Already have an account? <a href="/login/">Login here</a></p>
+            <p><a href="/">Back to Home</a></p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const optionButtons = document.querySelectorAll('.option-button');
+            const formContainers = document.querySelectorAll('.form-container');
+            
+            // Hide all forms initially
+            formContainers.forEach(container => {
+                container.classList.remove('active');
+            });
+            
+            optionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const formId = this.getAttribute('data-form') + '-form';
+                    
+                    // Hide all forms
+                    formContainers.forEach(container => {
+                        container.classList.remove('active');
+                    });
+                    
+                    // Show selected form
+                    document.getElementById(formId).classList.add('active');
+                    
+                    // Reset all buttons to default style
+                    optionButtons.forEach(btn => {
+                        btn.classList.remove('active-button');
+                        btn.style.opacity = '0.85';
+                        btn.style.backgroundColor = '#444';
+                    });
+                    
+                    // Apply active style to clicked button
+                    this.classList.add('active-button');
+                    this.style.opacity = '1';
+                    this.style.backgroundColor = '#222';
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.1) inset';
+                });
+            });
+            
+            // Function to add more certificate entries for doctors
+            document.getElementById('add-certificate-btn')?.addEventListener('click', function() {
+                const certificatesContainer = document.getElementById('certificates-container');
+                const newEntry = document.createElement('div');
+                newEntry.className = 'certificate-entry';
+                newEntry.innerHTML = `
+                    <div class="form-group">
+                        <label class="required">Nomor Sertifikat</label>
+                        <input type="text" name="no_sertifikat_kompetensi[]" placeholder="Nomor Sertifikat" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Nama Sertifikat</label>
+                        <input type="text" name="nama_sertifikat[]" placeholder="Nama Sertifikat" required>
+                    </div>
+                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Hapus</button>
+                `;
+                certificatesContainer.appendChild(newEntry);
+            });
+            
+            // Function to add more certificate entries for nurses
+            document.getElementById('add-certificate-btn-perawat')?.addEventListener('click', function() {
+                const certificatesContainer = document.getElementById('certificates-container-perawat');
+                const newEntry = document.createElement('div');
+                newEntry.className = 'certificate-entry';
+                newEntry.innerHTML = `
+                    <div class="form-group">
+                        <label class="required">Nomor Sertifikat</label>
+                        <input type="text" name="no_sertifikat_kompetensi[]" placeholder="Nomor Sertifikat" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Nama Sertifikat</label>
+                        <input type="text" name="nama_sertifikat[]" placeholder="Nama Sertifikat" required>
+                    </div>
+                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Hapus</button>
+                `;
+                certificatesContainer.appendChild(newEntry);
+            });
+            
+            // Function to add more schedule entries for doctors
+            document.getElementById('add-jadwal-btn')?.addEventListener('click', function() {
+                const jadwalContainer = document.getElementById('jadwal-container');
+                const newEntry = document.createElement('div');
+                newEntry.className = 'jadwal-entry';
+                newEntry.innerHTML = `
+                    <div class="form-group">
+                        <label class="required">Hari</label>
+                        <select name="hari[]" required>
+                            <option value="">Pilih Hari</option>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                            <option value="Minggu">Minggu</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">Jam</label>
+                        <input type="text" name="jam[]" placeholder="contoh: 09:00-12:00" required>
+                    </div>
+                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">Hapus</button>
+                `;
+                jadwalContainer.appendChild(newEntry);
+            });
+        });
+    </script>
+{% endblock content %}

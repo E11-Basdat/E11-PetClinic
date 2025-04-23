@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+    <title>Update Profile - Pet Clinic</title>
+    <link rel="stylesheet" href="{% static 'css/css_auth.css' %}">
+{% endblock meta %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4">
+    
+    <div class="register-form">
+        <h1 class="form-title">Update Profile</h1>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %} 
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{% url 'authentication:update_profile' %}">
+            {% csrf_token %}
+            
+            {% if user_data.user_type == 'individu' %}
+                <!-- Form for Individu -->
+                <div class="form-group">
+                    <label for="alamat" class="required">Alamat</label>
+                    <textarea id="alamat" name="alamat" placeholder="Alamat" rows="3" required>{{ user_data.alamat }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="nomor_telepon" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon" name="nomor_telepon" value="{{ user_data.nomor_telepon }}" placeholder="Nomor Telepon" required>
+                </div>
+                <div class="form-group">
+                    <label for="nama_depan" class="required">Nama Depan</label>
+                    <input type="text" id="nama_depan" name="nama_depan" value="{{ user_data.nama_depan }}" placeholder="Nama Depan" required>
+                </div>
+                <div class="form-group">
+                    <label for="nama_tengah">Nama Tengah</label>
+                    <input type="text" id="nama_tengah" name="nama_tengah" value="{{ user_data.nama_tengah }}" placeholder="Nama Tengah">
+                </div>
+                <div class="form-group">
+                    <label for="nama_belakang" class="required">Nama Belakang</label>
+                    <input type="text" id="nama_belakang" name="nama_belakang" value="{{ user_data.nama_belakang }}" placeholder="Nama Belakang" required>
+                </div>
+                
+            {% elif user_data.user_type == 'perusahaan' %}
+                <!-- Form for Perusahaan -->
+                <div class="form-group">
+                    <label for="alamat" class="required">Alamat</label>
+                    <textarea id="alamat" name="alamat" placeholder="Alamat" rows="3" required>{{ user_data.alamat }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="nomor_telepon" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon" name="nomor_telepon" value="{{ user_data.nomor_telepon }}" placeholder="Nomor Telepon" required>
+                </div>
+                <div class="form-group">
+                    <label for="nama_perusahaan" class="required">Nama Perusahaan</label>
+                    <input type="text" id="nama_perusahaan" name="nama_perusahaan" value="{{ user_data.nama_perusahaan }}" placeholder="Nama Perusahaan" required>
+                </div>
+                
+            {% elif user_data.user_type == 'front_desk' %}
+                <!-- Form for Front Desk -->
+                <div class="form-group">
+                    <label for="alamat" class="required">Alamat</label>
+                    <textarea id="alamat" name="alamat" placeholder="Alamat" rows="3" required>{{ user_data.alamat }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="nomor_telepon" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon" name="nomor_telepon" value="{{ user_data.nomor_telepon }}" placeholder="Nomor Telepon" required>
+                </div>
+                <div class="form-group">
+                    <label for="tanggal_akhir_kerja">Tanggal Akhir Kerja</label>
+                    <div class="date-input">
+                        <input type="date" id="tanggal_akhir_kerja" name="tanggal_akhir_kerja" value="{{ user_data.tanggal_akhir_kerja|default:'' }}">
+                        <span class="calendar-icon">📅</span>
+                    </div>
+                </div>
+                
+            {% elif user_data.user_type == 'dokter' %}
+                <!-- Form for Dokter -->
+                <div class="form-group">
+                    <label for="alamat" class="required">Alamat</label>
+                    <textarea id="alamat" name="alamat" placeholder="Alamat" rows="3" required>{{ user_data.alamat }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="nomor_telepon" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon" name="nomor_telepon" value="{{ user_data.nomor_telepon }}" placeholder="Nomor Telepon" required>
+                </div>
+                <div class="form-group">
+                    <label for="tanggal_akhir_kerja">Tanggal Akhir Kerja</label>
+                    <div class="date-input">
+                        <input type="date" id="tanggal_akhir_kerja" name="tanggal_akhir_kerja" value="{{ user_data.tanggal_akhir_kerja|default:'' }}">
+                        <span class="calendar-icon">📅</span>
+                    </div>
+                </div>
+                
+                <!-- Sertifikat Kompetensi -->
+                <h4 class="section-header">Sertifikat Kompetensi</h4>
+                <div id="sertifikat-container">
+                    {% for sertifikat in user_data.sertifikat %}
+                    <div class="certificate-entry">
+                        <div class="form-group">
+                            <label class="required">Nomor Sertifikat</label>
+                            <input type="text" name="no_sertifikat_kompetensi[]" value="{{ sertifikat.no_sertifikat }}" placeholder="Nomor Sertifikat" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Nama Sertifikat</label>
+                            <input type="text" name="nama_sertifikat[]" value="{{ sertifikat.nama_sertifikat }}" placeholder="Nama Sertifikat" required>
+                        </div>
+                        <button type="button" class="remove-btn remove-sertifikat">Hapus</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <button type="button" id="add-sertifikat" class="add-btn">
+                        <span class="add-icon">+</span> Tambah Sertifikat
+                    </button>
+                </div>
+                
+                <!-- Jadwal Praktik -->
+                <h4 class="section-header">Jadwal Praktik</h4>
+                <div id="jadwal-container">
+                    {% for jadwal in user_data.jadwal %}
+                    <div class="jadwal-entry">
+                        <div class="form-group">
+                            <label class="required">Hari</label>
+                            <select name="hari[]" required>
+                                <option value="Senin" {% if jadwal.hari == 'Senin' %}selected{% endif %}>Senin</option>
+                                <option value="Selasa" {% if jadwal.hari == 'Selasa' %}selected{% endif %}>Selasa</option>
+                                <option value="Rabu" {% if jadwal.hari == 'Rabu' %}selected{% endif %}>Rabu</option>
+                                <option value="Kamis" {% if jadwal.hari == 'Kamis' %}selected{% endif %}>Kamis</option>
+                                <option value="Jumat" {% if jadwal.hari == 'Jumat' %}selected{% endif %}>Jumat</option>
+                                <option value="Sabtu" {% if jadwal.hari == 'Sabtu' %}selected{% endif %}>Sabtu</option>
+                                <option value="Minggu" {% if jadwal.hari == 'Minggu' %}selected{% endif %}>Minggu</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Jam</label>
+                            <input type="text" name="jam[]" value="{{ jadwal.jam }}" placeholder="Format: HH:MM - HH:MM" required>
+                        </div>
+                        <button type="button" class="remove-btn remove-jadwal">Hapus</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <button type="button" id="add-jadwal" class="add-btn">
+                        <span class="add-icon">+</span> Tambah Jadwal
+                    </button>
+                </div>
+                
+            {% elif user_data.user_type == 'perawat' %}
+                <!-- Form for Perawat -->
+                <div class="form-group">
+                    <label for="alamat" class="required">Alamat</label>
+                    <textarea id="alamat" name="alamat" placeholder="Alamat" rows="3" required>{{ user_data.alamat }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="nomor_telepon" class="required">Nomor Telepon</label>
+                    <input type="tel" id="nomor_telepon" name="nomor_telepon" value="{{ user_data.nomor_telepon }}" placeholder="Nomor Telepon" required>
+                </div>
+                <div class="form-group">
+                    <label for="tanggal_akhir_kerja">Tanggal Akhir Kerja</label>
+                    <div class="date-input">
+                        <input type="date" id="tanggal_akhir_kerja" name="tanggal_akhir_kerja" value="{{ user_data.tanggal_akhir_kerja|default:'' }}">
+                        <span class="calendar-icon">📅</span>
+                    </div>
+                </div>
+                
+                <!-- Sertifikat Kompetensi -->
+                <h4 class="section-header">Sertifikat Kompetensi</h4>
+                <div id="sertifikat-container">
+                    {% for sertifikat in user_data.sertifikat %}
+                    <div class="certificate-entry">
+                        <div class="form-group">
+                            <label class="required">Nomor Sertifikat</label>
+                            <input type="text" name="no_sertifikat_kompetensi[]" value="{{ sertifikat.no_sertifikat }}" placeholder="Nomor Sertifikat" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Nama Sertifikat</label>
+                            <input type="text" name="nama_sertifikat[]" value="{{ sertifikat.nama_sertifikat }}" placeholder="Nama Sertifikat" required>
+                        </div>
+                        <button type="button" class="remove-btn remove-sertifikat">Hapus</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <button type="button" id="add-sertifikat" class="add-btn">
+                        <span class="add-icon">+</span> Tambah Sertifikat
+                    </button>
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="submit-btn">Simpan Perubahan</button>
+            
+            <div class="back-link">
+                <a href="{% url 'authentication:dashboard' %}">Back to Dashboard</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add sertifikat functionality
+        document.getElementById('add-sertifikat')?.addEventListener('click', function() {
+            const container = document.getElementById('sertifikat-container');
+            const newEntry = document.createElement('div');
+            newEntry.className = 'certificate-entry';
+            newEntry.innerHTML = `
+                <div class="form-group">
+                    <label class="required">Nomor Sertifikat</label>
+                    <input type="text" name="no_sertifikat_kompetensi[]" placeholder="Nomor Sertifikat" required>
+                </div>
+                <div class="form-group">
+                    <label class="required">Nama Sertifikat</label>
+                    <input type="text" name="nama_sertifikat[]" placeholder="Nama Sertifikat" required>
+                </div>
+                <button type="button" class="remove-btn remove-sertifikat">Hapus</button>
+            `;
+            container.appendChild(newEntry);
+        });
+        
+        // Remove sertifikat functionality
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('remove-sertifikat')) {
+                e.target.closest('.certificate-entry').remove();
+            }
+        });
+        
+        // Add jadwal functionality
+        document.getElementById('add-jadwal')?.addEventListener('click', function() {
+            const container = document.getElementById('jadwal-container');
+            const newEntry = document.createElement('div');
+            newEntry.className = 'jadwal-entry';
+            newEntry.innerHTML = `
+                <div class="form-group">
+                    <label class="required">Hari</label>
+                    <select name="hari[]" required>
+                        <option value="Senin">Senin</option>
+                        <option value="Selasa">Selasa</option>
+                        <option value="Rabu">Rabu</option>
+                        <option value="Kamis">Kamis</option>
+                        <option value="Jumat">Jumat</option>
+                        <option value="Sabtu">Sabtu</option>
+                        <option value="Minggu">Minggu</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="required">Jam</label>
+                    <input type="text" name="jam[]" placeholder="Format: HH:MM - HH:MM" required>
+                </div>
+                <button type="button" class="remove-btn remove-jadwal">Hapus</button>
+            `;
+            container.appendChild(newEntry);
+        });
+        
+        // Remove jadwal functionality
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('remove-jadwal')) {
+                e.target.closest('.jadwal-entry').remove();
+            }
+        });
+    });
+</script>
+{% endblock %}
