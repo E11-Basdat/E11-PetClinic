@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Create New Vaccination{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="w-full">
+        <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="bg-white/20 text-center">
+                <h1 class="text-stone-900 text-2xl font-bold pt-5 py-5">Create New Vaccination</h1>
+            </div>
+            
+            {% if messages %}
+            <div class="messages p-4"></div>
+                {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}bg-red-100 border-l-4 border-red-500 text-red-700{% elif message.tags == 'success' %}bg-stone-100 border-l-4 border-stone-500 text-stone-700{% else %}bg-stone-50 border-l-4 border-stone-400 text-stone-600{% endif %} p-4 mb-3 rounded">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="p-5">
+                <form method="post" action="{% url 'add_vaccination' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-6">
+                        <label for="id_kunjungan" class="block text-stone-700 font-medium mb-2">Kunjungan</label>
+                        <select name="id_kunjungan" id="id_kunjungan" class="w-full rounded border-gray-300 focus:border-stone-500 focus:ring focus:ring-stone-200 p-2" required>
+                            <option value="">Pilih Kunjungan</option>
+                            {% for visit in visits %}
+                            <option value="{{ visit.id_kunjungan }}">
+                                {{ visit.id_kunjungan }} 
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label for="kode_vaksin" class="block text-stone-700 font-medium mb-2">Vaksin</label>
+                        <select name="kode_vaksin" id="kode_vaksin" class="w-full rounded border-gray-300 focus:border-stone-500 focus:ring focus:ring-stone-200 p-2" required>
+                            <option value="">Pilih Vaksin</option>
+                            {% for vaccine in vaccines %}
+                            <option value="{{ vaccine.kode }}" {% if vaccine.stok <= 0 %}disabled{% endif %}>
+                                {{ vaccine.display }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-gray-500 mt-1 block">Format: ID - Nama [Stok]</small>
+                    </div>
+                    
+                    <div class="flex justify-end gap-3 mt-6">
+                        <a href="{% url 'vaccination_list' %}" class="bg-gray-500 text-white px-4 py-2 rounded text-sm transition duration-300">Cancel</a>
+                        <button type="submit" class="bg-stone-800 text-white px-4 py-2 rounded text-sm transition duration-300">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
