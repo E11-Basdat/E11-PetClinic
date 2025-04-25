@@ -10,6 +10,13 @@
 {% block content %}
 <div class="container mx-auto my-10 px-4 flex justify-center">
     <div class="w-full max-w-4xl">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %} 
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% if user_data.user_type == 'individu' %}
             <!-- Dashboard Klien Individu -->
             <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
