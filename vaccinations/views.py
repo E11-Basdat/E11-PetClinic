@@ -149,17 +149,28 @@ def get_nurse_id(request):
     
     return result[0] if result else None
 
-def get_vaccines_list():
+def get_vaccines_list(search=None):
     """Get list of all vaccines with usage information"""
     with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT v.kode, v.nama, v.harga, v.stok,
-                   CASE WHEN COUNT(k.id_kunjungan) > 0 THEN false ELSE true END as can_delete
-            FROM PETCLINIC.VAKSIN v
-            LEFT JOIN PETCLINIC.KUNJUNGAN k ON v.kode = k.kode_vaksin
-            GROUP BY v.kode, v.nama, v.harga, v.stok
-            ORDER BY v.kode
-        """)
+        if search:
+            cursor.execute("""
+                SELECT v.kode, v.nama, v.harga, v.stok,
+                       CASE WHEN COUNT(k.id_kunjungan) > 0 THEN false ELSE true END as can_delete
+                FROM PETCLINIC.VAKSIN v
+                LEFT JOIN PETCLINIC.KUNJUNGAN k ON v.kode = k.kode_vaksin
+                WHERE LOWER(v.nama) LIKE LOWER(%s)
+                GROUP BY v.kode, v.nama, v.harga, v.stok
+                ORDER BY v.kode DESC
+            """, [f'%{search}%'])
+        else:
+            cursor.execute("""
+                SELECT v.kode, v.nama, v.harga, v.stok,
+                       CASE WHEN COUNT(k.id_kunjungan) > 0 THEN false ELSE true END as can_delete
+                FROM PETCLINIC.VAKSIN v
+                LEFT JOIN PETCLINIC.KUNJUNGAN k ON v.kode = k.kode_vaksin
+                GROUP BY v.kode, v.nama, v.harga, v.stok
+                ORDER BY v.kode DESC
+            """)
         
         vaccines = cursor.fetchall()
         vaccine_list = []
@@ -448,8 +459,12 @@ def delete_vaccination(request, id_kunjungan):
 
 @perawat_required
 def vaccine_list(request):
-    vaccines = get_vaccines_list()
-    context = {'vaccines': vaccines}
+    search_query = request.GET.get('search', '')
+    vaccines = get_vaccines_list(search=search_query)
+    context = {
+        'vaccines': vaccines,
+        'search_query': search_query
+    }
     return render(request, 'vaccinations/vaccine_list.html', context)
 
 @perawat_required

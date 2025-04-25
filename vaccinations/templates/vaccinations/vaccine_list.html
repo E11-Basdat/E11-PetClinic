@@ -11,7 +11,7 @@
             </div>
             
             {% if messages %}
-            <div class="messages p-4"></div>
+            <div class="messages p-4">
                 {% for message in messages %}
                 <div class="{% if message.tags == 'error' %}bg-red-100 border-l-4 border-red-500 text-red-700{% elif message.tags == 'success' %}bg-stone-100 border-l-4 border-stone-500 text-stone-700{% else %}bg-stone-50 border-l-4 border-stone-400 text-stone-600{% endif %} p-4 mb-3 rounded">
                     <span>{{ message }}</span>
@@ -19,12 +19,27 @@
                 {% endfor %}
             </div>
             {% endif %}
-            
-            <div class="flex justify-end p-4 bg-white/30 border-b border-gray-200">
+               
+            <div class="flex justify-between items-center p-4 bg-white/30 border-b border-gray-200">
+                <form method="GET" action="." class="flex items-center">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        placeholder="Search by name..." 
+                        value="{{ request.GET.search|default:'' }}"
+                        class="border border-gray-300 rounded-l px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-500 text-sm"
+                    >
+                    <button type="submit" class="bg-stone-600 text-white px-4 py-2 rounded-r text-sm transition duration-300 hover:bg-stone-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-white" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.387 4.387a1 1 0 01-1.414 1.414l-4.387-4.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </form>
                 <a href="{% url 'add_vaccine' %}" class="bg-stone-800 text-white px-4 py-2 rounded text-sm transition duration-300">
                     <i class="fas fa-plus"></i> Add New Vaccine
                 </a>
             </div>
+            
             
             <div class="p-5">
                 <div class="overflow-x-auto">
