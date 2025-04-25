@@ -55,7 +55,7 @@ FOREIGN KEY (no_front_desk) REFERENCES PEGAWAI(no_pegawai)
 -- 7. TENAGA_MEDIS table
 CREATE TABLE TENAGA_MEDIS (
 no_tenaga_medis UUID PRIMARY KEY,
-no_izin_panggilan VARCHAR(20) UNIQUE NOT NULL,
+no_izin_praktik VARCHAR(20) UNIQUE NOT NULL,
 FOREIGN KEY (no_tenaga_medis) REFERENCES PEGAWAI(no_pegawai)
 );
 

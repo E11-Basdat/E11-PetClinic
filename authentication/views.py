@@ -51,7 +51,7 @@ def get_user_data(request):
     elif user_type == 'dokter':
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT p.no_pegawai, p.tanggal_mulai_kerja, tm.no_izin_panggilan 
+                SELECT p.no_pegawai, p.tanggal_mulai_kerja, tm.no_izin_praktek 
                 FROM petclinic.PEGAWAI p 
                 JOIN petclinic.TENAGA_MEDIS tm ON p.no_pegawai = tm.no_tenaga_medis
                 JOIN petclinic.DOKTER_HEWAN dh ON tm.no_tenaga_medis = dh.no_dokter_hewan
@@ -62,13 +62,27 @@ def get_user_data(request):
                 result.update({
                     'no_pegawai': emp_data[0][0],
                     'tanggal_mulai_kerja': emp_data[0][1],
-                    'no_izin_panggilan': emp_data[0][2]
+                    'no_izin_praktik': emp_data[0][2]
                 })
+                
+                # Get certificates
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT no_sertifikat_kompetensi, nama_sertifikat 
+                        FROM petclinic.SERTIFIKAT_KOMPETENSI
+                        WHERE no_tenaga_medis = %s
+                    """, [emp_data[0][0]])
+                    cert_data = cursor.fetchall()
+                    if cert_data:
+                        result['sertifikat'] = [
+                            {'no_sertifikat_kompetensi': cert[0], 'nama_sertifikat': cert[1]} 
+                            for cert in cert_data
+                        ]
             
     elif user_type == 'perawat':
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT p.no_pegawai, p.tanggal_mulai_kerja, tm.no_izin_panggilan 
+                SELECT p.no_pegawai, p.tanggal_mulai_kerja, tm.no_izin_praktik 
                 FROM petclinic.PEGAWAI p 
                 JOIN petclinic.TENAGA_MEDIS tm ON p.no_pegawai = tm.no_tenaga_medis
                 JOIN petclinic.PERAWAT_HEWAN ph ON tm.no_tenaga_medis = ph.no_perawat_hewan
@@ -79,8 +93,22 @@ def get_user_data(request):
                 result.update({
                     'no_pegawai': emp_data[0][0],
                     'tanggal_mulai_kerja': emp_data[0][1],
-                    'no_izin_panggilan': emp_data[0][2]
+                    'no_izin_praktik': emp_data[0][2]
                 })
+                
+                # Get certificates
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT no_sertifikat_kompetensi, nama_sertifikat 
+                        FROM petclinic.SERTIFIKAT_KOMPETENSI
+                        WHERE no_tenaga_medis = %s
+                    """, [emp_data[0][0]])
+                    cert_data = cursor.fetchall()
+                    if cert_data:
+                        result['sertifikat'] = [
+                            {'no_sertifikat_kompetensi': cert[0], 'nama_sertifikat': cert[1]} 
+                            for cert in cert_data
+                        ]
             
     elif user_type == 'individu':
         with connection.cursor() as cursor:
@@ -151,11 +179,9 @@ def dashboard(request):
 def login_user(request):
     """View function to handle user login."""
     if request.method == 'POST':
-        email = request.POST.get('username')  # Assuming username field contains email
+        email = request.POST.get('email')  
         password = request.POST.get('password')
         
-        # First, make sure we can access Django's session table by NOT setting the search path
-        # Authenticate using database query but fully qualify the table name
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT email, password FROM petclinic."USER" 
@@ -287,7 +313,7 @@ def register_user(request):
             elif user_type in ['dokter', 'perawat']:
                 # Common fields for medical staff
                 tanggal_mulai_kerja = request.POST.get('tanggal_mulai_kerja')
-                no_izin_panggilan = request.POST.get('no_izin_panggilan')
+                no_izin_praktik = request.POST.get('no_izin_praktik')
                 pegawai_id = str(uuid.uuid4())
                 
                 # Insert into PEGAWAI table
@@ -300,9 +326,9 @@ def register_user(request):
                 # Insert into TENAGA_MEDIS table
                 with connection.cursor() as cursor:
                     cursor.execute("""
-                        INSERT INTO petclinic.TENAGA_MEDIS (no_tenaga_medis, no_izin_panggilan)
+                        INSERT INTO petclinic.TENAGA_MEDIS (no_tenaga_medis, no_izin_praktik)
                         VALUES (%s, %s)
-                    """, [pegawai_id, no_izin_panggilan])
+                    """, [pegawai_id, no_izin_praktik])
                 
                 # Process certificates
                 cert_numbers = request.POST.getlist('no_sertifikat_kompetensi[]')
@@ -467,7 +493,7 @@ def update_profile(request):
             """, [user_data['no_pegawai']])
             sertifikats = cursor.fetchall()
             user_data['sertifikat'] = [
-                {'no_sertifikat': row[0], 'nama_sertifikat': row[1]} 
+                {'no_sertifikat_kompetensi': row[0], 'nama_sertifikat': row[1]} 
                 for row in sertifikats
             ]
         
@@ -494,7 +520,7 @@ def update_profile(request):
             """, [user_data['no_pegawai']])
             sertifikats = cursor.fetchall()
             user_data['sertifikat'] = [
-                {'no_sertifikat': row[0], 'nama_sertifikat': row[1]} 
+                {'no_sertifikat_kompetensi': row[0], 'nama_sertifikat': row[1]} 
                 for row in sertifikats
             ]
     
