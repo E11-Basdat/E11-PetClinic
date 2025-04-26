@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-{% if action == 'Tambah' %}plus{% else %}edit{% endif %}"></i>
+                {{ action }} Hewan Peliharaan
+            </h4>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="nama" class="form-label">Nama Hewan</label>
+                        <input type="text" class="form-control" id="nama" name="nama" 
+                               value="{{ hewan.nama|default_if_none:'' }}" required>
+                    </div>
+                    
+                    {% if not is_client %}
+                    <div class="col-md-6">
+                        <label for="no_identitas_klien" class="form-label">Pemilik</label>
+                        <select class="form-select" id="no_identitas_klien" name="no_identitas_klien" required>
+                            {% for klien in klien_list %}
+                            <option value="{{ klien.no_identitas }}" 
+                                    {% if hewan.no_identitas_klien == klien.no_identitas %}selected{% endif %}>
+                                {{ klien.nama_pemilik }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% else %}
+                    <div class="col-md-6">
+                        <label class="form-label">Pemilik</label>
+                        <input type="text" class="form-control" value="{{ nama_pemilik }}" readonly>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="id_jenis" class="form-label">Jenis Hewan</label>
+                        <select class="form-select" id="id_jenis" name="id_jenis" required>
+                            <option value="">Pilih Jenis Hewan</option>
+                            {% for jenis in jenis_hewan_list %}
+                            <option value="{{ jenis.id }}" 
+                                    {% if hewan.id_jenis == jenis.id %}selected{% endif %}>
+                                {{ jenis.nama_jenis }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                        <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir" 
+                               value="{{ hewan.tanggal_lahir|default_if_none:''|date:'Y-m-d' }}" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="url_foto" class="form-label">URL Foto</label>
+                    <input type="url" class="form-control" id="url_foto" name="url_foto" 
+                           value="{{ hewan.url_foto|default_if_none:'' }}" required
+                           placeholder="https://example.com/photo.jpg">
+                    <div class="form-text">Masukkan URL lengkap termasuk http:// atau https://</div>
+                </div>
+                
+                {% if hewan.url_foto %}
+                <div class="mb-3">
+                    <label class="form-label">Foto Saat Ini</label>
+                    <div>
+                        <img src="{{ hewan.url_foto }}" alt="Foto saat ini" 
+                             class="img-thumbnail" style="max-height: 150px;">
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
+                    <a href="{% url 'animals:hewan_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

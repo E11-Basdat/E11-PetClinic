@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-8">
+  <div class="border border-gray-300 rounded-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold">List Hewan Peliharaan</h2>
+
+      <a href="{% url 'animals:hewan_create' %}"
+         class="flex items-center space-x-2 bg-[#0F1327] text-white px-4 py-2 rounded hover:bg-[#1c2244] transition">
+        <span class="text-lg">＋</span>
+        <span>Create New Pet</span>
+      </a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left border-collapse text-center">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-4 py-2">No</th>
+            <th class="border px-4 py-2">Pemilik</th>
+            <th class="border px-4 py-2">Jenis Hewan</th>
+            <th class="border px-4 py-2">Nama Hewan</th>
+            <th class="border px-4 py-2">Tanggal Lahir</th>
+            <th class="border px-4 py-2">Foto</th>
+            <th class="border px-4 py-2 text-center">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for hewan in hewan_list %}
+          <tr class="hover:bg-gray-50">
+            <td class="border px-4 py-2 text-center">{{ forloop.counter }}</td>
+            <td class="border px-4 py-2">{{ hewan.nama_pemilik }}</td>
+            <td class="border px-4 py-2">{{ hewan.nama_jenis }}</td>
+            <td class="border px-4 py-2">{{ hewan.nama }}</td>
+            <td class="border px-4 py-2">{{ hewan.tanggal_lahir|date:"j F Y" }}</td>
+            <td class="border px-4 py-2">
+              {% if hewan.url_foto %}
+                <img src="{{ hewan.url_foto }}" alt="{{ hewan.nama }}" class="h-12 w-12 object-cover rounded">
+              {% else %}
+                <div class="h-12 w-12 bg-gray-200 rounded flex items-center justify-center">
+                  <i class="fas fa-paw text-gray-400"></i>
+                </div>
+              {% endif %}
+            </td>
+            <td class="border px-4 py-2">
+              <div class="flex justify-center space-x-2">
+                <button onclick="openUpdateModal('{{ hewan.nama }}', '{{ hewan.no_identitas_klien }}')"
+                        class="px-3 py-1 rounded bg-gray-800 text-white hover:bg-gray-900 transition">
+                  Update
+                </button>
+                {% if is_front_desk and hewan.can_delete %}
+                  {% url 'animals:hewan_delete' hewan.nama hewan.no_identitas_klien as del_url %}
+                  <button
+                      class="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition"
+                      data-url="{{ del_url }}"
+                      data-pet="{{ hewan.nama|urlencode }}"
+                      data-owner="{{ hewan.nama_pemilik }}"
+                      onclick="showDeleteModal(this)">
+                    Delete
+                  </button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="border px-4 py-6 text-center text-gray-500">
+              Tidak ada data hewan
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Update -->
+  <div id="updateModal"
+       class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div class="p-6" id="updateFormContent"></div>
+    </div>
+  </div>
+
+  <!-- Modal Delete -->
+  <div id="deleteModal"
+       class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white p-6 rounded shadow-md w-full max-w-md">
+      <h2 class="text-2xl font-bold text-red-600 mb-4">Delete Pet</h2>
+      <p class="mb-6">
+        Apakah kamu yakin untuk menghapus hewan
+        <span id="pet-name" class="font-semibold text-red-500"></span> milik
+        <span id="pet-owner" class="font-semibold text-red-600"></span>?
+      </p>
+      <div class="flex justify-end space-x-2">
+        <button onclick="hideDeleteModal()" class="px-4 py-2 border rounded">Cancel</button>
+        <form id="deleteForm" method="post" action="">
+          {% csrf_token %}
+          <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">
+            Confirm Deletion
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openUpdateModal(nama, no_identitas_klien) {
+  const url = `{% url 'animals:hewan_update' '0' '00000000-0000-0000-0000-000000000000' %}`
+                .replace('0', nama)
+                .replace('00000000-0000-0000-0000-000000000000', no_identitas_klien) + '?modal=true';
+  fetch(url)
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById('updateFormContent').innerHTML = html;
+      document.getElementById('updateModal').classList.remove('hidden');
+      attachUpdateHandler();
+    });
+}
+
+function attachUpdateHandler() {
+  const form = document.getElementById('updatePetForm');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const fd = new FormData(form);
+    fetch(form.action, {
+      method: 'POST',
+      body: fd,
+      headers: { 'X-CSRFToken': fd.get('csrfmiddlewaretoken') }
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.message) {
+        closeModal();
+        window.location.reload();
+      } else if (d.error) {
+        alert('Error: ' + d.error);
+      }
+    })
+    .catch(() => alert('Terjadi kesalahan saat memperbarui data'));
+  });
+}
+
+function closeModal() {
+  document.getElementById('updateModal').classList.add('hidden');
+}
+
+function showDeleteModal(btn) {
+  const url       = btn.dataset.url;
+  const petName   = decodeURIComponent(btn.dataset.pet);
+  const ownerName = btn.dataset.owner || '';
+  document.getElementById('pet-name').textContent  = petName;
+  document.getElementById('pet-owner').textContent = ownerName;
+  document.getElementById('deleteForm').action = url;
+  document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function hideDeleteModal() {
+  document.getElementById('deleteModal').classList.add('hidden');
+  document.getElementById('deleteForm').action = '';
+}
+</script>
+{% endblock %}

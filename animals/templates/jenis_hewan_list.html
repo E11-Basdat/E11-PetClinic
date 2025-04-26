@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Daftar Jenis Hewan</h2>
+    
+    {% if is_front_desk %}
+    <a href="{% url 'animals:jenis_hewan_create' %}" class="btn btn-primary mb-3">Tambah Jenis Hewan</a>
+    {% endif %}
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>ID Jenis</th>
+                <th>Nama Jenis</th>
+                {% if is_front_desk %}<th>Aksi</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for jenis in jenis_hewan_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ jenis.id }}</td>
+                <td>{{ jenis.nama_jenis }}</td>
+                {% if is_front_desk %}
+                <td>
+                    <a href="{% url 'animals:jenis_hewan_update' jenis.id %}" class="btn btn-sm btn-warning">Edit</a>
+                    {% if jenis.can_delete %}
+                    <a href="{% url 'animals:jenis_hewan_confirm_delete' jenis.id %}" class="btn btn-sm btn-danger">Hapus</a>
+                    {% else %}
+                    <button class="btn btn-sm btn-danger" disabled>Hapus</button>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

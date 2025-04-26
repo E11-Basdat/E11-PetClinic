@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-{% if action == 'Tambah' %}plus{% else %}edit{% endif %}"></i>
+                {{ action }} Jenis Hewan
+            </h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if action == 'Edit' %}
+                <div class="mb-3">
+                    <label class="form-label">ID Jenis</label>
+                    <input type="text" class="form-control" value="{{ jenis_hewan.id }}" readonly>
+                </div>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label for="nama_jenis" class="form-label">Nama Jenis</label>
+                    <input type="text" class="form-control" id="nama_jenis" name="nama_jenis" 
+                           value="{{ jenis_hewan.nama_jenis|default_if_none:'' }}" required>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
+                    <a href="{% url 'animals:jenis_hewan_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
