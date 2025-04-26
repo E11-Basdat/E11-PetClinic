@@ -19,6 +19,24 @@
     </select>
     <br>
 
+    <label for="no_perawat_hewan">Perawat Hewan:</label>
+    <select id="no_perawat_hewan" name="no_perawat_hewan" required>
+        <option value="" disabled selected>Pilih Perawat Hewan</option>
+        {% for perawat in perawat_hewan %}
+        <option value="{{ perawat.0 }}">{{ perawat.1 }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <label for="no_dokter_hewan">Dokter Hewan:</label>
+    <select id="no_dokter_hewan" name="no_dokter_hewan" required>
+        <option value="" disabled selected>Pilih Dokter Hewan</option>
+        {% for dokter in dokter_hewan %}
+        <option value="{{ dokter.0 }}">{{ dokter.1 }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
     <label for="tipe_kunjungan">Metode Kunjungan:</label>
     <select id="tipe_kunjungan" name="tipe_kunjungan" required>
         <option value="Janji Temu">Janji Temu</option>

@@ -2,6 +2,21 @@ from django.shortcuts import render, redirect
 from django.db import connection
 from django.contrib import messages
 
+def generate_kunjungan_id():
+    query = "SELECT id_kunjungan FROM petclinic.KUNJUNGAN ORDER BY id_kunjungan DESC LIMIT 1"
+    last_id = execute_query(query, fetch_one=True)
+
+    if last_id and last_id[0].startswith('VISIT') and last_id[0][5:].isdigit():
+        # Ambil angka terakhir dari ID kunjungan sebelumnya
+        last_number = int(last_id[0][5:])  # Mengambil angka setelah "VISIT"
+        new_number = last_number + 1
+    else:
+        # Jika belum ada data atau format ID tidak sesuai, mulai dari 1
+        new_number = 1
+
+    # Format ID baru dengan prefix "VISIT" dan padding angka menjadi 2 digit
+    return f"VISIT{new_number:02d}"
+
 def execute_query(query, params=None, fetch_one=False, fetch_all=False):
     with connection.cursor() as cursor:
         cursor.execute(query, params or [])
@@ -57,7 +72,11 @@ def list_visits(request):
         visits = cursor.fetchall()
     return render(request, 'list.html', {'visits': visits})
 
+import logging
+logger = logging.getLogger(__name__)
+
 def create_visit(request):
+    logger.debug(f"POST Data: {request.POST}")
     if request.method == 'POST':
         no_identitas_klien = request.POST.get('no_identitas_klien')
         nama_hewan = request.POST.get('nama_hewan')
@@ -65,13 +84,29 @@ def create_visit(request):
         timestamp_awal = request.POST.get('timestamp_awal')
         timestamp_akhir = request.POST.get('timestamp_akhir')
 
+        # Ambil no_front_desk dari session
+        no_front_desk = request.session.get('no_front_desk')
+        if not no_front_desk:
+            messages.error(request, 'Anda tidak memiliki akses untuk membuat kunjungan.')
+            return redirect('visits:list_visits')
+
+        # Generate ID kunjungan baru
+        id_kunjungan = generate_kunjungan_id()
+
         query = """
             INSERT INTO petclinic.KUNJUNGAN (
-                id_kunjungan, nama_hewan, no_identitas_klien, tipe_kunjungan, 
+                id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk, 
+                no_perawat_hewan, no_dokter_hewan, tipe_kunjungan, 
                 timestamp_awal, timestamp_akhir
-            ) VALUES (gen_random_uuid(), %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        params = [nama_hewan, no_identitas_klien, tipe_kunjungan, timestamp_awal, timestamp_akhir]
+        params = [
+            id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk, 
+            request.POST.get('no_perawat_hewan'), request.POST.get('no_dokter_hewan'), 
+            tipe_kunjungan, timestamp_awal, timestamp_akhir
+        ]
+        logger.debug(f"Query: {query}")
+        logger.debug(f"Params: {params}")
         execute_query(query, params)
         messages.success(request, 'Kunjungan berhasil dibuat.')
         return redirect('visits:list_visits')
@@ -79,10 +114,19 @@ def create_visit(request):
     # Ambil data klien dan hewan untuk dropdown
     query_klien = "SELECT no_identitas, email FROM petclinic.KLIEN"
     query_hewan = "SELECT nama, no_identitas_klien FROM petclinic.HEWAN"
+    query_perawat = "SELECT no_perawat_hewan, nama FROM petclinic.PERAWAT_HEWAN"
+    query_dokter = "SELECT no_dokter_hewan, nama FROM petclinic.DOKTER_HEWAN"
+    perawat_hewan = execute_query(query_perawat, fetch_all=True)
+    dokter_hewan = execute_query(query_dokter, fetch_all=True)
     klien = execute_query(query_klien, fetch_all=True)
     hewan = execute_query(query_hewan, fetch_all=True)
-
-    return render(request, 'create.html', {'klien': klien, 'hewan': hewan})
+    
+    return render(request, 'create.html', {
+        'klien': klien,
+        'hewan': hewan,
+        'perawat_hewan': perawat_hewan,
+        'dokter_hewan': dokter_hewan
+    })
 
 # Update an existing visit
 def update_visit(request, visit_id):

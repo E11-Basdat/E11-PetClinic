@@ -1,5 +1,10 @@
 <!-- filepath: c:\tk-basdat\E11-PetClinic\visits\templates\visits\list.html -->
+<!-- filepath: c:\tk-basdat\E11-PetClinic\visits\templates\visits\list.html -->
 <h1>Daftar Kunjungan</h1>
+
+<!-- Tambahkan tombol Buat Kunjungan -->
+<a href="{% url 'visits:create_visit' %}" class="btn btn-primary">Buat Kunjungan</a>
+
 <table>
     <tr>
         <th>ID Kunjungan</th>
@@ -22,6 +27,23 @@
     </tr>
     {% endfor %}
 </table>
+
+<style>
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 10px 0;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .btn:hover {
+        background-color: #0056b3;
+    }
+</style>
 
 <!-- Modal untuk pemberitahuan -->
 <div id="medical-record-modal" style="display: none;">
