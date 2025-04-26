@@ -1,0 +1,53 @@
+<h1>Buat Kunjungan Baru</h1>
+<form method="POST">
+    {% csrf_token %}
+    <label for="no_identitas_klien">ID Klien:</label>
+    <select id="no_identitas_klien" name="no_identitas_klien" required>
+        <option value="" disabled selected>Pilih Klien</option>
+        {% for klien in klien %}
+        <option value="{{ klien.0 }}">{{ klien.0 }} - {{ klien.1 }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <label for="nama_hewan">Nama Hewan:</label>
+    <select id="nama_hewan" name="nama_hewan" required>
+        <option value="" disabled selected>Pilih Hewan</option>
+        {% for hewan in hewan %}
+        <option value="{{ hewan.0 }}" data-klien="{{ hewan.1 }}">{{ hewan.0 }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <label for="tipe_kunjungan">Metode Kunjungan:</label>
+    <select id="tipe_kunjungan" name="tipe_kunjungan" required>
+        <option value="Janji Temu">Janji Temu</option>
+        <option value="Walk-In">Walk-In</option>
+        <option value="Darurat">Darurat</option>
+    </select>
+    <br>
+
+    <label for="timestamp_awal">Waktu Mulai Penanganan:</label>
+    <input type="datetime-local" id="timestamp_awal" name="timestamp_awal" required>
+    <br>
+
+    <label for="timestamp_akhir">Waktu Akhir Penanganan:</label>
+    <input type="datetime-local" id="timestamp_akhir" name="timestamp_akhir">
+    <br>
+
+    <button type="submit">Simpan</button>
+</form>
+
+<script>
+    // Filter nama hewan berdasarkan ID Klien yang dipilih
+    const klienSelect = document.getElementById('no_identitas_klien');
+    const hewanSelect = document.getElementById('nama_hewan');
+
+    klienSelect.addEventListener('change', function () {
+        const selectedKlien = this.value;
+        Array.from(hewanSelect.options).forEach(option => {
+            option.style.display = option.getAttribute('data-klien') === selectedKlien ? 'block' : 'none';
+        });
+        hewanSelect.value = ""; // Reset pilihan hewan
+    });
+</script>

@@ -1,0 +1,72 @@
+<!-- filepath: c:\tk-basdat\E11-PetClinic\visits\templates\visits\list.html -->
+<h1>Daftar Kunjungan</h1>
+<table>
+    <tr>
+        <th>ID Kunjungan</th>
+        <th>Nama Hewan</th>
+        <th>Metode Kunjungan</th>
+        <th>Waktu Mulai</th>
+        <th>Waktu Akhir</th>
+        <th>Rekam Medis</th>
+    </tr>
+    {% for visit in visits %}
+    <tr>
+        <td>{{ visit.0 }}</td>
+        <td>{{ visit.2 }}</td>
+        <td>{{ visit.3 }}</td>
+        <td>{{ visit.4 }}</td>
+        <td>{{ visit.5 }}</td>
+        <td>
+            <a href="#" class="check-medical-record" data-id="{{ visit.0 }}">Lihat Rekam Medis</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Modal untuk pemberitahuan -->
+<div id="medical-record-modal" style="display: none;">
+    <div>
+        <p id="medical-record-message"></p>
+        <button id="create-medical-record" style="display: none;">Create</button>
+        <button id="close-modal">OK</button>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.check-medical-record').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const idKunjungan = this.getAttribute('data-id');
+
+            // AJAX request untuk memeriksa rekam medis
+            fetch(`/visits/check-medical-record/${idKunjungan}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const modal = document.getElementById('medical-record-modal');
+                    const message = document.getElementById('medical-record-message');
+                    const createButton = document.getElementById('create-medical-record');
+
+                    if (data.exists) {
+                        message.textContent = `Rekam Medis ditemukan: ${data.data.catatan}`;
+                        createButton.style.display = 'none';
+                    } else {
+                        message.textContent = 'Rekam Medis tidak ditemukan.';
+                        {% if request.session.user_type == 'dokter' %}
+                        createButton.style.display = 'inline-block';
+                        createButton.onclick = function () {
+                            window.location.href = `/visits/medical-records/create/${idKunjungan}/`;
+                        };
+                        {% else %}
+                        createButton.style.display = 'none';
+                        {% endif %}
+                    }
+
+                    modal.style.display = 'block';
+                });
+        });
+    });
+
+    document.getElementById('close-modal').addEventListener('click', function () {
+        document.getElementById('medical-record-modal').style.display = 'none';
+    });
+</script>
