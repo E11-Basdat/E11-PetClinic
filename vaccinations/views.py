@@ -5,6 +5,7 @@ from django.contrib import messages
 from functools import wraps
 from datetime import datetime
 import uuid
+import locale
 
 
 def dokter_required(view_func):
@@ -17,7 +18,7 @@ def dokter_required(view_func):
         
         if request.session.get('user_type') != 'dokter':
             messages.error(request, "Anda tidak memiliki akses ke halaman ini.")
-            return redirect('home')
+            return redirect('authentication:dashboard')
         
         return view_func(request, *args, **kwargs)
     return _wrapped_view
@@ -128,7 +129,7 @@ def perawat_required(view_func):
         
         if request.session.get('user_type') != 'perawat':
             messages.error(request, "Anda tidak memiliki akses ke halaman ini.")
-            return redirect('home')
+            return redirect('authentication:dashboard')
         
         return view_func(request, *args, **kwargs)
     return _wrapped_view
@@ -176,15 +177,23 @@ def get_vaccines_list(search=None):
         vaccine_list = []
         
         for row in vaccines:
+            try:
+                original_harga = row[2]
+                formatted_harga = f"Rp{locale.format_string('%d', float(original_harga), grouping=True)}"
+            except (ValueError, TypeError):
+                formatted_harga = f"Rp{row[2]}"
+                
             vaccine_list.append({
                 'kode': row[0],
                 'nama': row[1],
-                'harga': row[2],
+                'harga': formatted_harga,
+                'harga_raw': original_harga,  
                 'stok': row[3],
                 'can_delete': row[4]
             })
     
     return vaccine_list
+
 
 def get_vaccine_by_id(kode):
     """Get vaccine by ID"""
@@ -198,10 +207,11 @@ def get_vaccine_by_id(kode):
         result = cursor.fetchone()
         
         if result:
+
             return {
                 'kode': result[0],
                 'nama': result[1],
-                'harga': result[2],
+                'harga': result[2],  
                 'stok': result[3]
             }
         

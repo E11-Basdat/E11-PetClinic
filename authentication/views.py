@@ -577,3 +577,176 @@ def update_profile(request):
     
     return render(request, 'update_profile.html', {'user_data': user_data})
 
+def list_client(request):
+    """View function to display all clients."""
+    
+    if not request.session.get('user_email') or request.session.get('user_type') != 'front_desk':
+        messages.error(request, 'Only Front Desk officers can access this page.')
+        return redirect('authentication:dashboard')
+    
+    user_data = get_user_data(request)
+    
+    
+    individual_clients = execute_query("""
+        SELECT k.no_identitas, k.email, u.alamat, 
+               i.nama_depan, i.nama_tengah, i.nama_belakang, 
+               'Individu' as jenis
+        FROM petclinic.KLIEN k
+        JOIN petclinic."USER" u ON k.email = u.email
+        JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
+    """)
+    
+    
+    company_clients = execute_query("""
+        SELECT k.no_identitas, k.email, u.alamat, 
+               p.nama_perusahaan, 
+               'Perusahaan' as jenis
+        FROM petclinic.KLIEN k
+        JOIN petclinic."USER" u ON k.email = u.email
+        JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
+    """)
+    
+    clients_list = []
+    
+    
+    if individual_clients:
+        for client in individual_clients:
+            
+            nama_lengkap = client[3]  
+            if client[4]:  
+                nama_lengkap += " " + client[4]
+            if client[5]:  
+                nama_lengkap += " " + client[5]
+                
+            clients_list.append({
+                'no_identitas': client[0],
+                'email': client[1],
+                'alamat': client[2],
+                'nama': nama_lengkap.strip(),
+                'jenis': client[6],
+            })
+    
+    
+    if company_clients:
+        for client in company_clients:
+            clients_list.append({
+                'no_identitas': client[0],
+                'email': client[1],
+                'alamat': client[2],
+                'nama': client[3],  
+                'jenis': client[4],
+            })
+    
+    context = {
+        'user_data': user_data,
+        'clients': clients_list
+    }
+    
+    return render(request, 'list_client.html', context)
+
+def client_detail(request, no_identitas):
+    """View function to display client details and their pets."""
+    
+    if not request.session.get('user_email') or request.session.get('user_type') != 'front_desk':
+        messages.error(request, 'Only Front Desk officers can access this page.')
+        return redirect('authentication:dashboard')
+    
+    user_data = get_user_data(request)
+    
+    
+    client_type = execute_query("""
+        SELECT 
+            CASE 
+                WHEN EXISTS (SELECT 1 FROM petclinic.INDIVIDU WHERE no_identitas_klien = %s) THEN 'Individu'
+                WHEN EXISTS (SELECT 1 FROM petclinic.PERUSAHAAN WHERE no_identitas_klien = %s) THEN 'Perusahaan'
+                ELSE 'Unknown'
+            END
+    """, [no_identitas, no_identitas])
+    
+    if not client_type:
+        messages.error(request, 'Client not found.')
+        return redirect('authentication:list_client')
+    
+    client_jenis = client_type[0][0]
+    client = {}
+    
+    
+    if client_jenis == 'Individu':
+        individual_data = execute_query("""
+            SELECT k.no_identitas, k.email, u.alamat, u.nomor_telepon, k.tanggal_registrasi,
+                   i.nama_depan, i.nama_tengah, i.nama_belakang
+            FROM petclinic.KLIEN k
+            JOIN petclinic."USER" u ON k.email = u.email
+            JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
+            WHERE k.no_identitas = %s
+        """, [no_identitas])
+        
+        if individual_data:
+            
+            nama_lengkap = individual_data[0][5]  
+            if individual_data[0][6]:  
+                nama_lengkap += " " + individual_data[0][6]
+            if individual_data[0][7]:  
+                nama_lengkap += " " + individual_data[0][7]
+            
+            client = {
+                'no_identitas': individual_data[0][0],
+                'email': individual_data[0][1],
+                'alamat': individual_data[0][2],
+                'nomor_telepon': individual_data[0][3],
+                'tanggal_registrasi': individual_data[0][4],
+                'nama': nama_lengkap.strip(),
+                'jenis': client_jenis
+            }
+    else:  
+        company_data = execute_query("""
+            SELECT k.no_identitas, k.email, u.alamat, u.nomor_telepon, k.tanggal_registrasi,
+                   p.nama_perusahaan
+            FROM petclinic.KLIEN k
+            JOIN petclinic."USER" u ON k.email = u.email
+            JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
+            WHERE k.no_identitas = %s
+        """, [no_identitas])
+        
+        if company_data:
+            client = {
+                'no_identitas': company_data[0][0],
+                'email': company_data[0][1],
+                'alamat': company_data[0][2],
+                'nomor_telepon': company_data[0][3],
+                'tanggal_registrasi': company_data[0][4],
+                'nama': company_data[0][5],
+                'jenis': client_jenis
+            }
+    
+    if not client:
+        messages.error(request, 'Client details could not be retrieved.')
+        return redirect('authentication:list_client')
+    
+    
+    pets_query = """
+        SELECT h.nama, h.tanggal_lahir, jh.nama_jenis
+        FROM petclinic.HEWAN h
+        JOIN petclinic.JENIS_HEWAN jh ON h.id_jenis = jh.id
+        WHERE h.no_identitas_klien = %s
+    """
+    
+    pets_data = execute_query(pets_query, [no_identitas])
+    
+    pets = []
+    if pets_data:
+        for pet in pets_data:
+            pets.append({
+                'nama': pet[0],
+                'tanggal_lahir': pet[1],
+                'jenis': pet[2]
+            })
+    
+    context = {
+        'user_data': user_data,
+        'client': client,
+        'pets': pets
+    }
+    
+    return render(request, 'client_detail.html', context)
+

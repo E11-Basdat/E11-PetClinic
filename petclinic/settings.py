@@ -137,13 +137,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'id'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
 USE_TZ = True
+
+# Locale configuration for currency formatting
+import locale
+try:
+    locale.setlocale(locale.LC_ALL, 'id_ID.UTF-8')  # Indonesian locale
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_ALL, 'id_ID')  # Fallback
+    except locale.Error:
+        locale.setlocale(locale.LC_ALL, '')  # Default locale
 
 
 # Static files (CSS, JavaScript, Images)
