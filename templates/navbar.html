@@ -28,7 +28,7 @@
               <!-- Menu Front-Desk Officer -->
               <a href="//" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Jenis Hewan</a>
               <a href="//" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Hewan Peliharaan</a>
-              <a href="//" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Kunjungan</a>
+              <a href="{% url 'visits:list_visits' %}" class="{% if '/visits/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Kunjungan</a>
               <a href="//" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Klien</a>
             {% elif request.session.user_type == 'dokter' %}
               <!-- Menu Dokter Hewan -->
@@ -71,7 +71,7 @@
           <!-- Menu Front-Desk Officer (Mobile) -->
           <a href="//" class="block {% if request.path == '//' %}bg-stone-600 text-white{% else %}text.white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Jenis Hewan</a>
           <a href="//" class="block {% if request.path == '//' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Hewan Peliharaan</a>
-          <a href="//" class="block {% if request.path == '//' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Kunjungan</a>
+          <a href="{% url 'visits:list_visits' %}" class="block {% if '/visits/' in request.path %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Kunjungan</a>
           <a href="//" class="block {% if request.path == '//' %}bg-stone-600 text-white{% else %}text.white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Daftar Klien</a>
         {% elif request.session.user_type == 'dokter' %}
           <!-- Menu Dokter Hewan (Mobile) -->
