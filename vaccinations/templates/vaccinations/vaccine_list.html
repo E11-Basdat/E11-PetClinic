@@ -27,7 +27,7 @@
                         name="search" 
                         placeholder="Search by name..." 
                         value="{{ request.GET.search|default:'' }}"
-                        class="border border-gray-300 rounded-l px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-500 text-sm"
+                        class="border border-stone-300 rounded-l px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-500 text-sm"
                     >
                     <button type="submit" class="bg-stone-600 text-white px-4 py-2 rounded-r text-sm transition duration-300 hover:bg-stone-700 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-white" viewBox="0 0 20 20">
@@ -36,33 +36,36 @@
                     </button>
                 </form>
                 <a href="{% url 'add_vaccine' %}" class="bg-stone-800 text-white px-4 py-2 rounded text-sm transition duration-300">
-                    <i class="fas fa-plus"></i> Add New Vaccine
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg> 
+                    Add New Vaccine
                 </a>
             </div>
             
             
             <div class="p-5">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full border-collapse text-sm">
+                    <table class="min-w-full bgborder-collapse text-center text-sm">
                         <thead>
                             <tr>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">No</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">ID Vaksin</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Nama Vaksin</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Harga</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Stok</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Action</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">No</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">ID Vaksin</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Nama Vaksin</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Harga</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Stok</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for vaccine in vaccines %}
                             <tr class="{% cycle '' 'bg-gray-50' %}">
-                                <td class="border border-gray-300 p-3">{{ forloop.counter }}</td>
-                                <td class="border border-gray-300 p-3">{{ vaccine.kode }}</td>
-                                <td class="border border-gray-300 p-3">{{ vaccine.nama }}</td>
-                                <td class="border border-gray-300 p-3">Rp{{ vaccine.harga|floatformat:"0" }}</td>
-                                <td class="border border-gray-300 p-3">{{ vaccine.stok }}</td>
-                                <td class="border border-gray-300 p-3">
+                                <td class="border border-stone-300 p-3">{{ forloop.counter }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccine.kode }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccine.nama }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccine.harga }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccine.stok }}</td>
+                                <td class="border border-stone-300 p-3">
                                     <a href="{% url 'update_stock' vaccine.kode %}" class="bg-stone-500 text-white px-3 py-1 rounded text-xs inline-block mb-1 md:mb-0 md:mr-1">
                                         <i class="fas fa-cubes"></i> Update Stock
                                     </a>
@@ -78,7 +81,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center border border-gray-300 p-4">Tidak ada data vaksin yang tersedia</td>
+                                <td colspan="6" class="text-center border border-stone-300 p-4">Tidak ada data vaksin yang tersedia</td>
                             </tr>
                             {% endfor %}
                         </tbody>

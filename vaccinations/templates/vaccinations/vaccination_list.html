@@ -22,32 +22,35 @@
             
             <div class="flex justify-end p-4 bg-white/30 border-b border-gray-200">
                 <a href="{% url 'add_vaccination' %}" class="bg-stone-800 text-white px-4 py-2 rounded text-sm transition duration-300">
-                    <i class="fas fa-plus"></i> Add New Vaccination
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add New Vaccination
                 </a>
             </div>
             
             <div class="p-5">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full border-collapse text-sm">
+                    <table class="min-w-full border-collapse text-sm text-center">
                         <thead>
                             <tr>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">No</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">ID Kunjungan</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Nama Hewan</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Tanggal Kunjungan</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Vaksin</th>
-                                <th class="border border-gray-300 p-3 bg-gray-100/90 font-semibold text-left">Aksi</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">No</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Kunjungan</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Nama Hewan</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Tanggal Kunjungan</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Vaksin</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for vaccination in vaccinations %}
                             <tr class="{% cycle '' 'bg-gray-50' %}">
-                                <td class="border border-gray-300 p-3">{{ forloop.counter }}</td>
-                                <td class="border border-gray-300 p-3">{{ vaccination.id_kunjungan }}</td>
-                                <td class="border border-gray-300 p-3">{{ vaccination.nama_hewan }}</td>
-                                <td class="border border-gray-300 p-3">{{ vaccination.tanggal_kunjungan|date:"d M Y, H:i" }}</td>
-                                <td class="border border-gray-300 p-3">{{ vaccination.kode_vaksin }} - {{ vaccination.nama_vaksin }}</td>
-                                <td class="border border-gray-300 p-3">
+                                <td class="border border-stone-300 p-3">{{ forloop.counter }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccination.id_kunjungan }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccination.nama_hewan }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccination.tanggal_kunjungan|date:"d M Y, H:i" }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccination.kode_vaksin }} - {{ vaccination.nama_vaksin }}</td>
+                                <td class="border border-stone-300 p-3">
                                     <a href="{% url 'update_vaccination' vaccination.id_kunjungan %}" class="bg-stone-800 text-white px-3 py-1 rounded text-xs inline-block mb-1 md:mb-0 md:mr-1">
                                         <i class="fas fa-edit"></i> Update
                                     </a>
@@ -59,7 +62,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center border border-gray-300 p-4">Tidak ada data vaksinasi yang tersedia</td>
+                                <td colspan="6" class="text-center border border-stone-300 p-4">Tidak ada data vaksinasi yang tersedia</td>
                             </tr>
                             {% endfor %}
                         </tbody>

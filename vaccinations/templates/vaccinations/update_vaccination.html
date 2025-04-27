@@ -21,28 +21,24 @@
             {% endif %}
             
             <div class="p-5">
-                <div class="mb-6">
-                    <p class="text-lg">
-                        <strong>ID Kunjungan:</strong> {{ vaccination.id_kunjungan }}<br>
-                        <strong>Nama Hewan:</strong> {{ vaccination.nama_hewan }}<br>
-                        <strong>Tanggal Kunjungan:</strong> {{ vaccination.tanggal_kunjungan|date:"d M Y, H:i" }}
-                    </p>
-                </div>
-                
                 <form method="post" action="{% url 'update_vaccination' vaccination.id_kunjungan %}">
                     {% csrf_token %}
+                    
+                    <div class="mb-6">
+                        <label for="id_kunjungan" class="block text-stone-700 font-medium mb-2">Kunjungan</label>
+                        <input type="text" id="id_kunjungan" value="{{ vaccination.id_kunjungan }}" class="w-full rounded border-gray-300 focus:border-stone-500 focus:ring focus:ring-stone-200 p-2" disabled>
+                    </div>
                     
                     <div class="mb-6">
                         <label for="kode_vaksin" class="block text-stone-700 font-medium mb-2">Vaksin</label>
                         <select name="kode_vaksin" id="kode_vaksin" class="w-full rounded border-gray-300 focus:border-stone-500 focus:ring focus:ring-stone-200 p-2" required>
                             <option value="">Pilih Vaksin</option>
                             {% for vaccine in vaccines %}
-                            <option value="{{ vaccine.kode }}" {% if vaccine.kode == vaccination.kode_vaksin %}selected{% endif %} {% if vaccine.stok <= 0 and vaccine.kode != vaccination.kode_vaksin %}disabled{% endif %}>
+                            <option value="{{ vaccine.kode }}" {% if vaccine.kode == vaccination.kode_vaksin %}selected{% endif %}>
                                 {{ vaccine.display }}
                             </option>
                             {% endfor %}
                         </select>
-                        <small class="text-gray-500 mt-1 block">Format: ID - Nama [Stok]</small>
                     </div>
                     
                     <div class="flex justify-end gap-3 mt-6">

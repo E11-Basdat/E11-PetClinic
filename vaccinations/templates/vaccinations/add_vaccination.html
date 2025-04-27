@@ -41,12 +41,11 @@
                         <select name="kode_vaksin" id="kode_vaksin" class="w-full rounded border-gray-300 focus:border-stone-500 focus:ring focus:ring-stone-200 p-2" required>
                             <option value="">Pilih Vaksin</option>
                             {% for vaccine in vaccines %}
-                            <option value="{{ vaccine.kode }}" {% if vaccine.stok <= 0 %}disabled{% endif %}>
+                            <option value="{{ vaccine.kode }}">
                                 {{ vaccine.display }}
                             </option>
                             {% endfor %}
                         </select>
-                        <small class="text-gray-500 mt-1 block">Format: ID - Nama [Stok]</small>
                     </div>
                     
                     <div class="flex justify-end gap-3 mt-6">
