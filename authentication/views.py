@@ -203,6 +203,7 @@ def login_user(request):
                 """, [email])
                 front_desk = cursor.fetchall()
                 if front_desk:
+                    user_id = front_desk[0]
                     request.session['user_type'] = 'front_desk'
             
             # Check if doctor

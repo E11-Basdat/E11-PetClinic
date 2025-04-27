@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Daftar Perawatan{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2>List Treatments</h2>
+            <p>Menampilkan daftar perawatan untuk hewan yang dilakukan oleh dr. {{ user_data.email }}</p>
+            
+            <div class="mb-3">
+                <a href="{% url 'treatments:create_treatment' %}" class="btn btn-primary">Create New Treatment</a>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID Kunjungan</th>
+                            <th>Klien</th>
+                            <th>Nama Hewan</th>
+                            <th>Perawat Hewan</th>
+                            <th>Dokter Hewan</th>
+                            <th>Front Desk Officer</th>
+                            <th>Jenis Perawatan</th>
+                            <th>Catatan Medis</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for treatment in treatments %}
+                        <tr>
+                            <td>{{ treatment.id_kunjungan }}</td>
+                            <td>{{ treatment.klien }}</td>
+                            <td>{{ treatment.nama_hewan }}</td>
+                            <td>{{ treatment.perawat }}</td>
+                            <td>{{ treatment.dokter }}</td>
+                            <td>{{ treatment.front_desk }}</td>
+                            <td>{{ treatment.kode_perawatan }} - {{ treatment.nama_perawatan }}</td>
+                            <td>{{ treatment.catatan }}</td>
+                            <td>
+                                {% if treatment.kode_perawatan %}
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'treatments:update_treatment' treatment.id_kunjungan treatment.kode_perawatan %}" class="btn btn-sm btn-warning">Update</a>
+                                    <a href="{% url 'treatments:delete_treatment' treatment.id_kunjungan treatment.kode_perawatan %}" class="btn btn-sm btn-danger">Delete</a>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center">No treatment records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

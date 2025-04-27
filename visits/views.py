@@ -117,7 +117,10 @@ import uuid
 import logging
 logger = logging.getLogger(__name__)
 def create_visit(request):
+    logger.debug(f"Session data")
     if request.method == 'POST':
+        logger.debug(f"Session data: {request.session.items()}")
+        logger.debug(f"Front desk ID: {request.session.get('no_front_desk')}")
         try:
             # 1. Kumpulkan semua data dari form
             no_identitas_klien = request.POST.get('no_identitas_klien')
@@ -131,7 +134,7 @@ def create_visit(request):
             no_dokter_hewan = request.POST.get('no_dokter_hewan')
             
             # 2. Ambil no_front_desk dari session
-            no_front_desk = request.session.get('no_front_desk')
+            no_front_desk = request.session.get('employee_id') 
             if not no_front_desk:
                 messages.error(request, 'Anda tidak memiliki akses untuk membuat kunjungan.')
                 return redirect('visits:list_visits')
