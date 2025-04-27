@@ -23,7 +23,7 @@
     <select id="no_perawat_hewan" name="no_perawat_hewan" required>
         <option value="" disabled selected>Pilih Perawat Hewan</option>
         {% for perawat in perawat_hewan %}
-        <option value="{{ perawat.0 }}">{{ perawat.1 }}</option>
+        <option value="{{ perawat.0 }}">{{ perawat.0 }}</option>
         {% endfor %}
     </select>
     <br>
@@ -32,7 +32,7 @@
     <select id="no_dokter_hewan" name="no_dokter_hewan" required>
         <option value="" disabled selected>Pilih Dokter Hewan</option>
         {% for dokter in dokter_hewan %}
-        <option value="{{ dokter.0 }}">{{ dokter.1 }}</option>
+        <option value="{{ dokter.0 }}">{{ dokter.0 }}</option>
         {% endfor %}
     </select>
     <br>
@@ -43,6 +43,14 @@
         <option value="Walk-In">Walk-In</option>
         <option value="Darurat">Darurat</option>
     </select>
+    <br>
+
+    <label for="suhu">Suhu (°C):</label>
+    <input type="number" id="suhu" name="suhu" required>
+    <br>
+
+    <label for="berat_badan">Berat Badan (kg):</label>
+    <input type="number" id="berat_badan" name="berat_badan" step="0.01" required>
     <br>
 
     <label for="timestamp_awal">Waktu Mulai Penanganan:</label>
