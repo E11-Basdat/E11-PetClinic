@@ -3,7 +3,7 @@ from django.contrib import messages
 import uuid
 from datetime import date
 
-# Mock database using dictionaries
+
 USERS = {
     'front_desk@petclinic.com': {
         'email': 'front_desk@petclinic.com',
@@ -125,27 +125,27 @@ PERUSAHAAN = {
 HEWAN = [
     {
         'id': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-        'nama': 'Fluffy',
-        'tanggal_lahir': '2020-05-15',  # ISO format: YYYY-MM-DD
+        'nama': 'Acu',
+        'tanggal_lahir': '2020-05-15',  
         'id_jenis': 'f6a7b8c9-d0e1-2345-fghi-678901234567',
         'no_identitas_klien': 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
-        'url_foto': 'https://example.com/fluffy.jpg'  # Added per SQL schema
+        'url_foto': 'https://example.com/Acu.jpg'  
     },
     {
         'id': 'd4e5f6a7-b8c9-0123-defg-456789012345',
-        'nama': 'Buddy',
-        'tanggal_lahir': '2019-10-20',  # ISO format: YYYY-MM-DD
+        'nama': 'Aci',
+        'tanggal_lahir': '2019-10-20',  
         'id_jenis': 'h8i9j0k1-l2m3-4567-hijk-890123456789',
         'no_identitas_klien': 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
-        'url_foto': 'https://example.com/buddy.jpg'  # Added per SQL schema
+        'url_foto': 'https://example.com/Aci.jpg'  
     },
     {
         'id': 'l2m3n4o5-p6q7-8901-lmno-234567890123',
-        'nama': 'Rex',
-        'tanggal_lahir': '2021-03-10',  # ISO format: YYYY-MM-DD
+        'nama': 'Beyyi',
+        'tanggal_lahir': '2021-03-10',  
         'id_jenis': 'h8i9j0k1-l2m3-4567-hijk-890123456789',
         'no_identitas_klien': 'e5f6a7b8-c9d0-1234-efgh-567890123456',
-        'url_foto': 'https://example.com/rex.jpg'  # Added per SQL schema
+        'url_foto': 'https://example.com/Beyyi.jpg'  
     }
 ]
 
@@ -154,7 +154,7 @@ JENIS_HEWAN = {
     'h8i9j0k1-l2m3-4567-hijk-890123456789': {'id': 'h8i9j0k1-l2m3-4567-hijk-890123456789', 'nama_jenis': 'Anjing'}
 }
 
-# Mock database functions
+
 def get_sertifikat_data(no_tenaga_medis):
     """Get certificate data for medical staff"""
     cert_data = []
@@ -179,27 +179,27 @@ def get_jadwal_data(no_dokter_hewan):
 
 def get_user_type(email):
     """Determine user type based on email"""
-    # Check front desk
+    
     for fd_id, fd in FRONT_DESK.items():
         if PEGAWAI[fd_id]['email_user'] == email:
             return 'front_desk'
     
-    # Check dokter
+    
     for doc_id, doc in DOKTER_HEWAN.items():
         if PEGAWAI[doc_id]['email_user'] == email:
             return 'dokter'
     
-    # Check perawat
+    
     for nurse_id, nurse in PERAWAT_HEWAN.items():
         if PEGAWAI[nurse_id]['email_user'] == email:
             return 'perawat'
     
-    # Check individu
+    
     for client_id, client in INDIVIDU.items():
         if KLIEN[client_id]['email'] == email:
             return 'individu'
     
-    # Check perusahaan
+    
     for client_id, client in PERUSAHAAN.items():
         if KLIEN[client_id]['email'] == email:
             return 'perusahaan'
@@ -336,26 +336,26 @@ def logout_user(request):
 def handle_certificates(no_tenaga_medis, cert_numbers, cert_names):
     """Helper function to handle certificate CRUD operations"""
     
-    # Get existing certificates for this medical staff
+    
     existing_certs = {}
     for cert in SERTIFIKAT_KOMPETENSI:
         if cert['no_tenaga_medis'] == no_tenaga_medis:
             existing_certs[cert['no_sertifikat_kompetensi']] = cert['nama_sertifikat']
     
-    # Update or add new certificates
+    
     processed_certs = set()
     for i in range(len(cert_numbers)):
         cert_number = cert_numbers[i]
         cert_name = cert_names[i]
         
         if cert_number in existing_certs:
-            # Update existing certificate
+            
             for cert in SERTIFIKAT_KOMPETENSI:
                 if cert['no_sertifikat_kompetensi'] == cert_number and cert['no_tenaga_medis'] == no_tenaga_medis:
                     cert['nama_sertifikat'] = cert_name
                     break
         else:
-            # Add new certificate
+            
             SERTIFIKAT_KOMPETENSI.append({
                 'no_sertifikat_kompetensi': cert_number,
                 'no_tenaga_medis': no_tenaga_medis,
@@ -364,7 +364,7 @@ def handle_certificates(no_tenaga_medis, cert_numbers, cert_names):
         
         processed_certs.add(cert_number)
     
-    # Remove certificates not in the new list
+    
     for cert_number in existing_certs:
         if cert_number not in processed_certs:
             for i, cert in enumerate(SERTIFIKAT_KOMPETENSI):
@@ -375,26 +375,26 @@ def handle_certificates(no_tenaga_medis, cert_numbers, cert_names):
 def handle_schedules(no_dokter_hewan, days, hours):
     """Helper function to handle doctor schedule CRUD operations"""
     
-    # Get existing schedules for this doctor
+    
     existing_schedules = {}
     for schedule in JADWAL_PRAKTIK:
         if schedule['no_dokter_hewan'] == no_dokter_hewan:
             existing_schedules[schedule['hari']] = schedule['jam']
     
-    # Update or add new schedules
+    
     processed_days = set()
     for i in range(len(days)):
         day = days[i]
         hour = hours[i]
         
         if day in existing_schedules:
-            # Update existing schedule
+            
             for schedule in JADWAL_PRAKTIK:
                 if schedule['no_dokter_hewan'] == no_dokter_hewan and schedule['hari'] == day:
                     schedule['jam'] = hour
                     break
         else:
-            # Add new schedule
+            
             JADWAL_PRAKTIK.append({
                 'no_dokter_hewan': no_dokter_hewan,
                 'hari': day,
@@ -403,7 +403,7 @@ def handle_schedules(no_dokter_hewan, days, hours):
         
         processed_days.add(day)
     
-    # Remove schedules not in the new list
+    
     for day in existing_schedules:
         if day not in processed_days:
             for i, schedule in enumerate(JADWAL_PRAKTIK):
@@ -423,12 +423,12 @@ def register_user(request):
         nomor_telepon = request.POST.get('nomor_telepon')
         
         try:
-            # Check if email already exists
+            
             if email in USERS:
                 messages.error(request, 'Email already exists!')
                 return render(request, 'register.html')
             
-            # Create new user
+            
             USERS[email] = {
                 'email': email,
                 'password': password,
@@ -477,7 +477,7 @@ def register_user(request):
                     hours = request.POST.getlist('jam[]')
                     handle_schedules(pegawai_id, days, hours)
                             
-                else:  # perawat
+                else:  
                     PERAWAT_HEWAN[pegawai_id] = {'no_perawat_hewan': pegawai_id}
                     
             elif user_type in ['individu', 'perusahaan']:
@@ -502,7 +502,7 @@ def register_user(request):
                         'nama_belakang': nama_belakang
                     }
                     
-                else:  # perusahaan
+                else:  
                     nama_perusahaan = request.POST.get('nama_perusahaan')
                     
                     PERUSAHAAN[klien_id] = {
@@ -546,7 +546,7 @@ def update_password(request):
             messages.error(request, 'New passwords do not match.')
             return render(request, 'update_password.html', {'user_data': user_data})
         
-        # Update password
+        
         USERS[user_email]['password'] = new_password
             
         messages.success(request, 'Password updated successfully.')
@@ -571,7 +571,7 @@ def update_profile(request):
         nomor_telepon = request.POST.get('nomor_telepon')
         
         try:
-            # Update user basic info
+            
             USERS[user_email]['alamat'] = alamat
             USERS[user_email]['nomor_telepon'] = nomor_telepon
             
@@ -603,7 +603,7 @@ def update_profile(request):
                         PEGAWAI[no_pegawai]['tanggal_akhir_kerja'] = tanggal_akhir_kerja if tanggal_akhir_kerja else None
                         break
             
-            # Handle certificates for medical staff
+            
             if user_type in ['dokter', 'perawat']:
                 cert_numbers = request.POST.getlist('no_sertifikat_kompetensi[]')
                 cert_names = request.POST.getlist('nama_sertifikat[]')
@@ -613,7 +613,7 @@ def update_profile(request):
                         handle_certificates(no_pegawai, cert_numbers, cert_names)
                         break
             
-            # Handle schedules for doctors
+            
             if user_type == 'dokter':
                 days = request.POST.getlist('hari[]')
                 hours = request.POST.getlist('jam[]')
@@ -642,7 +642,7 @@ def list_client(request):
     
     clients_list = []
     
-    # Add individual clients
+    
     for client_id, client in INDIVIDU.items():
         if client_id in KLIEN:
             klien = KLIEN[client_id]
@@ -662,7 +662,7 @@ def list_client(request):
                 'jenis': 'Individu',
             })
     
-    # Add company clients
+    
     for client_id, client in PERUSAHAAN.items():
         if client_id in KLIEN:
             klien = KLIEN[client_id]
@@ -695,7 +695,7 @@ def client_detail(request, no_identitas):
     client = {}
     client_jenis = ""
     
-    # Check if client exists and get type
+    
     if no_identitas in INDIVIDU:
         client_jenis = 'Individu'
     elif no_identitas in PERUSAHAAN:
@@ -705,7 +705,7 @@ def client_detail(request, no_identitas):
         messages.error(request, 'Client not found.')
         return redirect('authentication:list_client')
     
-    # Get client details
+    
     if client_jenis == 'Individu':
         individu = INDIVIDU[no_identitas]
         klien = KLIEN[no_identitas]
@@ -726,7 +726,7 @@ def client_detail(request, no_identitas):
             'nama': nama_lengkap.strip(),
             'jenis': client_jenis
         }
-    else:  # Perusahaan
+    else:  
         perusahaan = PERUSAHAAN[no_identitas]
         klien = KLIEN[no_identitas]
         user = USERS.get(klien['email'], {})
@@ -741,7 +741,7 @@ def client_detail(request, no_identitas):
             'jenis': client_jenis
         }
     
-    # Get pets for this client
+    
     pets = []
     for pet in HEWAN:
         if pet['no_identitas_klien'] == no_identitas:

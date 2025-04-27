@@ -8,7 +8,7 @@ import uuid
 VACCINATIONS = [
     {
         'id_kunjungan': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-        'nama_hewan': 'Fluffy',
+        'nama_hewan': 'Beyyi',
         'tanggal_kunjungan': datetime(2025, 4, 20, 14, 30),
         'nama_vaksin': 'Rabies Vaccine',
         'no_identitas_klien': 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
@@ -17,7 +17,7 @@ VACCINATIONS = [
     },
     {
         'id_kunjungan': 'd4e5f6a7-b8c9-0123-defg-456789012345',
-        'nama_hewan': 'Buddy',
+        'nama_hewan': 'Aci',
         'tanggal_kunjungan': datetime(2025, 4, 22, 10, 15),
         'nama_vaksin': 'Distemper Vaccine',
         'no_identitas_klien': 'e5f6a7b8-c9d0-1234-efgh-567890123456',
@@ -26,7 +26,7 @@ VACCINATIONS = [
     },
     {
         'id_kunjungan': 'f6a7b8c9-d0e1-2345-fghi-678901234567',
-        'nama_hewan': 'Luna',
+        'nama_hewan': 'Acu',
         'tanggal_kunjungan': datetime(2025, 4, 23, 16, 45),
         'nama_vaksin': 'Parvovirus Vaccine',
         'no_identitas_klien': 'g7h8i9j0-k1l2-3456-ghij-789012345678',
