@@ -7,30 +7,30 @@ import uuid
 # In-memory data storage
 VACCINATIONS = [
     {
-        'id_kunjungan': 'KJ001',
+        'id_kunjungan': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
         'nama_hewan': 'Fluffy',
         'tanggal_kunjungan': datetime(2025, 4, 20, 14, 30),
         'nama_vaksin': 'Rabies Vaccine',
-        'no_identitas_klien': 'K001',
-        'no_dokter_hewan': 'DH001',
+        'no_identitas_klien': 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
+        'no_dokter_hewan': 'c3d4e5f6-a7b8-9012-cdef-345678901234',
         'kode_vaksin': 'VAC001'
     },
     {
-        'id_kunjungan': 'KJ002',
+        'id_kunjungan': 'd4e5f6a7-b8c9-0123-defg-456789012345',
         'nama_hewan': 'Buddy',
         'tanggal_kunjungan': datetime(2025, 4, 22, 10, 15),
         'nama_vaksin': 'Distemper Vaccine',
-        'no_identitas_klien': 'K002',
-        'no_dokter_hewan': 'DH001',
+        'no_identitas_klien': 'e5f6a7b8-c9d0-1234-efgh-567890123456',
+        'no_dokter_hewan': 'c3d4e5f6-a7b8-9012-cdef-345678901234',
         'kode_vaksin': 'VAC002'
     },
     {
-        'id_kunjungan': 'KJ003',
+        'id_kunjungan': 'f6a7b8c9-d0e1-2345-fghi-678901234567',
         'nama_hewan': 'Luna',
         'tanggal_kunjungan': datetime(2025, 4, 23, 16, 45),
         'nama_vaksin': 'Parvovirus Vaccine',
-        'no_identitas_klien': 'K003',
-        'no_dokter_hewan': 'DH001',
+        'no_identitas_klien': 'g7h8i9j0-k1l2-3456-ghij-789012345678',
+        'no_dokter_hewan': 'c3d4e5f6-a7b8-9012-cdef-345678901234',
         'kode_vaksin': 'VAC003'
     }
 ]
@@ -68,29 +68,41 @@ VACCINES = [
 
 OPEN_VISITS = [
     {
-        'id_kunjungan': 'KJ004',
+        'id_kunjungan': 'h8i9j0k1-l2m3-4567-hijk-890123456789',
         'nama_hewan': 'Max',
-        'tanggal_kunjungan': datetime(2025, 4, 25, 9, 30),
-        'no_identitas_klien': 'K004',
-        'no_front_desk': 'FD001',
-        'no_perawat_hewan': 'PH001'
+        'no_identitas_klien': 'i9j0k1l2-m3n4-5678-ijkl-901234567890',
+        'no_front_desk': 'j0k1l2m3-n4o5-6789-jklm-012345678901',
+        'no_perawat_hewan': 'k1l2m3n4-o5p6-7890-klmn-123456789012',
+        'no_dokter_hewan': 'c3d4e5f6-a7b8-9012-cdef-345678901234',
+        'kode_vaksin': None,
+        'tipe_kunjungan': 'Regular',
+        'timestamp_awal': datetime(2025, 4, 25, 9, 30),
+        'timestamp_akhir': None,  # Null timestamp_akhir indicates an open visit
+        'suhu': 38,
+        'berat_badan': 12.5
     },
     {
-        'id_kunjungan': 'KJ005',
+        'id_kunjungan': 'l2m3n4o5-p6q7-8901-lmno-234567890123',
         'nama_hewan': 'Charlie',
-        'tanggal_kunjungan': datetime(2025, 4, 26, 11, 15),
-        'no_identitas_klien': 'K005',
-        'no_front_desk': 'FD001',
-        'no_perawat_hewan': 'PH002'
+        'no_identitas_klien': 'm3n4o5p6-q7r8-9012-mnop-345678901234',
+        'no_front_desk': 'j0k1l2m3-n4o5-6789-jklm-012345678901',
+        'no_perawat_hewan': 'n4o5p6q7-r8s9-0123-nopq-456789012345',
+        'no_dokter_hewan': 'c3d4e5f6-a7b8-9012-cdef-345678901234',
+        'kode_vaksin': None,
+        'tipe_kunjungan': 'Regular',
+        'timestamp_awal': datetime(2025, 4, 26, 11, 15),
+        'timestamp_akhir': None,  # Null timestamp_akhir indicates an open visit
+        'suhu': 39,
+        'berat_badan': 8.2
     }
 ]
 
 DOCTORS = {
-    'doctor@petclinic.com': 'DH001'
+    'doctor@petclinic.com': 'c3d4e5f6-a7b8-9012-cdef-345678901234'
 }
 
 NURSES = {
-    'nurse@petclinic.com': 'PH001'
+    'nurse@petclinic.com': 'k1l2m3n4-o5p6-7890-klmn-123456789012'
 }
 
 # Decorator functions
@@ -126,19 +138,20 @@ def perawat_required(view_func):
 def get_doctor_id(request):
     """Get doctor ID from session"""
     user_email = request.session.get('user_email', 'doctor@petclinic.com')
-    return DOCTORS.get(user_email, 'DH001')  # Default for testing
+    return DOCTORS.get(user_email, 'c3d4e5f6-a7b8-9012-cdef-345678901234')  # Default for testing
 
 def get_nurse_id(request):
     """Get nurse ID from session"""
     user_email = request.session.get('user_email', 'nurse@petclinic.com')
-    return NURSES.get(user_email, 'PH001')  # Default for testing
+    return NURSES.get(user_email, 'k1l2m3n4-o5p6-7890-klmn-123456789012')  # Default for testing
 
 def get_list_vaccinations(request):
     doctor_id = get_doctor_id(request)
     return [v for v in VACCINATIONS if v['no_dokter_hewan'] == doctor_id]
 
 def get_open_visits(request):
-    return OPEN_VISITS
+    # Return visits where timestamp_akhir is None (open visits)
+    return [v for v in OPEN_VISITS if v['timestamp_akhir'] is None]
 
 def get_vaccines_with_stock():
     return [{
@@ -216,7 +229,7 @@ def add_vaccination(request):
             new_vaccination = {
                 'id_kunjungan': id_kunjungan,
                 'nama_hewan': visit['nama_hewan'],
-                'tanggal_kunjungan': visit['tanggal_kunjungan'],
+                'tanggal_kunjungan': visit['timestamp_awal'],  # Use timestamp_awal from visit
                 'nama_vaksin': vaccine['nama'],
                 'no_identitas_klien': visit['no_identitas_klien'],
                 'no_dokter_hewan': get_doctor_id(request),
@@ -344,10 +357,16 @@ def delete_vaccination(request, id_kunjungan):
         OPEN_VISITS.append({
             'id_kunjungan': id_kunjungan,
             'nama_hewan': vaccination['nama_hewan'],
-            'tanggal_kunjungan': vaccination['tanggal_kunjungan'],
             'no_identitas_klien': vaccination['no_identitas_klien'],
-            'no_front_desk': 'FD001',  # Default
-            'no_perawat_hewan': 'PH001'  # Default
+            'no_front_desk': 'j0k1l2m3-n4o5-6789-jklm-012345678901',  # Updated to UUID format
+            'no_perawat_hewan': 'k1l2m3n4-o5p6-7890-klmn-123456789012',  # Updated to UUID format
+            'no_dokter_hewan': vaccination['no_dokter_hewan'],
+            'kode_vaksin': None,
+            'tipe_kunjungan': 'Regular',
+            'timestamp_awal': vaccination['tanggal_kunjungan'],
+            'timestamp_akhir': None,  # Set to None to mark as open visit
+            'suhu': 38,  # Default
+            'berat_badan': 10.0  # Default
         })
         
         messages.success(request, f"Vaksinasi {vaccine_name} untuk kunjungan {id_kunjungan} berhasil dihapus")

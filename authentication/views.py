@@ -1,90 +1,208 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.db import connection
 import uuid
 from datetime import date
 
-def execute_query(query, params=None):
-    """Execute a database query and return results"""
-    with connection.cursor() as cursor:
-        cursor.execute(query, params or [])
-        try:
-            return cursor.fetchall()
-        except Exception:
-            return None
+# Mock database using dictionaries
+USERS = {
+    'front_desk@petclinic.com': {
+        'email': 'front_desk@petclinic.com',
+        'password': 'password123',
+        'alamat': 'Jl. Front Desk No. 1',
+        'nomor_telepon': '081234567890'
+    },
+    'dokter@petclinic.com': {
+        'email': 'dokter@petclinic.com',
+        'password': 'password123',
+        'alamat': 'Jl. Dokter No. 2',
+        'nomor_telepon': '081234567891'
+    },
+    'perawat@petclinic.com': {
+        'email': 'perawat@petclinic.com',
+        'password': 'password123',
+        'alamat': 'Jl. Perawat No. 3',
+        'nomor_telepon': '081234567892'
+    },
+    'individu@petclinic.com': {
+        'email': 'individu@petclinic.com',
+        'password': 'password123',
+        'alamat': 'Jl. Individu No. 4',
+        'nomor_telepon': '081234567893'
+    },
+    'perusahaan@petclinic.com': {
+        'email': 'perusahaan@petclinic.com',
+        'password': 'password123',
+        'alamat': 'Jl. Perusahaan No. 5',
+        'nomor_telepon': '081234567894'
+    }
+}
 
-def execute_update_query(query, params=None):
-    """Execute a database query (INSERT, UPDATE, DELETE) that doesn't return results"""
-    with connection.cursor() as cursor:
-        cursor.execute(query, params or [])
-        return True
+PEGAWAI = {
+    'j0k1l2m3-n4o5-6789-jklm-012345678901': {
+        'no_pegawai': 'j0k1l2m3-n4o5-6789-jklm-012345678901',
+        'tanggal_mulai_kerja': '2022-01-01',
+        'tanggal_akhir_kerja': None,
+        'email_user': 'front_desk@petclinic.com'
+    },
+    'c3d4e5f6-a7b8-9012-cdef-345678901234': {
+        'no_pegawai': 'c3d4e5f6-a7b8-9012-cdef-345678901234',
+        'tanggal_mulai_kerja': '2022-01-02',
+        'tanggal_akhir_kerja': None,
+        'email_user': 'dokter@petclinic.com'
+    },
+    'k1l2m3n4-o5p6-7890-klmn-123456789012': {
+        'no_pegawai': 'k1l2m3n4-o5p6-7890-klmn-123456789012',
+        'tanggal_mulai_kerja': '2022-01-03',
+        'tanggal_akhir_kerja': None,
+        'email_user': 'perawat@petclinic.com'
+    }
+}
 
+FRONT_DESK = {
+    'j0k1l2m3-n4o5-6789-jklm-012345678901': {'no_front_desk': 'j0k1l2m3-n4o5-6789-jklm-012345678901'}
+}
+
+TENAGA_MEDIS = {
+    'c3d4e5f6-a7b8-9012-cdef-345678901234': {
+        'no_tenaga_medis': 'c3d4e5f6-a7b8-9012-cdef-345678901234',
+        'no_izin_praktik': 'IP-DOC-001'
+    },
+    'k1l2m3n4-o5p6-7890-klmn-123456789012': {
+        'no_tenaga_medis': 'k1l2m3n4-o5p6-7890-klmn-123456789012',
+        'no_izin_praktik': 'IP-NURSE-001'
+    }
+}
+
+DOKTER_HEWAN = {
+    'c3d4e5f6-a7b8-9012-cdef-345678901234': {'no_dokter_hewan': 'c3d4e5f6-a7b8-9012-cdef-345678901234'}
+}
+
+PERAWAT_HEWAN = {
+    'k1l2m3n4-o5p6-7890-klmn-123456789012': {'no_perawat_hewan': 'k1l2m3n4-o5p6-7890-klmn-123456789012'}
+}
+
+SERTIFIKAT_KOMPETENSI = [
+    {'no_sertifikat_kompetensi': 'CERT-001', 'no_tenaga_medis': 'c3d4e5f6-a7b8-9012-cdef-345678901234', 'nama_sertifikat': 'Sertifikat Dokter Hewan'},
+    {'no_sertifikat_kompetensi': 'CERT-002', 'no_tenaga_medis': 'c3d4e5f6-a7b8-9012-cdef-345678901234', 'nama_sertifikat': 'Sertifikat Bedah Hewan'},
+    {'no_sertifikat_kompetensi': 'CERT-003', 'no_tenaga_medis': 'k1l2m3n4-o5p6-7890-klmn-123456789012', 'nama_sertifikat': 'Sertifikat Perawat Hewan'}
+]
+
+JADWAL_PRAKTIK = [
+    {'no_dokter_hewan': 'c3d4e5f6-a7b8-9012-cdef-345678901234', 'hari': 'Senin', 'jam': '08:00-12:00'},
+    {'no_dokter_hewan': 'c3d4e5f6-a7b8-9012-cdef-345678901234', 'hari': 'Rabu', 'jam': '13:00-17:00'},
+    {'no_dokter_hewan': 'c3d4e5f6-a7b8-9012-cdef-345678901234', 'hari': 'Jumat', 'jam': '08:00-15:00'}
+]
+
+KLIEN = {
+    'b2c3d4e5-f6a7-8901-bcde-f23456789012': {
+        'no_identitas': 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
+        'tanggal_registrasi': '2022-02-01',
+        'email': 'individu@petclinic.com'
+    },
+    'e5f6a7b8-c9d0-1234-efgh-567890123456': {
+        'no_identitas': 'e5f6a7b8-c9d0-1234-efgh-567890123456',
+        'tanggal_registrasi': '2022-02-02',
+        'email': 'perusahaan@petclinic.com'
+    }
+}
+
+INDIVIDU = {
+    'b2c3d4e5-f6a7-8901-bcde-f23456789012': {
+        'no_identitas_klien': 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
+        'nama_depan': 'Hanni',
+        'nama_tengah': '',
+        'nama_belakang': 'Pham'
+    }
+}
+
+PERUSAHAAN = {
+    'e5f6a7b8-c9d0-1234-efgh-567890123456': {
+        'no_identitas_klien': 'e5f6a7b8-c9d0-1234-efgh-567890123456',
+        'nama_perusahaan': 'PT Newjeans'
+    }
+}
+
+HEWAN = [
+    {
+        'id': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        'nama': 'Fluffy',
+        'tanggal_lahir': '2020-05-15',  # ISO format: YYYY-MM-DD
+        'id_jenis': 'f6a7b8c9-d0e1-2345-fghi-678901234567',
+        'no_identitas_klien': 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
+        'url_foto': 'https://example.com/fluffy.jpg'  # Added per SQL schema
+    },
+    {
+        'id': 'd4e5f6a7-b8c9-0123-defg-456789012345',
+        'nama': 'Buddy',
+        'tanggal_lahir': '2019-10-20',  # ISO format: YYYY-MM-DD
+        'id_jenis': 'h8i9j0k1-l2m3-4567-hijk-890123456789',
+        'no_identitas_klien': 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
+        'url_foto': 'https://example.com/buddy.jpg'  # Added per SQL schema
+    },
+    {
+        'id': 'l2m3n4o5-p6q7-8901-lmno-234567890123',
+        'nama': 'Rex',
+        'tanggal_lahir': '2021-03-10',  # ISO format: YYYY-MM-DD
+        'id_jenis': 'h8i9j0k1-l2m3-4567-hijk-890123456789',
+        'no_identitas_klien': 'e5f6a7b8-c9d0-1234-efgh-567890123456',
+        'url_foto': 'https://example.com/rex.jpg'  # Added per SQL schema
+    }
+]
+
+JENIS_HEWAN = {
+    'f6a7b8c9-d0e1-2345-fghi-678901234567': {'id': 'f6a7b8c9-d0e1-2345-fghi-678901234567', 'nama_jenis': 'Kucing'},
+    'h8i9j0k1-l2m3-4567-hijk-890123456789': {'id': 'h8i9j0k1-l2m3-4567-hijk-890123456789', 'nama_jenis': 'Anjing'}
+}
+
+# Mock database functions
 def get_sertifikat_data(no_tenaga_medis):
     """Get certificate data for medical staff"""
-    query = """
-        SELECT no_sertifikat_kompetensi, nama_sertifikat 
-        FROM petclinic.SERTIFIKAT_KOMPETENSI
-        WHERE no_tenaga_medis = %s
-    """
-    cert_data = execute_query(query, [no_tenaga_medis])
-    if cert_data:
-        return [
-            {'no_sertifikat_kompetensi': cert[0], 'nama_sertifikat': cert[1]} 
-            for cert in cert_data
-        ]
-    return []
+    cert_data = []
+    for cert in SERTIFIKAT_KOMPETENSI:
+        if cert['no_tenaga_medis'] == no_tenaga_medis:
+            cert_data.append({
+                'no_sertifikat_kompetensi': cert['no_sertifikat_kompetensi'], 
+                'nama_sertifikat': cert['nama_sertifikat']
+            })
+    return cert_data
 
 def get_jadwal_data(no_dokter_hewan):
     """Get schedule data for a doctor"""
-    query = """
-        SELECT hari, jam 
-        FROM petclinic.JADWAL_PRAKTIK
-        WHERE no_dokter_hewan = %s
-    """
-    jadwal_data = execute_query(query, [no_dokter_hewan])
-    if jadwal_data:
-        return [
-            {'hari': jadwal[0], 'jam': jadwal[1]} 
-            for jadwal in jadwal_data
-        ]
-    return []
-
+    jadwal_data = []
+    for jadwal in JADWAL_PRAKTIK:
+        if jadwal['no_dokter_hewan'] == no_dokter_hewan:
+            jadwal_data.append({
+                'hari': jadwal['hari'], 
+                'jam': jadwal['jam']
+            })
+    return jadwal_data
 
 def get_user_type(email):
     """Determine user type based on email"""
-    user_types = [
-        ('front_desk', """
-            SELECT p.no_pegawai FROM petclinic.PEGAWAI p 
-            JOIN petclinic.FRONT_DESK fd ON p.no_pegawai = fd.no_front_desk
-            WHERE p.email_user = %s
-        """),
-        ('dokter', """
-            SELECT p.no_pegawai FROM petclinic.PEGAWAI p 
-            JOIN petclinic.TENAGA_MEDIS tm ON p.no_pegawai = tm.no_tenaga_medis
-            JOIN petclinic.DOKTER_HEWAN dh ON tm.no_tenaga_medis = dh.no_dokter_hewan
-            WHERE p.email_user = %s
-        """),
-        ('perawat', """
-            SELECT p.no_pegawai FROM petclinic.PEGAWAI p 
-            JOIN petclinic.TENAGA_MEDIS tm ON p.no_pegawai = tm.no_tenaga_medis
-            JOIN petclinic.PERAWAT_HEWAN ph ON tm.no_tenaga_medis = ph.no_perawat_hewan
-            WHERE p.email_user = %s
-        """),
-        ('individu', """
-            SELECT k.no_identitas FROM petclinic.KLIEN k 
-            JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
-            WHERE k.email = %s
-        """),
-        ('perusahaan', """
-            SELECT k.no_identitas FROM petclinic.KLIEN k 
-            JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
-            WHERE k.email = %s
-        """)
-    ]
+    # Check front desk
+    for fd_id, fd in FRONT_DESK.items():
+        if PEGAWAI[fd_id]['email_user'] == email:
+            return 'front_desk'
     
-    for user_type, query in user_types:
-        if execute_query(query, [email]):
-            return user_type
+    # Check dokter
+    for doc_id, doc in DOKTER_HEWAN.items():
+        if PEGAWAI[doc_id]['email_user'] == email:
+            return 'dokter'
+    
+    # Check perawat
+    for nurse_id, nurse in PERAWAT_HEWAN.items():
+        if PEGAWAI[nurse_id]['email_user'] == email:
+            return 'perawat'
+    
+    # Check individu
+    for client_id, client in INDIVIDU.items():
+        if KLIEN[client_id]['email'] == email:
+            return 'individu'
+    
+    # Check perusahaan
+    for client_id, client in PERUSAHAAN.items():
+        if KLIEN[client_id]['email'] == email:
+            return 'perusahaan'
     
     return None
 
@@ -93,108 +211,77 @@ def get_user_data(request):
     user_email = request.session.get('user_email')
     user_type = request.session.get('user_type')
     
-    if not user_email or not user_type:
+    if not user_email or not user_type or user_email not in USERS:
         return None
     
-    user_data = execute_query("""
-        SELECT email, alamat, nomor_telepon FROM petclinic."USER" 
-        WHERE email = %s
-    """, [user_email])
-    
-    if not user_data:
-        return None
-        
+    user = USERS[user_email]
     result = {
-        'email': user_data[0][0],
-        'alamat': user_data[0][1],
-        'nomor_telepon': user_data[0][2],
+        'email': user['email'],
+        'alamat': user['alamat'],
+        'nomor_telepon': user['nomor_telepon'],
         'user_type': user_type
     }
     
     if user_type == 'front_desk':
-        emp_data = execute_query("""
-            SELECT p.no_pegawai, p.tanggal_mulai_kerja FROM petclinic.PEGAWAI p 
-            JOIN petclinic.FRONT_DESK fd ON p.no_pegawai = fd.no_front_desk
-            WHERE p.email_user = %s
-        """, [user_email])
-        
-        if emp_data:
-            result.update({
-                'no_pegawai': emp_data[0][0],
-                'tanggal_mulai_kerja': emp_data[0][1]
-            })
-            
+        for no_pegawai, pegawai in PEGAWAI.items():
+            if pegawai['email_user'] == user_email:
+                result.update({
+                    'no_pegawai': no_pegawai,
+                    'tanggal_mulai_kerja': pegawai['tanggal_mulai_kerja'],
+                    'tanggal_akhir_kerja': pegawai['tanggal_akhir_kerja']
+                })
+                break
+                
     elif user_type == 'dokter':
-        emp_data = execute_query("""
-            SELECT p.no_pegawai, p.tanggal_mulai_kerja, tm.no_izin_praktik 
-            FROM petclinic.PEGAWAI p 
-            JOIN petclinic.TENAGA_MEDIS tm ON p.no_pegawai = tm.no_tenaga_medis
-            JOIN petclinic.DOKTER_HEWAN dh ON tm.no_tenaga_medis = dh.no_dokter_hewan
-            WHERE p.email_user = %s
-        """, [user_email])
-        
-        if emp_data:
-            result.update({
-                'no_pegawai': emp_data[0][0],
-                'tanggal_mulai_kerja': emp_data[0][1],
-                'no_izin_praktik': emp_data[0][2]
-            })
-            
-            result['sertifikat'] = get_sertifikat_data(emp_data[0][0])
-            result['jadwal'] = get_jadwal_data(emp_data[0][0])
-            
+        for no_pegawai, pegawai in PEGAWAI.items():
+            if pegawai['email_user'] == user_email and no_pegawai in TENAGA_MEDIS:
+                result.update({
+                    'no_pegawai': no_pegawai,
+                    'tanggal_mulai_kerja': pegawai['tanggal_mulai_kerja'],
+                    'tanggal_akhir_kerja': pegawai['tanggal_akhir_kerja'],
+                    'no_izin_praktik': TENAGA_MEDIS[no_pegawai]['no_izin_praktik']
+                })
+                result['sertifikat'] = get_sertifikat_data(no_pegawai)
+                result['jadwal'] = get_jadwal_data(no_pegawai)
+                break
+                
     elif user_type == 'perawat':
-        emp_data = execute_query("""
-            SELECT p.no_pegawai, p.tanggal_mulai_kerja, tm.no_izin_praktik 
-            FROM petclinic.PEGAWAI p 
-            JOIN petclinic.TENAGA_MEDIS tm ON p.no_pegawai = tm.no_tenaga_medis
-            JOIN petclinic.PERAWAT_HEWAN ph ON tm.no_tenaga_medis = ph.no_perawat_hewan
-            WHERE p.email_user = %s
-        """, [user_email])
-        
-        if emp_data:
-            result.update({
-                'no_pegawai': emp_data[0][0],
-                'tanggal_mulai_kerja': emp_data[0][1],
-                'no_izin_praktik': emp_data[0][2]
-            })
-            
-            result['sertifikat'] = get_sertifikat_data(emp_data[0][0])
-            
+        for no_pegawai, pegawai in PEGAWAI.items():
+            if pegawai['email_user'] == user_email and no_pegawai in TENAGA_MEDIS:
+                result.update({
+                    'no_pegawai': no_pegawai,
+                    'tanggal_mulai_kerja': pegawai['tanggal_mulai_kerja'],
+                    'tanggal_akhir_kerja': pegawai['tanggal_akhir_kerja'],
+                    'no_izin_praktik': TENAGA_MEDIS[no_pegawai]['no_izin_praktik']
+                })
+                result['sertifikat'] = get_sertifikat_data(no_pegawai)
+                break
+                
     elif user_type == 'individu':
-        client_data = execute_query("""
-            SELECT k.no_identitas, k.tanggal_registrasi, i.nama_depan, i.nama_tengah, i.nama_belakang
-            FROM petclinic.KLIEN k 
-            JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
-            WHERE k.email = %s
-        """, [user_email])
-        
-        if client_data:
-            result.update({
-                'no_identitas': client_data[0][0],
-                'tanggal_registrasi': client_data[0][1],
-                'nama_depan': client_data[0][2],
-                'nama_tengah': client_data[0][3],
-                'nama_belakang': client_data[0][4]
-            })
-            
+        for no_identitas, klien in KLIEN.items():
+            if klien['email'] == user_email and no_identitas in INDIVIDU:
+                individu = INDIVIDU[no_identitas]
+                result.update({
+                    'no_identitas': no_identitas,
+                    'tanggal_registrasi': klien['tanggal_registrasi'],
+                    'nama_depan': individu['nama_depan'],
+                    'nama_tengah': individu['nama_tengah'],
+                    'nama_belakang': individu['nama_belakang']
+                })
+                break
+                
     elif user_type == 'perusahaan':
-        client_data = execute_query("""
-            SELECT k.no_identitas, k.tanggal_registrasi, p.nama_perusahaan
-            FROM petclinic.KLIEN k 
-            JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
-            WHERE k.email = %s
-        """, [user_email])
-        
-        if client_data:
-            result.update({
-                'no_identitas': client_data[0][0],
-                'tanggal_registrasi': client_data[0][1],
-                'nama_perusahaan': client_data[0][2]
-            })
-            
+        for no_identitas, klien in KLIEN.items():
+            if klien['email'] == user_email and no_identitas in PERUSAHAAN:
+                perusahaan = PERUSAHAAN[no_identitas]
+                result.update({
+                    'no_identitas': no_identitas,
+                    'tanggal_registrasi': klien['tanggal_registrasi'],
+                    'nama_perusahaan': perusahaan['nama_perusahaan']
+                })
+                break
+                
     return result
-
 
 def show_pengguna(request):
     return render(request, 'pengguna.html')
@@ -208,8 +295,6 @@ def dashboard(request):
     
     user_data = get_user_data(request)
     
-    print("User data for dashboard:", user_data)
-    
     if not user_data:
         if 'user_email' in request.session:
             del request.session['user_email']
@@ -220,21 +305,14 @@ def dashboard(request):
     
     return render(request, 'dashboard.html', {'user_data': user_data})
 
-
 def login_user(request):
     """View function to handle user login."""
     if request.method == 'POST':
-        email = request.POST.get('email')  
+        email = request.POST.get('email')
         password = request.POST.get('password')
         
-        user = execute_query("""
-            SELECT email, password FROM petclinic."USER" 
-            WHERE email = %s AND password = %s
-        """, [email, password])
-        
-        if user:
-            request.session['user_email'] = user[0][0]
-            
+        if email in USERS and USERS[email]['password'] == password:
+            request.session['user_email'] = email
             
             user_type = get_user_type(email)
             if user_type:
@@ -244,7 +322,6 @@ def login_user(request):
         else:
             messages.info(request, 'Username or password is incorrect!')
     return render(request, 'login.html')
-
 
 def logout_user(request):
     """View function to handle user logout."""
@@ -256,95 +333,83 @@ def logout_user(request):
     
     return redirect('authentication:pengguna')
 
-
 def handle_certificates(no_tenaga_medis, cert_numbers, cert_names):
     """Helper function to handle certificate CRUD operations"""
     
+    # Get existing certificates for this medical staff
     existing_certs = {}
-    cert_data = execute_query("""
-        SELECT no_sertifikat_kompetensi, nama_sertifikat 
-        FROM petclinic.SERTIFIKAT_KOMPETENSI
-        WHERE no_tenaga_medis = %s
-    """, [no_tenaga_medis])
+    for cert in SERTIFIKAT_KOMPETENSI:
+        if cert['no_tenaga_medis'] == no_tenaga_medis:
+            existing_certs[cert['no_sertifikat_kompetensi']] = cert['nama_sertifikat']
     
-    for row in cert_data:
-        existing_certs[row[0]] = row[1]
-    
-    
+    # Update or add new certificates
+    processed_certs = set()
     for i in range(len(cert_numbers)):
         cert_number = cert_numbers[i]
         cert_name = cert_names[i]
         
         if cert_number in existing_certs:
-            
-            if existing_certs[cert_number] != cert_name:
-                execute_update_query("""
-                    UPDATE petclinic.SERTIFIKAT_KOMPETENSI 
-                    SET nama_sertifikat = %s
-                    WHERE no_sertifikat_kompetensi = %s AND no_tenaga_medis = %s
-                """, [cert_name, cert_number, no_tenaga_medis])
-            
-            del existing_certs[cert_number]
+            # Update existing certificate
+            for cert in SERTIFIKAT_KOMPETENSI:
+                if cert['no_sertifikat_kompetensi'] == cert_number and cert['no_tenaga_medis'] == no_tenaga_medis:
+                    cert['nama_sertifikat'] = cert_name
+                    break
         else:
-            
-            execute_update_query("""
-                INSERT INTO petclinic.SERTIFIKAT_KOMPETENSI (no_sertifikat_kompetensi, no_tenaga_medis, nama_sertifikat)
-                VALUES (%s, %s, %s)
-            """, [cert_number, no_tenaga_medis, cert_name])
+            # Add new certificate
+            SERTIFIKAT_KOMPETENSI.append({
+                'no_sertifikat_kompetensi': cert_number,
+                'no_tenaga_medis': no_tenaga_medis,
+                'nama_sertifikat': cert_name
+            })
+        
+        processed_certs.add(cert_number)
     
-    
+    # Remove certificates not in the new list
     for cert_number in existing_certs:
-        execute_update_query("""
-            DELETE FROM petclinic.SERTIFIKAT_KOMPETENSI
-            WHERE no_sertifikat_kompetensi = %s AND no_tenaga_medis = %s
-        """, [cert_number, no_tenaga_medis])
-
+        if cert_number not in processed_certs:
+            for i, cert in enumerate(SERTIFIKAT_KOMPETENSI):
+                if cert['no_sertifikat_kompetensi'] == cert_number and cert['no_tenaga_medis'] == no_tenaga_medis:
+                    del SERTIFIKAT_KOMPETENSI[i]
+                    break
 
 def handle_schedules(no_dokter_hewan, days, hours):
     """Helper function to handle doctor schedule CRUD operations"""
     
+    # Get existing schedules for this doctor
     existing_schedules = {}
-    schedule_data = execute_query("""
-        SELECT hari, jam 
-        FROM petclinic.JADWAL_PRAKTIK
-        WHERE no_dokter_hewan = %s
-    """, [no_dokter_hewan])
+    for schedule in JADWAL_PRAKTIK:
+        if schedule['no_dokter_hewan'] == no_dokter_hewan:
+            existing_schedules[schedule['hari']] = schedule['jam']
     
-    for row in schedule_data:
-        existing_schedules[row[0]] = row[1]
-    
-    
+    # Update or add new schedules
     processed_days = set()
-    
     for i in range(len(days)):
         day = days[i]
         hour = hours[i]
         
         if day in existing_schedules:
-            
-            if existing_schedules[day] != hour:
-                execute_update_query("""
-                    UPDATE petclinic.JADWAL_PRAKTIK 
-                    SET jam = %s
-                    WHERE no_dokter_hewan = %s AND hari = %s
-                """, [hour, no_dokter_hewan, day])
-            processed_days.add(day)
+            # Update existing schedule
+            for schedule in JADWAL_PRAKTIK:
+                if schedule['no_dokter_hewan'] == no_dokter_hewan and schedule['hari'] == day:
+                    schedule['jam'] = hour
+                    break
         else:
-            
-            execute_update_query("""
-                INSERT INTO petclinic.JADWAL_PRAKTIK (no_dokter_hewan, hari, jam)
-                VALUES (%s, %s, %s)
-            """, [no_dokter_hewan, day, hour])
-            processed_days.add(day)
+            # Add new schedule
+            JADWAL_PRAKTIK.append({
+                'no_dokter_hewan': no_dokter_hewan,
+                'hari': day,
+                'jam': hour
+            })
+        
+        processed_days.add(day)
     
-    
+    # Remove schedules not in the new list
     for day in existing_schedules:
         if day not in processed_days:
-            execute_update_query("""
-                DELETE FROM petclinic.JADWAL_PRAKTIK
-                WHERE no_dokter_hewan = %s AND hari = %s
-            """, [no_dokter_hewan, day])
-
+            for i, schedule in enumerate(JADWAL_PRAKTIK):
+                if schedule['no_dokter_hewan'] == no_dokter_hewan and schedule['hari'] == day:
+                    del JADWAL_PRAKTIK[i]
+                    break
 
 def register_user(request):
     """View function to handle user registration."""
@@ -352,107 +417,102 @@ def register_user(request):
     if request.method == 'POST':
         user_type = request.POST.get('user_type')
         
-        
         email = request.POST.get('email')
         password = request.POST.get('password')
         alamat = request.POST.get('alamat')
         nomor_telepon = request.POST.get('nomor_telepon')
         
         try:
+            # Check if email already exists
+            if email in USERS:
+                messages.error(request, 'Email already exists!')
+                return render(request, 'register.html')
             
-            execute_update_query("""
-                INSERT INTO petclinic."USER" (email, password, alamat, nomor_telepon)
-                VALUES (%s, %s, %s, %s)
-            """, [email, password, alamat, nomor_telepon])
-            
+            # Create new user
+            USERS[email] = {
+                'email': email,
+                'password': password,
+                'alamat': alamat,
+                'nomor_telepon': nomor_telepon
+            }
             
             if user_type == 'front_desk':
                 tanggal_mulai_kerja = request.POST.get('tanggal_mulai_kerja')
                 pegawai_id = str(uuid.uuid4())
                 
-                execute_update_query("""
-                    INSERT INTO petclinic.PEGAWAI (no_pegawai, tanggal_mulai_kerja, email_user)
-                    VALUES (%s, %s, %s)
-                """, [pegawai_id, tanggal_mulai_kerja, email])
+                PEGAWAI[pegawai_id] = {
+                    'no_pegawai': pegawai_id,
+                    'tanggal_mulai_kerja': tanggal_mulai_kerja,
+                    'tanggal_akhir_kerja': None,
+                    'email_user': email
+                }
                 
-                execute_update_query("""
-                    INSERT INTO petclinic.FRONT_DESK (no_front_desk)
-                    VALUES (%s)
-                """, [pegawai_id])
+                FRONT_DESK[pegawai_id] = {'no_front_desk': pegawai_id}
                 
             elif user_type in ['dokter', 'perawat']:
                 tanggal_mulai_kerja = request.POST.get('tanggal_mulai_kerja')
                 no_izin_praktik = request.POST.get('no_izin_praktik')
                 pegawai_id = str(uuid.uuid4())
                 
-                execute_update_query("""
-                    INSERT INTO petclinic.PEGAWAI (no_pegawai, tanggal_mulai_kerja, email_user)
-                    VALUES (%s, %s, %s)
-                """, [pegawai_id, tanggal_mulai_kerja, email])
+                PEGAWAI[pegawai_id] = {
+                    'no_pegawai': pegawai_id,
+                    'tanggal_mulai_kerja': tanggal_mulai_kerja,
+                    'tanggal_akhir_kerja': None,
+                    'email_user': email
+                }
                 
-                execute_update_query("""
-                    INSERT INTO petclinic.TENAGA_MEDIS (no_tenaga_medis, no_izin_praktik)
-                    VALUES (%s, %s)
-                """, [pegawai_id, no_izin_praktik])
-                
+                TENAGA_MEDIS[pegawai_id] = {
+                    'no_tenaga_medis': pegawai_id,
+                    'no_izin_praktik': no_izin_praktik
+                }
                 
                 cert_numbers = request.POST.getlist('no_sertifikat_kompetensi[]')
                 cert_names = request.POST.getlist('nama_sertifikat[]')
                 handle_certificates(pegawai_id, cert_numbers, cert_names)
                 
                 if user_type == 'dokter':
-                    execute_update_query("""
-                        INSERT INTO petclinic.DOKTER_HEWAN (no_dokter_hewan)
-                        VALUES (%s)
-                    """, [pegawai_id])
-                    
+                    DOKTER_HEWAN[pegawai_id] = {'no_dokter_hewan': pegawai_id}
                     
                     days = request.POST.getlist('hari[]')
                     hours = request.POST.getlist('jam[]')
                     handle_schedules(pegawai_id, days, hours)
                             
-                else:  
-                    execute_update_query("""
-                        INSERT INTO petclinic.PERAWAT_HEWAN (no_perawat_hewan)
-                        VALUES (%s)
-                    """, [pegawai_id])
+                else:  # perawat
+                    PERAWAT_HEWAN[pegawai_id] = {'no_perawat_hewan': pegawai_id}
                     
             elif user_type in ['individu', 'perusahaan']:
                 klien_id = str(uuid.uuid4())
+                today = date.today().strftime('%Y-%m-%d')
                 
-                execute_update_query("""
-                    INSERT INTO petclinic.KLIEN (no_identitas, tanggal_registrasi, email)
-                    VALUES (%s, %s, %s)
-                """, [klien_id, date.today(), email])
+                KLIEN[klien_id] = {
+                    'no_identitas': klien_id,
+                    'tanggal_registrasi': today,
+                    'email': email
+                }
                 
                 if user_type == 'individu':
                     nama_depan = request.POST.get('nama_depan')
-                    nama_tengah = request.POST.get('nama_tengah')
+                    nama_tengah = request.POST.get('nama_tengah', '')
                     nama_belakang = request.POST.get('nama_belakang')
                     
-                    execute_update_query("""
-                        INSERT INTO petclinic.INDIVIDU (no_identitas_klien, nama_depan, nama_tengah, nama_belakang)
-                        VALUES (%s, %s, %s, %s)
-                    """, [klien_id, nama_depan, nama_tengah, nama_belakang])
+                    INDIVIDU[klien_id] = {
+                        'no_identitas_klien': klien_id,
+                        'nama_depan': nama_depan,
+                        'nama_tengah': nama_tengah,
+                        'nama_belakang': nama_belakang
+                    }
                     
-                else:  
+                else:  # perusahaan
                     nama_perusahaan = request.POST.get('nama_perusahaan')
                     
-                    execute_update_query("""
-                        INSERT INTO petclinic.PERUSAHAAN (no_identitas_klien, nama_perusahaan)
-                        VALUES (%s, %s)
-                    """, [klien_id, nama_perusahaan])
-            
+                    PERUSAHAAN[klien_id] = {
+                        'no_identitas_klien': klien_id,
+                        'nama_perusahaan': nama_perusahaan
+                    }
             
             request.session['user_email'] = email
             request.session['user_type'] = user_type
             
-            if user_type in ['front_desk', 'dokter', 'perawat']:
-                request.session['employee_id'] = pegawai_id
-            
-            elif user_type in ['individu', 'perusahaan']:
-                request.session['client_id'] = klien_id
-        
             messages.success(request, 'Account created successfully!')
             
             return redirect('authentication:login') 
@@ -461,7 +521,6 @@ def register_user(request):
             messages.error(request, f'Error during registration: {str(e)}')
     
     return render(request, 'register.html')
-
 
 def update_password(request):
     """View function to handle password updates."""
@@ -477,12 +536,9 @@ def update_password(request):
         new_password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
         
-        user = execute_query("""
-            SELECT email FROM petclinic."USER" 
-            WHERE email = %s AND password = %s
-        """, [request.session.get('user_email'), current_password])
+        user_email = request.session.get('user_email')
         
-        if not user:
+        if user_email not in USERS or USERS[user_email]['password'] != current_password:
             messages.error(request, 'Current password is incorrect.')
             return render(request, 'update_password.html', {'user_data': user_data})
         
@@ -490,17 +546,13 @@ def update_password(request):
             messages.error(request, 'New passwords do not match.')
             return render(request, 'update_password.html', {'user_data': user_data})
         
-        
-        execute_update_query("""
-            UPDATE petclinic."USER" SET password = %s
-            WHERE email = %s
-        """, [new_password, request.session.get('user_email')])
+        # Update password
+        USERS[user_email]['password'] = new_password
             
         messages.success(request, 'Password updated successfully.')
         return redirect('authentication:dashboard')
     
     return render(request, 'update_password.html', {'user_data': user_data})
-
 
 def update_profile(request):
     """View function to handle profile updates."""
@@ -519,55 +571,57 @@ def update_profile(request):
         nomor_telepon = request.POST.get('nomor_telepon')
         
         try:
-            execute_update_query("""
-                UPDATE petclinic."USER" SET alamat = %s, nomor_telepon = %s
-                WHERE email = %s
-            """, [alamat, nomor_telepon, user_email])
-            
+            # Update user basic info
+            USERS[user_email]['alamat'] = alamat
+            USERS[user_email]['nomor_telepon'] = nomor_telepon
             
             if user_type == 'individu':
                 nama_depan = request.POST.get('nama_depan')
                 nama_tengah = request.POST.get('nama_tengah', '')
                 nama_belakang = request.POST.get('nama_belakang')
                 
-                execute_update_query("""
-                    UPDATE petclinic.INDIVIDU SET nama_depan = %s, nama_tengah = %s, nama_belakang = %s
-                    WHERE no_identitas_klien = %s
-                """, [nama_depan, nama_tengah, nama_belakang, user_data['no_identitas']])
+                for no_identitas, klien in KLIEN.items():
+                    if klien['email'] == user_email and no_identitas in INDIVIDU:
+                        INDIVIDU[no_identitas]['nama_depan'] = nama_depan
+                        INDIVIDU[no_identitas]['nama_tengah'] = nama_tengah
+                        INDIVIDU[no_identitas]['nama_belakang'] = nama_belakang
+                        break
                 
             elif user_type == 'perusahaan':
                 nama_perusahaan = request.POST.get('nama_perusahaan')
                 
-                execute_update_query("""
-                    UPDATE petclinic.PERUSAHAAN SET nama_perusahaan = %s
-                    WHERE no_identitas_klien = %s
-                """, [nama_perusahaan, user_data['no_identitas']])
+                for no_identitas, klien in KLIEN.items():
+                    if klien['email'] == user_email and no_identitas in PERUSAHAAN:
+                        PERUSAHAAN[no_identitas]['nama_perusahaan'] = nama_perusahaan
+                        break
                 
             elif user_type in ['front_desk', 'dokter', 'perawat']:
                 tanggal_akhir_kerja = request.POST.get('tanggal_akhir_kerja')
                 
-                if tanggal_akhir_kerja:
-                    execute_update_query("""
-                        UPDATE petclinic.PEGAWAI SET tanggal_akhir_kerja = %s
-                        WHERE no_pegawai = %s
-                    """, [tanggal_akhir_kerja, user_data['no_pegawai']])
-                else:
-                    execute_update_query("""
-                        UPDATE petclinic.PEGAWAI SET tanggal_akhir_kerja = NULL
-                        WHERE no_pegawai = %s
-                    """, [user_data['no_pegawai']])
+                for no_pegawai, pegawai in PEGAWAI.items():
+                    if pegawai['email_user'] == user_email:
+                        PEGAWAI[no_pegawai]['tanggal_akhir_kerja'] = tanggal_akhir_kerja if tanggal_akhir_kerja else None
+                        break
             
-            
+            # Handle certificates for medical staff
             if user_type in ['dokter', 'perawat']:
                 cert_numbers = request.POST.getlist('no_sertifikat_kompetensi[]')
                 cert_names = request.POST.getlist('nama_sertifikat[]')
-                handle_certificates(user_data['no_pegawai'], cert_numbers, cert_names)
+                
+                for no_pegawai, pegawai in PEGAWAI.items():
+                    if pegawai['email_user'] == user_email:
+                        handle_certificates(no_pegawai, cert_numbers, cert_names)
+                        break
             
-            
+            # Handle schedules for doctors
             if user_type == 'dokter':
                 days = request.POST.getlist('hari[]')
                 hours = request.POST.getlist('jam[]')
-                handle_schedules(user_data['no_pegawai'], days, hours)
+                
+                for no_pegawai, pegawai in PEGAWAI.items():
+                    if pegawai['email_user'] == user_email:
+                        handle_schedules(no_pegawai, days, hours)
+                        break
         
             messages.success(request, 'Profile updated successfully!')
             return redirect('authentication:dashboard')
@@ -586,55 +640,40 @@ def list_client(request):
     
     user_data = get_user_data(request)
     
-    
-    individual_clients = execute_query("""
-        SELECT k.no_identitas, k.email, u.alamat, 
-               i.nama_depan, i.nama_tengah, i.nama_belakang, 
-               'Individu' as jenis
-        FROM petclinic.KLIEN k
-        JOIN petclinic."USER" u ON k.email = u.email
-        JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
-    """)
-    
-    
-    company_clients = execute_query("""
-        SELECT k.no_identitas, k.email, u.alamat, 
-               p.nama_perusahaan, 
-               'Perusahaan' as jenis
-        FROM petclinic.KLIEN k
-        JOIN petclinic."USER" u ON k.email = u.email
-        JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
-    """)
-    
     clients_list = []
     
-    
-    if individual_clients:
-        for client in individual_clients:
+    # Add individual clients
+    for client_id, client in INDIVIDU.items():
+        if client_id in KLIEN:
+            klien = KLIEN[client_id]
+            user = USERS.get(klien['email'], {})
             
-            nama_lengkap = client[3]  
-            if client[4]:  
-                nama_lengkap += " " + client[4]
-            if client[5]:  
-                nama_lengkap += " " + client[5]
+            nama_lengkap = client['nama_depan']
+            if client['nama_tengah']:
+                nama_lengkap += " " + client['nama_tengah']
+            if client['nama_belakang']:
+                nama_lengkap += " " + client['nama_belakang']
                 
             clients_list.append({
-                'no_identitas': client[0],
-                'email': client[1],
-                'alamat': client[2],
+                'no_identitas': client_id,
+                'email': klien['email'],
+                'alamat': user.get('alamat', ''),
                 'nama': nama_lengkap.strip(),
-                'jenis': client[6],
+                'jenis': 'Individu',
             })
     
-    
-    if company_clients:
-        for client in company_clients:
+    # Add company clients
+    for client_id, client in PERUSAHAAN.items():
+        if client_id in KLIEN:
+            klien = KLIEN[client_id]
+            user = USERS.get(klien['email'], {})
+            
             clients_list.append({
-                'no_identitas': client[0],
-                'email': client[1],
-                'alamat': client[2],
-                'nama': client[3],  
-                'jenis': client[4],
+                'no_identitas': client_id,
+                'email': klien['email'],
+                'alamat': user.get('alamat', ''),
+                'nama': client['nama_perusahaan'],
+                'jenis': 'Perusahaan',
             })
     
     context = {
@@ -653,93 +692,66 @@ def client_detail(request, no_identitas):
     
     user_data = get_user_data(request)
     
+    client = {}
+    client_jenis = ""
     
-    client_type = execute_query("""
-        SELECT 
-            CASE 
-                WHEN EXISTS (SELECT 1 FROM petclinic.INDIVIDU WHERE no_identitas_klien = %s) THEN 'Individu'
-                WHEN EXISTS (SELECT 1 FROM petclinic.PERUSAHAAN WHERE no_identitas_klien = %s) THEN 'Perusahaan'
-                ELSE 'Unknown'
-            END
-    """, [no_identitas, no_identitas])
+    # Check if client exists and get type
+    if no_identitas in INDIVIDU:
+        client_jenis = 'Individu'
+    elif no_identitas in PERUSAHAAN:
+        client_jenis = 'Perusahaan'
     
-    if not client_type:
+    if not client_jenis:
         messages.error(request, 'Client not found.')
         return redirect('authentication:list_client')
     
-    client_jenis = client_type[0][0]
-    client = {}
-    
-    
+    # Get client details
     if client_jenis == 'Individu':
-        individual_data = execute_query("""
-            SELECT k.no_identitas, k.email, u.alamat, u.nomor_telepon, k.tanggal_registrasi,
-                   i.nama_depan, i.nama_tengah, i.nama_belakang
-            FROM petclinic.KLIEN k
-            JOIN petclinic."USER" u ON k.email = u.email
-            JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
-            WHERE k.no_identitas = %s
-        """, [no_identitas])
+        individu = INDIVIDU[no_identitas]
+        klien = KLIEN[no_identitas]
+        user = USERS.get(klien['email'], {})
         
-        if individual_data:
-            
-            nama_lengkap = individual_data[0][5]  
-            if individual_data[0][6]:  
-                nama_lengkap += " " + individual_data[0][6]
-            if individual_data[0][7]:  
-                nama_lengkap += " " + individual_data[0][7]
-            
-            client = {
-                'no_identitas': individual_data[0][0],
-                'email': individual_data[0][1],
-                'alamat': individual_data[0][2],
-                'nomor_telepon': individual_data[0][3],
-                'tanggal_registrasi': individual_data[0][4],
-                'nama': nama_lengkap.strip(),
-                'jenis': client_jenis
-            }
-    else:  
-        company_data = execute_query("""
-            SELECT k.no_identitas, k.email, u.alamat, u.nomor_telepon, k.tanggal_registrasi,
-                   p.nama_perusahaan
-            FROM petclinic.KLIEN k
-            JOIN petclinic."USER" u ON k.email = u.email
-            JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
-            WHERE k.no_identitas = %s
-        """, [no_identitas])
+        nama_lengkap = individu['nama_depan']
+        if individu['nama_tengah']:
+            nama_lengkap += " " + individu['nama_tengah']
+        if individu['nama_belakang']:
+            nama_lengkap += " " + individu['nama_belakang']
         
-        if company_data:
-            client = {
-                'no_identitas': company_data[0][0],
-                'email': company_data[0][1],
-                'alamat': company_data[0][2],
-                'nomor_telepon': company_data[0][3],
-                'tanggal_registrasi': company_data[0][4],
-                'nama': company_data[0][5],
-                'jenis': client_jenis
-            }
+        client = {
+            'no_identitas': no_identitas,
+            'email': klien['email'],
+            'alamat': user.get('alamat', ''),
+            'nomor_telepon': user.get('nomor_telepon', ''),
+            'tanggal_registrasi': klien['tanggal_registrasi'],
+            'nama': nama_lengkap.strip(),
+            'jenis': client_jenis
+        }
+    else:  # Perusahaan
+        perusahaan = PERUSAHAAN[no_identitas]
+        klien = KLIEN[no_identitas]
+        user = USERS.get(klien['email'], {})
+        
+        client = {
+            'no_identitas': no_identitas,
+            'email': klien['email'],
+            'alamat': user.get('alamat', ''),
+            'nomor_telepon': user.get('nomor_telepon', ''),
+            'tanggal_registrasi': klien['tanggal_registrasi'],
+            'nama': perusahaan['nama_perusahaan'],
+            'jenis': client_jenis
+        }
     
-    if not client:
-        messages.error(request, 'Client details could not be retrieved.')
-        return redirect('authentication:list_client')
-    
-    
-    pets_query = """
-        SELECT h.nama, h.tanggal_lahir, jh.nama_jenis
-        FROM petclinic.HEWAN h
-        JOIN petclinic.JENIS_HEWAN jh ON h.id_jenis = jh.id
-        WHERE h.no_identitas_klien = %s
-    """
-    
-    pets_data = execute_query(pets_query, [no_identitas])
-    
+    # Get pets for this client
     pets = []
-    if pets_data:
-        for pet in pets_data:
+    for pet in HEWAN:
+        if pet['no_identitas_klien'] == no_identitas:
+            jenis = JENIS_HEWAN.get(pet['id_jenis'], {}).get('nama_jenis', 'Unknown')
+            
             pets.append({
-                'nama': pet[0],
-                'tanggal_lahir': pet[1],
-                'jenis': pet[2]
+                'id': pet['id'],
+                'nama': pet['nama'],
+                'tanggal_lahir': pet['tanggal_lahir'],
+                'jenis': jenis
             })
     
     context = {
