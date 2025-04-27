@@ -55,7 +55,7 @@
                     </div>
                     <div>
                         <p class="font-semibold text-gray-700">Tanggal Registrasi</p>
-                        <p>{{ client.tanggal_registrasi|date:"d M Y" }}</p>
+                        <p>{{ client.tanggal_registrasi }}</p>
                     </div>
                 </div>
                 
@@ -78,7 +78,7 @@
                                     <td class="border border-stone-300 p-3">{{ forloop.counter }}</td>
                                     <td class="border border-stone-300 p-3">{{ pet.nama }}</td>
                                     <td class="border border-stone-300 p-3">{{ pet.jenis }}</td>
-                                    <td class="border border-stone-300 p-3">{{ pet.tanggal_lahir|date:"d M Y" }}</td>
+                                    <td class="border border-stone-300 p-3">{{ pet.tanggal_lahir }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr>
