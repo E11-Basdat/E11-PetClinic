@@ -289,6 +289,7 @@ def show_pengguna(request):
 def dashboard(request):
     """Unified dashboard for all user types"""
     
+    
     if not request.session.get('user_email'):
         messages.error(request, 'Please log in to access this page.')
         return redirect('authentication:login')
@@ -325,6 +326,7 @@ def login_user(request):
 
 def logout_user(request):
     """View function to handle user logout."""
+    
     
     if 'user_email' in request.session:
         del request.session['user_email']
@@ -414,6 +416,7 @@ def handle_schedules(no_dokter_hewan, days, hours):
 def register_user(request):
     """View function to handle user registration."""
 
+
     if request.method == 'POST':
         user_type = request.POST.get('user_type')
         
@@ -469,12 +472,14 @@ def register_user(request):
                 cert_numbers = request.POST.getlist('no_sertifikat_kompetensi[]')
                 cert_names = request.POST.getlist('nama_sertifikat[]')
                 handle_certificates(pegawai_id, cert_numbers, cert_names)
+                handle_certificates(pegawai_id, cert_numbers, cert_names)
                 
                 if user_type == 'dokter':
                     DOKTER_HEWAN[pegawai_id] = {'no_dokter_hewan': pegawai_id}
                     
                     days = request.POST.getlist('hari[]')
                     hours = request.POST.getlist('jam[]')
+                    handle_schedules(pegawai_id, days, hours)
                     handle_schedules(pegawai_id, days, hours)
                             
                 else:  
@@ -525,6 +530,7 @@ def register_user(request):
 def update_password(request):
     """View function to handle password updates."""
     
+    
     if not request.session.get('user_email'):
         messages.error(request, 'Please log in to update your password.')
         return redirect('authentication:login')
@@ -556,6 +562,7 @@ def update_password(request):
 
 def update_profile(request):
     """View function to handle profile updates."""
+    
     
     if not request.session.get('user_email'):
         messages.error(request, 'Please log in to update your profile.')

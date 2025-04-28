@@ -1,3 +1,4 @@
+<!-- filepath: c:\new-basdat\E11-PetClinic\visits\templates\create.html -->
 <h1>Buat Kunjungan Baru</h1>
 <form method="POST">
     {% csrf_token %}
@@ -19,24 +20,6 @@
     </select>
     <br>
 
-    <label for="no_perawat_hewan">Perawat Hewan:</label>
-    <select id="no_perawat_hewan" name="no_perawat_hewan" required>
-        <option value="" disabled selected>Pilih Perawat Hewan</option>
-        {% for perawat in perawat_hewan %}
-        <option value="{{ perawat.0 }}">{{ perawat.0 }}</option>
-        {% endfor %}
-    </select>
-    <br>
-
-    <label for="no_dokter_hewan">Dokter Hewan:</label>
-    <select id="no_dokter_hewan" name="no_dokter_hewan" required>
-        <option value="" disabled selected>Pilih Dokter Hewan</option>
-        {% for dokter in dokter_hewan %}
-        <option value="{{ dokter.0 }}">{{ dokter.0 }}</option>
-        {% endfor %}
-    </select>
-    <br>
-
     <label for="tipe_kunjungan">Metode Kunjungan:</label>
     <select id="tipe_kunjungan" name="tipe_kunjungan" required>
         <option value="Janji Temu">Janji Temu</option>
@@ -45,12 +28,22 @@
     </select>
     <br>
 
-    <label for="suhu">Suhu (°C):</label>
-    <input type="number" id="suhu" name="suhu" required>
+    <label for="dokter">Dokter:</label>
+    <select id="dokter" name="dokter" required>
+        <option value="" disabled selected>Pilih Dokter</option>
+        {% for dokter in dokter %}
+        <option value="{{ dokter.0 }}">{{ dokter.1 }}</option>
+        {% endfor %}
+    </select>
     <br>
 
-    <label for="berat_badan">Berat Badan (kg):</label>
-    <input type="number" id="berat_badan" name="berat_badan" step="0.01" required>
+    <label for="perawat">Perawat:</label>
+    <select id="perawat" name="perawat" required>
+        <option value="" disabled selected>Pilih Perawat</option>
+        {% for perawat in perawat %}
+        <option value="{{ perawat.0 }}">{{ perawat.1 }}</option>
+        {% endfor %}
+    </select>
     <br>
 
     <label for="timestamp_awal">Waktu Mulai Penanganan:</label>

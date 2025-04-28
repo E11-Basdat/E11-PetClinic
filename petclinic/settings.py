@@ -46,7 +46,30 @@ INSTALLED_APPS = [
     'medications',
     'vaccinations',
     'visits'
+    'treatments',
 ]
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',  # Ubah level ke DEBUG
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',  # Ubah level ke DEBUG
+#             'propagate': True,
+#         },
+#         '': {  # Root logger
+#             'handlers': ['console'],
+#             'level': 'DEBUG',  # Ubah level ke DEBUG
+#         },
+#     },
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
