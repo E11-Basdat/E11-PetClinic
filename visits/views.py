@@ -3,19 +3,8 @@ from django.db import connection
 from django.contrib import messages
 
 def generate_kunjungan_id():
-    query = "SELECT id_kunjungan FROM petclinic.KUNJUNGAN ORDER BY id_kunjungan DESC LIMIT 1"
-    last_id = execute_query(query, fetch_one=True)
-
-    if last_id and last_id[0].startswith('VISIT') and last_id[0][5:].isdigit():
-        # Ambil angka terakhir dari ID kunjungan sebelumnya
-        last_number = int(last_id[0][5:])  # Mengambil angka setelah "VISIT"
-        new_number = last_number + 1
-    else:
-        # Jika belum ada data atau format ID tidak sesuai, mulai dari 1
-        new_number = 1
-
-    # Format ID baru dengan prefix "VISIT" dan padding angka menjadi 2 digit
-    return f"VISIT{new_number:02d}"
+    # Menghasilkan UUID baru untuk ID kunjungan
+    return str(uuid.uuid4())
 
 def execute_query(query, params=None, fetch_one=False, fetch_all=False):
     try:
@@ -74,30 +63,37 @@ def create_medical_record(request, id_kunjungan):
         return redirect('visits:list_visits')
 
     if request.method == 'POST':
-        kode_perawatan = request.POST.get('kode_perawatan')
         suhu = request.POST.get('suhu')
         berat_badan = request.POST.get('berat_badan')
+        kode_vaksin = request.POST.get('kode_vaksin')  # Jika ada input kode vaksin
         catatan = request.POST.get('catatan')
 
-        query = """
-            INSERT INTO petclinic.KUNJUNGAN_KEPERAWATAN (
-                id_kunjungan, kode_perawatan, catatan
-            ) VALUES (%s, %s, %s)
-        """
-        params = [id_kunjungan, kode_perawatan, catatan]
-        execute_query(query, params)
-        messages.success(request, 'Rekam Medis berhasil dibuat.')
-        return redirect('visits:list_visits')
+        try:
+            # Perbarui data suhu, berat badan, kode vaksin, dan catatan di tabel KUNJUNGAN
+            query_update = """
+                UPDATE petclinic.KUNJUNGAN
+                SET suhu = %s, berat_badan = %s, kode_vaksin = %s, catatan = %s
+                WHERE id_kunjungan = %s
+            """
+            params_update = [suhu, berat_badan, kode_vaksin, catatan, id_kunjungan]
+            execute_query(query_update, params_update)
 
-    # Ambil data jenis perawatan untuk dropdown
-    query_perawatan = "SELECT kode_perawatan, nama_perawatan FROM petclinic.PERAWATAN"
-    jenis_perawatan = execute_query(query_perawatan, fetch_all=True)
+            messages.success(request, 'Rekam Medis berhasil dibuat dan data kunjungan diperbarui.')
+            return redirect('visits:list_visits')
+
+        except Exception as e:
+            messages.error(request, f'Gagal membuat rekam medis: {str(e)}')
+            return redirect('visits:create_medical_record', id_kunjungan=id_kunjungan)
+
+    # Ambil data kode vaksin untuk dropdown
+    query_vaksin = "SELECT kode, nama FROM petclinic.VAKSIN"
+    daftar_vaksin = execute_query(query_vaksin, fetch_all=True)
 
     return render(request, 'create_medical_record.html', {
         'id_kunjungan': id_kunjungan,
-        'jenis_perawatan': jenis_perawatan
+        'daftar_vaksin': daftar_vaksin
     })
-
+    
 def list_visits(request):
     query = """
         SELECT 
@@ -119,89 +115,79 @@ logger = logging.getLogger(__name__)
 def create_visit(request):
     logger.debug(f"Session data")
     if request.method == 'POST':
-        logger.debug(f"Session data: {request.session.items()}")
-        logger.debug(f"Front desk ID: {request.session.get('no_front_desk')}")
         try:
-            # 1. Kumpulkan semua data dari form
+            # Ambil data dari form
             no_identitas_klien = request.POST.get('no_identitas_klien')
             nama_hewan = request.POST.get('nama_hewan')
             tipe_kunjungan = request.POST.get('tipe_kunjungan')
             timestamp_awal = request.POST.get('timestamp_awal')
             timestamp_akhir = request.POST.get('timestamp_akhir')
-            suhu = request.POST.get('suhu', 0)  
-            berat_badan = request.POST.get('berat_badan', 0.0)
-            no_perawat_hewan = request.POST.get('no_perawat_hewan')
-            no_dokter_hewan = request.POST.get('no_dokter_hewan')
-            
-            # 2. Ambil no_front_desk dari session
-            no_front_desk = request.session.get('employee_id') 
+            no_dokter = request.POST.get('dokter')
+            no_perawat = request.POST.get('perawat')
+
+            # Ambil no_front_desk dari session
+            no_front_desk = request.session.get('employee_id')
             if not no_front_desk:
                 messages.error(request, 'Anda tidak memiliki akses untuk membuat kunjungan.')
                 return redirect('visits:list_visits')
-            
-            # 3. Validasi UUID format
-            try:
-                uuid.UUID(str(no_front_desk))
-                uuid.UUID(str(no_perawat_hewan))
-                uuid.UUID(str(no_dokter_hewan))
-                uuid.UUID(str(no_identitas_klien))
-            except ValueError:
-                messages.error(request, 'Format ID tidak valid. Pastikan semua ID dalam format UUID.')
-                return redirect('visits:create_visit')
-            
-            # 4. Generate ID kunjungan
+
+            # Generate ID kunjungan
             id_kunjungan = generate_kunjungan_id()
-            
-            # 5. Buat query dan parameters
+
+            # Buat query dan parameters
             query = """
                 INSERT INTO petclinic.KUNJUNGAN (
                     id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk, 
-                    no_perawat_hewan, no_dokter_hewan, tipe_kunjungan, 
-                    timestamp_awal, timestamp_akhir, suhu, berat_badan
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING id_kunjungan
+                    no_dokter_hewan, no_perawat_hewan, tipe_kunjungan, timestamp_awal, timestamp_akhir
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             params = [
-                id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk, 
-                no_perawat_hewan, no_dokter_hewan, 
-                tipe_kunjungan, timestamp_awal, timestamp_akhir, suhu, berat_badan
+                id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk,
+                no_dokter, no_perawat, tipe_kunjungan, timestamp_awal, timestamp_akhir
             ]
-            
-            # 6. Eksekusi query
-            result = execute_query(query, params, fetch_one=True)
-            logger.info(f"Kunjungan berhasil dibuat dengan ID: {result[0]}")
-            messages.success(request, f'Kunjungan berhasil dibuat dengan ID: {result[0]}')
+
+            # Eksekusi query
+            execute_query(query, params)
+            messages.success(request, 'Kunjungan berhasil dibuat.')
             return redirect('visits:list_visits')
-            
+
         except Exception as e:
             logger.error(f"Gagal membuat kunjungan: {str(e)}")
             messages.error(request, f'Gagal membuat kunjungan: {str(e)}')
             return redirect('visits:create_visit')
 
     # GET request: tampilkan form
-    # Ambil data klien dan hewan untuk dropdown
-    query_klien = "SELECT no_identitas, email FROM petclinic.KLIEN"
-    query_hewan = "SELECT nama, no_identitas_klien FROM petclinic.HEWAN"
-    query_perawat = "SELECT no_perawat_hewan FROM petclinic.PERAWAT_HEWAN"
-    query_dokter = "SELECT no_dokter_hewan FROM petclinic.DOKTER_HEWAN"
-    
     try:
-        dokter_hewan = execute_query(query_dokter, fetch_all=True)
-        perawat_hewan = execute_query(query_perawat, fetch_all=True)
+        query_klien = "SELECT no_identitas, email FROM petclinic.KLIEN"
+        query_hewan = "SELECT nama, no_identitas_klien FROM petclinic.HEWAN"
+        query_dokter = """
+            SELECT d.no_dokter_hewan, pg.email_user 
+            FROM petclinic.DOKTER_HEWAN d
+            JOIN petclinic.PEGAWAI pg ON d.no_dokter_hewan = pg.no_pegawai
+        """
+        query_perawat = """
+            SELECT p.no_perawat_hewan, pg.email_user 
+            FROM petclinic.PERAWAT_HEWAN p
+            JOIN petclinic.PEGAWAI pg ON p.no_perawat_hewan = pg.no_pegawai
+        """
+
         klien = execute_query(query_klien, fetch_all=True)
         hewan = execute_query(query_hewan, fetch_all=True)
+        dokter = execute_query(query_dokter, fetch_all=True)
+        perawat = execute_query(query_perawat, fetch_all=True)
+
     except Exception as e:
         logger.error(f"Error fetching data for dropdowns: {str(e)}")
         messages.error(request, f"Gagal memuat data: {str(e)}")
         return redirect('visits:list_visits')
-    
+
     return render(request, 'create.html', {
         'klien': klien,
         'hewan': hewan,
-        'perawat_hewan': perawat_hewan,
-        'dokter_hewan': dokter_hewan
+        'dokter': dokter,
+        'perawat': perawat
     })
-
+    
 # Update an existing visit
 def update_visit(request, visit_id):
     if request.method == 'POST':

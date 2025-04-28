@@ -1,66 +1,35 @@
-<!-- filepath: c:\tk-basdat\E11-PetClinic\visits\templates\visits\list.html -->
-<h1>Daftar Kunjungan</h1>
-<table>
-    <tr>
-        <th>ID Kunjungan</th>
-        <th>Nama Hewan</th>
-        <th>Metode Kunjungan</th>
-        <th>Waktu Mulai</th>
-        <th>Waktu Akhir</th>
-        <th>Rekam Medis</th>
-    </tr>
-    {% for visit in visits %}
-    <tr>
-        <td>{{ visit.0 }}</td>
-        <td>{{ visit.2 }}</td>
-        <td>{{ visit.3 }}</td>
-        <td>{{ visit.4 }}</td>
-        <td>{{ visit.5 }}</td>
-        <td>
-            <a href="#" class="check-medical-record" data-id="{{ visit.0 }}">Lihat Rekam Medis</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+<!-- filepath: c:\new-basdat\E11-PetClinic\visits\templates\create_medical_record.html -->
+<h1>Buat Rekam Medis</h1>
 
-<!-- Modal untuk menampilkan rekam medis -->
-<div id="medical-record-modal" class="modal hidden">
-    <div class="modal-content">
-        <h2>Rekam Medis</h2>
-        <p id="medical-record-message"></p>
-        <button id="create-medical-record" class="btn btn-primary">Create</button>
-        <button id="close-modal" class="btn btn-secondary">Close</button>
-    </div>
-</div>
+<form method="POST">
+    {% csrf_token %}
+    
+    <label for="suhu">Suhu Tubuh (°C):</label>
+    <input type="number" id="suhu" name="suhu" step="0.1" required>
+    <br>
+
+    <label for="berat_badan">Berat Badan (kg):</label>
+    <input type="number" id="berat_badan" name="berat_badan" step="0.1" required>
+    <br>
+
+    <label for="kode_vaksin">Kode Vaksin (Opsional):</label>
+    <select id="kode_vaksin" name="kode_vaksin">
+        <option value="" disabled selected>Pilih Kode Vaksin</option>
+        {% for vaksin in daftar_vaksin %}
+        <option value="{{ vaksin.0 }}">{{ vaksin.0 }} - {{ vaksin.1 }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <label for="catatan">Catatan:</label>
+    <textarea id="catatan" name="catatan" rows="4" required></textarea>
+    <br>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a href="{% url 'visits:list_visits' %}" class="btn btn-secondary">Cancel</a>
+</form>
 
 <style>
-    /* Modal styling */
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-    .modal.hidden {
-        display: none;
-    }
-
-    .modal-content {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 400px;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
     .btn {
         padding: 10px 20px;
         margin: 10px;
@@ -77,52 +46,10 @@
     .btn-secondary {
         background-color: #6c757d;
         color: white;
+        text-decoration: none;
     }
 
-    .btn:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
+    .btn:hover {
+        opacity: 0.9;
     }
 </style>
-
-<script>
-    document.querySelectorAll('.check-medical-record').forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            const idKunjungan = this.getAttribute('data-id');
-
-            // AJAX request untuk memeriksa rekam medis
-            fetch(`/visits/check-medical-record/${idKunjungan}/`)
-                .then(response => response.json())
-                .then(data => {
-                    const modal = document.getElementById('medical-record-modal');
-                    const message = document.getElementById('medical-record-message');
-                    const createButton = document.getElementById('create-medical-record');
-
-                    if (data.exists) {
-                        message.textContent = `Rekam Medis ditemukan: ${data.data.catatan}`;
-                    } else {
-                        message.textContent = 'Rekam Medis tidak ditemukan.';
-                    }
-
-                    // Atur tombol Create
-                    createButton.onclick = function () {
-                        window.location.href = `/visits/medical-records/create/${idKunjungan}/`;
-                    };
-
-                    // Validasi user type
-                    {% if request.session.user_type != 'dokter' %}
-                    createButton.disabled = true;
-                    {% else %}
-                    createButton.disabled = false;
-                    {% endif %}
-
-                    modal.classList.remove('hidden');
-                });
-        });
-    });
-
-    document.getElementById('close-modal').addEventListener('click', function () {
-        document.getElementById('medical-record-modal').classList.add('hidden');
-    });
-</script>

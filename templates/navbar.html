@@ -38,7 +38,8 @@
             {% elif request.session.user_type == 'dokter' %}
               <!-- Menu Dokter Hewan -->
               <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Daftar Jenis Hewan</a>
-              <a href="/s/" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Rekam Medis</a>
+              <a href="{% url 'visits:list_visits' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Kunjungan</a>
+              <a href="{% url 'treatments:list_treatments' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Perawatan Hewan</a>
               <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Obat</a>
               <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Jenis Perawatan</a>
               <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Pemberian Obat</a>

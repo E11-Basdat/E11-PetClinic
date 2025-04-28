@@ -64,7 +64,7 @@ def dokter_required(view_func):
 
 @dokter_required
 def list_treatments(request):
-    """View function to list all treatments for a veterinarian"""
+    """View function to list treatments"""
     user_data = get_user_data(request)
     if not user_data:
         messages.error(request, 'User data not found. Please login again.')
@@ -72,41 +72,35 @@ def list_treatments(request):
     
     dokter_id = user_data.get('no_pegawai')
     
-    # Get treatments data from database
+    # Query untuk mengambil data perawatan yang sudah dibuat
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT k.id_kunjungan, k.nama_hewan, kl.email, 
-                   p.email_user as perawat_email, d.no_dokter_hewan, fd.no_front_desk, 
-                   kk.kode_perawatan, pr.nama_perawatan, kk.catatan
-            FROM petclinic.KUNJUNGAN k
-            JOIN petclinic.KLIEN kl ON k.no_identitas_klien = kl.no_identitas
-            JOIN petclinic.DOKTER_HEWAN d ON k.no_dokter_hewan = d.no_dokter_hewan
-            JOIN petclinic.PERAWAT_HEWAN p ON k.no_perawat_hewan = p.no_perawat_hewan
-            JOIN petclinic.FRONT_DESK fd ON k.no_front_desk = fd.no_front_desk
-            JOIN petclinic.PEGAWAI pe ON p.no_perawat_hewan = pe.no_pegawai
-            LEFT JOIN petclinic.KUNJUNGAN_KEPERAWATAN kk ON 
-                k.id_kunjungan = kk.id_kunjungan AND 
-                k.nama_hewan = kk.nama_hewan AND 
-                k.no_identitas_klien = kk.no_identitas_klien AND
-                k.no_dokter_hewan = kk.no_dokter_hewan AND
-                k.no_perawat_hewan = kk.no_perawat_hewan AND
-                k.no_front_desk = kk.no_front_desk
+            SELECT kk.id_kunjungan, kl.email AS klien, kk.nama_hewan, 
+                   pg_perawat.email_user AS perawat, pg_dokter.email_user AS dokter, 
+                   fd.no_front_desk, kk.kode_perawatan, pr.nama_perawatan, kk.catatan
+            FROM petclinic.KUNJUNGAN_KEPERAWATAN kk
+            JOIN petclinic.KLIEN kl ON kk.no_identitas_klien = kl.no_identitas
+            LEFT JOIN petclinic.PERAWAT_HEWAN ph ON kk.no_perawat_hewan = ph.no_perawat_hewan
+            LEFT JOIN petclinic.PEGAWAI pg_perawat ON ph.no_perawat_hewan = pg_perawat.no_pegawai
+            LEFT JOIN petclinic.DOKTER_HEWAN dh ON kk.no_dokter_hewan = dh.no_dokter_hewan
+            LEFT JOIN petclinic.PEGAWAI pg_dokter ON dh.no_dokter_hewan = pg_dokter.no_pegawai
+            LEFT JOIN petclinic.FRONT_DESK fd ON kk.no_front_desk = fd.no_front_desk
             LEFT JOIN petclinic.PERAWATAN pr ON kk.kode_perawatan = pr.kode_perawatan
-            WHERE k.no_dokter_hewan = %s
-            ORDER BY k.id_kunjungan
+            WHERE kk.no_dokter_hewan = %s
+            ORDER BY kk.id_kunjungan
         """, [dokter_id])
         treatments = cursor.fetchall()
     
-    # Prepare the treatment data for display
+    # Siapkan data untuk ditampilkan di template
     treatment_list = []
     for t in treatments:
         treatment_data = {
             'id_kunjungan': t[0],
-            'nama_hewan': t[1],
-            'klien': t[2],
-            'perawat': t[3],
-            'dokter': 'dr. ' + user_data.get('email'),
-            'front_desk': t[5],
+            'klien': t[1],
+            'nama_hewan': t[2],
+            'perawat': t[3] if t[3] else '-',
+            'dokter': t[4] if t[4] else '-',
+            'front_desk': t[5] if t[5] else '-',
             'kode_perawatan': t[6],
             'nama_perawatan': t[7] if t[7] else '-',
             'catatan': t[8] if t[8] else '-'
@@ -118,7 +112,7 @@ def list_treatments(request):
         'treatments': treatment_list
     }
     
-    return render(request, 'treatments/list_treatments.html', context)
+    return render(request, 'list_treatments.html', context)
 
 @dokter_required
 def create_treatment(request):
@@ -130,12 +124,13 @@ def create_treatment(request):
     
     dokter_id = user_data.get('no_pegawai')
     
-    # Get available visits (kunjungan) for the doctor
+    # Get available visits (kunjungan) for the doctor that do not have treatments yet
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT k.id_kunjungan, k.nama_hewan 
             FROM petclinic.KUNJUNGAN k
-            WHERE k.no_dokter_hewan = %s AND k.timestamp_akhir IS NULL
+            LEFT JOIN petclinic.KUNJUNGAN_KEPERAWATAN kk ON k.id_kunjungan = kk.id_kunjungan
+            WHERE k.no_dokter_hewan = %s AND kk.id_kunjungan IS NULL
             ORDER BY k.id_kunjungan
         """, [dokter_id])
         kunjungan_data = cursor.fetchall()
@@ -199,7 +194,7 @@ def create_treatment(request):
         'form': form
     }
     
-    return render(request, 'treatments/create_treatment.html', context)
+    return render(request, 'create_treatments.html', context)
 
 @dokter_required
 def update_treatment(request, kunjungan_id, kode_perawatan):
@@ -313,7 +308,7 @@ def delete_treatment(request, kunjungan_id, kode_perawatan):
     
     if not treatment:
         messages.error(request, 'Treatment record not found or you do not have permission to delete it.')
-        return redirect('treatments:list_treatments')
+        return redirect('list_treatments')
     
     if request.method == 'POST':
         try:
