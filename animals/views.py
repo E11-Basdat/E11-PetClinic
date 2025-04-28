@@ -4,6 +4,7 @@ from django.db import connection
 import uuid
 from authentication.views import get_user_data
 from django.http import JsonResponse
+from django.db import IntegrityError
 
 
 # ===== JENIS HEWAN =====
@@ -104,51 +105,50 @@ def jenis_hewan_update(request, id):
     })
 
 def jenis_hewan_delete(request, id):
-    if not request.session.get('user_email'):
-        messages.error(request, 'Please log in to access this page.')
-        return redirect('authentication:login')
-    
-    user_data = get_user_data(request)
-    if user_data['user_type'] != 'front_desk':
-        messages.error(request, 'Anda tidak memiliki akses untuk menghapus jenis hewan.')
+    if request.method != 'POST':
         return redirect('animals:jenis_hewan_list')
-    
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT COUNT(*) FROM petclinic.HEWAN WHERE id_jenis = %s", [id])
-        count = cursor.fetchone()[0]
-    
-    if count > 0:
-        messages.error(request, 'Tidak dapat menghapus jenis hewan karena masih ada hewan dengan jenis ini.')
-        return redirect('animals:jenis_hewan_list')
-    
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM petclinic.JENIS_HEWAN WHERE id = %s", [id])
-        messages.success(request, 'Jenis hewan berhasil dihapus!')
-    except Exception as e:
-        messages.error(request, f'Error: {str(e)}')
-    
+
+    # hanya front-desk
+    user = get_user_data(request)
+    if user['user_type'] != 'front_desk':
+        msg = {'error': 'Unauthorized'}
+        return JsonResponse(msg, status=403) if request.GET.get('modal') else redirect('animals:jenis_hewan_list')
+
+    # masih dipakai?
+    with connection.cursor() as cur:
+        cur.execute("SELECT COUNT(*) FROM petclinic.HEWAN WHERE id_jenis=%s", [id])
+        if cur.fetchone()[0]:
+            txt = 'Tidak dapat menghapus, masih ada hewan dengan jenis ini.'
+            if request.GET.get('modal'):
+                return JsonResponse({'error': txt}, status=400)
+            messages.error(request, txt)
+            return redirect('animals:jenis_hewan_list')
+
+        cur.execute("DELETE FROM petclinic.JENIS_HEWAN WHERE id=%s", [id])
+
+    if request.GET.get('modal'):
+        return JsonResponse({'message': 'success'})
+    messages.success(request, 'Jenis hewan berhasil dihapus!')
     return redirect('animals:jenis_hewan_list')
 
 def jenis_hewan_confirm_delete(request, id):
     if not request.session.get('user_email'):
-        messages.error(request, 'Please log in to access this page.')
+        if request.GET.get('modal'):
+            return JsonResponse({'error': 'Unauthenticated'}, status=403)
         return redirect('authentication:login')
-    
-    user_data = get_user_data(request)
-    
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT id, nama_jenis FROM petclinic.JENIS_HEWAN WHERE id = %s", [id])
-        jenis_hewan = cursor.fetchone()
-    
-    if not jenis_hewan:
-        messages.error(request, 'Jenis hewan tidak ditemukan!')
-        return redirect('animals:jenis_hewan_list')
-    
-    return render(request, 'jenis_hewan_confirm_delete.html', {
-        'user_data': user_data,
-        'jenis_hewan': {'id': jenis_hewan[0], 'nama_jenis': jenis_hewan[1]}
-    })
+
+    with connection.cursor() as cur:
+        cur.execute("SELECT id, nama_jenis FROM petclinic.JENIS_HEWAN WHERE id=%s", [id])
+        row = cur.fetchone()
+    if not row:
+        msg = {'error': 'Data tidak ditemukan'}
+        return JsonResponse(msg, status=404) if request.GET.get('modal') else redirect('animals:jenis_hewan_list')
+
+    ctx = {'jenis_hewan': {'id': row[0], 'nama_jenis': row[1]}}
+
+    # ── kalau dipanggil via fetch modal ──
+    if request.GET.get('modal'):
+        return render(request, 'jenis_hewan_confirm_delete.html', ctx)
 
 # ===== HEWAN PELIHARAAN =====
 def hewan_list(request):
@@ -246,77 +246,91 @@ def hewan_list(request):
     context = {
         'user_data'    : user_data,
         'hewan_list'   : hewan_data,
-        'is_front_desk': is_fdesk,
-        'is_client'    : is_client,
+        'is_front_desk': user_type == 'front_desk',
+        'is_client'    : user_type in ('individu', 'perusahaan'),
     }
     return render(request, 'hewan_list.html', context)
 
 def hewan_create(request):
+    # ---------- 1. Autentikasi ----------
     if not request.session.get('user_email'):
         messages.error(request, 'Please log in to access this page.')
         return redirect('authentication:login')
-    
+
     user_data = get_user_data(request)
-    is_client = user_data['user_type'] in ['individu', 'perusahaan']
-    
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT id, nama_jenis FROM petclinic.JENIS_HEWAN ORDER BY nama_jenis ASC")
-        jenis_hewan_list = cursor.fetchall()
-    
+    is_client = user_data['user_type'] in ('individu', 'perusahaan')
+
+    # ---------- 2. Jika POST, simpan data ----------
     if request.method == 'POST':
-        nama = request.POST.get('nama')
-        tanggal_lahir = request.POST.get('tanggal_lahir')
-        id_jenis = request.POST.get('id_jenis')
-        url_foto = request.POST.get('url_foto')
-        
+        nama           = request.POST.get('nama')
+        tanggal_lahir  = request.POST.get('tanggal_lahir')
+        id_jenis       = request.POST.get('id_jenis')
+        url_foto       = request.POST.get('url_foto')
+
+        # tentukan pemilik
+        if is_client:
+            no_identitas_klien = user_data['no_identitas']
+        else:
+            no_identitas_klien = request.POST.get('no_identitas_klien')
+
+        # validasi super-singkat
+        if not (nama and tanggal_lahir and id_jenis and no_identitas_klien):
+            messages.error(request, 'Semua field wajib diisi.')
+            return redirect('animals:hewan_create')
+
         try:
-            if is_client:
-                no_identitas_klien = user_data['no_identitas']
-            else:
-                no_identitas_klien = request.POST.get('no_identitas_klien')
-                if not no_identitas_klien:
-                    raise ValueError("Pemilik harus dipilih")
-            
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "INSERT INTO petclinic.HEWAN (nama, no_identitas_klien, tanggal_lahir, id_jenis, url_foto) "
-                    "VALUES (%s, %s, %s, %s, %s)",
-                    [nama, no_identitas_klien, tanggal_lahir, id_jenis, url_foto]
-                )
+            with connection.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO petclinic.HEWAN
+                        (nama, no_identitas_klien, tanggal_lahir, id_jenis, url_foto)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, [nama, no_identitas_klien, tanggal_lahir, id_jenis, url_foto])
             messages.success(request, 'Hewan peliharaan berhasil ditambahkan!')
             return redirect('animals:hewan_list')
+
+        except IntegrityError as e:
+            messages.error(request, f'Data duplikat atau tidak valid: {e}')
+            return redirect('animals:hewan_create')
+
         except Exception as e:
-            messages.error(request, f'Error: {str(e)}')
-    
+            messages.error(request, f'Error: {e}')
+            return redirect('animals:hewan_create')
+
+    # ---------- 3. Jika GET, tampilkan form ----------
+    with connection.cursor() as cur:
+        cur.execute("SELECT id, nama_jenis FROM petclinic.JENIS_HEWAN ORDER BY nama_jenis")
+        jenis_rows = cur.fetchall()
+
     context = {
-        'user_data': user_data,
-        'jenis_hewan_list': [{'id': row[0], 'nama_jenis': row[1]} for row in jenis_hewan_list],
-        'action': 'Tambah'
+        'user_data'        : user_data,
+        'is_client'        : is_client,
+        'jenis_hewan_list' : [{'id': r[0], 'nama_jenis': r[1]} for r in jenis_rows],
     }
-    
-    if not is_client:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT k.no_identitas, 
-                       CASE 
-                           WHEN i.nama_depan IS NOT NULL THEN i.nama_depan || ' ' || COALESCE(i.nama_tengah || ' ', '') || i.nama_belakang
-                           ELSE p.nama_perusahaan
-                       END as nama_pemilik
-                FROM petclinic.KLIEN k
-                LEFT JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
-                LEFT JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
-                ORDER BY nama_pemilik ASC
-            """)
-            klien_list = cursor.fetchall()
-        context['klien_list'] = [{'no_identitas': row[0], 'nama_pemilik': row[1]} for row in klien_list]
-    else:
-        if user_data['user_type'] == 'individu':
-            nama_pemilik = f"{user_data['nama_depan']} {user_data.get('nama_tengah', '')} {user_data['nama_belakang']}".replace('  ', ' ')
-        else:
+
+    if is_client:
+        nama_pemilik = (f"{user_data['nama_depan']} "
+                        f"{user_data.get('nama_tengah','')} "
+                        f"{user_data['nama_belakang']}"
+                        ).replace('  ', ' ')
+        if user_data['user_type'] == 'perusahaan':
             nama_pemilik = user_data['nama_perusahaan']
         context['nama_pemilik'] = nama_pemilik
-    
+    else:
+        with connection.cursor() as cur:
+            cur.execute("""
+                SELECT k.no_identitas,
+                       COALESCE(i.nama_depan || ' ' || COALESCE(i.nama_tengah||' ','')|| i.nama_belakang,
+                                p.nama_perusahaan)
+                FROM petclinic.KLIEN k
+                LEFT JOIN petclinic.INDIVIDU   i ON k.no_identitas = i.no_identitas_klien
+                LEFT JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
+                ORDER BY 2
+            """)
+            klien_rows = cur.fetchall()
+        context['klien_list'] = [{'no_identitas': r[0], 'nama_pemilik': r[1]} for r in klien_rows]
+
     return render(request, 'hewan_create_form.html', context)
+
 
 # === FUNGSI UPDATE UNTUK MODAL ===
 def hewan_update(request, nama, no_identitas_klien):
