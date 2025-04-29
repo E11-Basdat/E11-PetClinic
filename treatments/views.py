@@ -5,7 +5,13 @@ from django.http import JsonResponse
 from django.urls import reverse
 
 def n_treatment_list(request):
-    return render(request, 'n_treatment_list.html')
+    return render(request, 'n_treatment_list.html', {'user_role': 'else'})
+
+def n_treatment_list_doctor(request):
+    return render(request, 'n_treatment_list.html', {'user_role': 'doctor'})
+
+def n_treatment_list_klien(request):
+    return render(request, 'n_treatment_list.html', {'user_role': 'klien'})
 
 def n_create_treatment(request):
     if request.method == 'POST':
