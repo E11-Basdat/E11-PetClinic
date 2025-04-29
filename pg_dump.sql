@@ -180,3 +180,24 @@ FOREIGN KEY (id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk, no_per
 REFERENCES KUNJUNGAN(id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk, no_perawat_hewan, no_dokter_hewan),
 FOREIGN KEY (kode_perawatan) REFERENCES PERAWATAN(kode_perawatan)
 );
+
+-- INSERT VALUE KE TABLE VAKSIN
+INSERT INTO VAKSIN (kode, nama, harga, stok) VALUES 
+('VAC001', 'Rabies (Anti-Lyssa)', 150000, 0),
+('VAC002', 'DHPPi (Canine Distemper)', 200000, 30),
+('VAC003', 'Feline Triple (Panleukopenia)', 175000, 20),
+('VAC004', 'Leptospirosis', 120000, 15),
+('VAC005', 'Bordetella (Kennel Cough)', 90000, 35),
+('VAC006', 'Parvovirus (Canine)', 180000, 10),
+('VAC007', 'Feline Leukemia (FeLV)', 250000, 12),
+('VAC008', 'Canine Parainfluenza', 95000, 40),
+('VAC009', 'Avian Influenza (AI)', 110000, 50),
+('VAC010', 'Newcastle Disease (ND)', 85000, 22);
+
+-- STRUKTUR TABLE VAKSIN
+\d VAKSIN;
+
+-- ISI TABLE VAKSIN
+SELECT * FROM VAKSIN;
+
+

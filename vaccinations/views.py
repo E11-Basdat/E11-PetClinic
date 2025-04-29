@@ -38,30 +38,72 @@ VACCINATIONS = [
 VACCINES = [
     {
         'kode': 'VAC001',
-        'nama': 'Rabies Vaccine',
+        'nama': 'Rabies (Anti-Lyssa)',
         'harga': 150000,
-        'stok': 25,
+        'stok': 0,
         'can_delete': False  # Used in vaccinations
     },
     {
         'kode': 'VAC002',
-        'nama': 'Distemper Vaccine',
-        'harga': 120000,
-        'stok': 15,
+        'nama': 'DHPPi (Canine Distemper)',
+        'harga': 200000,
+        'stok': 30,
         'can_delete': False  # Used in vaccinations
     },
     {
         'kode': 'VAC003',
-        'nama': 'Parvovirus Vaccine',
-        'harga': 135000,
+        'nama': 'Feline Triple (Panleukopenia)',
+        'harga': 175000,
         'stok': 20,
         'can_delete': False  # Used in vaccinations
     },
     {
         'kode': 'VAC004',
-        'nama': 'Feline Leukemia Vaccine',
+        'nama': 'Leptospirosis',
+        'harga': 120000,
+        'stok': 15,
+        'can_delete': True  # Not used in vaccinations
+    },
+    {
+        'kode': 'VAC005',
+        'nama': 'Bordetella (Kennel Cough)',
+        'harga': 90000,
+        'stok': 35,
+        'can_delete': True  # Not used in vaccinations
+    },
+    {
+        'kode': 'VAC006',
+        'nama': 'Parvovirus (Canine)',
         'harga': 180000,
         'stok': 10,
+        'can_delete': True  # Not used in vaccinations
+    },
+    {
+        'kode': 'VAC007',
+        'nama': 'Feline Leukemia (FeLV)',
+        'harga': 250000,
+        'stok': 12,
+        'can_delete': True  # Not used in vaccinations
+    },
+    {
+        'kode': 'VAC008',
+        'nama': 'Canine Parainfluenza',
+        'harga': 95000,
+        'stok': 40,
+        'can_delete': True  # Not used in vaccinations
+    },
+    {
+        'kode': 'VAC009',
+        'nama': 'Avian Influenza (AI)',
+        'harga': 110000,
+        'stok': 50,
+        'can_delete': True  # Not used in vaccinations
+    },
+    {
+        'kode': 'VAC010',
+        'nama': 'Newcastle Disease (ND)',
+        'harga': 85000,
+        'stok': 22,
         'can_delete': True  # Not used in vaccinations
     }
 ]
