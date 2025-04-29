@@ -190,26 +190,44 @@
             this.type = 'datetime-local';
         });
         
-        // Handle cancel button
+        // Handle cancel button - redirect to visit list
         document.querySelector('.btn-cancel').addEventListener('click', function() {
             if(confirm('Apakah Anda yakin ingin membatalkan pembuatan kunjungan?')) {
-                window.location.href = '/list/'; // Ganti dengan URL list kunjungan
+                window.location.href = "{% url 'visits:visit_list_fd' %}"; // Updated to use Django URL tag
             }
         });
+        
+        // Simulasi data hewan berdasarkan klien - data lebih realistis
+        const hewanByKlien = {
+            'f47ac10b-58cc-4372-a567-0e02b2c3d479': ['Blacky', 'Luna'],
+            '550e8400-e29b-41d4-a716-446655440000': ['Snowy', 'Rocky'],
+            'd3973b2a-5fc2-47d6-8358-19123d4d4442': ['Coco', 'Milo'],
+            '9a33b35c-f3c8-4ca0-8c8c-dcc21e3d15e2': ['Bubbles', 'Polly'],
+            'b5f8c3d2-e28a-4af1-bc18-3a0c18373a8b': ['Spike', 'Shadow'],
+            'c7c6897c-5e3e-4f0a-8d84-b9ffb83023a6': ['Bella', 'Rango'],
+            '01234567-89ab-cdef-0123-456789abcdef': ['Sky', 'Ginger'],
+            '98765432-10fe-dcba-9876-54321fedcba9': ['Kiwi', 'Quack'],
+            'a12bc34d-56f8-47b3-860c-1fe123ab56c7': ['Nemo', 'Puffy'],
+            '87654321-fedc-ba98-7654-3210fedcba98': ['Axel', 'Draco'],
+            '6ba7b810-9dad-11d1-80b4-00c04fd430c8': ['Luna', 'Spike'],
+            '6ba7b811-9dad-11d1-80b4-00c04fd430c8': ['Milo', 'Sky'],
+            '6ba7b812-9dad-11d1-80b4-00c04fd430c8': ['Rocky', 'Blacky'],
+            '6ba7b814-9dad-11d1-80b4-00c04fd430c8': ['Bella', 'Nemo'],
+            '6ba7b815-9dad-11d1-80b4-00c04fd430c8': ['Coco', 'Kiwi'],
+            '6ba7b818-9dad-11d1-80b4-00c04fd430c8': ['Snowy', 'Axel'],
+            '6ba7b819-9dad-11d1-80b4-00c04fd430c8': ['Bubbles', 'Ginger'],
+            '6ba7b81a-9dad-11d1-80b4-00c04fd430c8': ['Polly', 'Draco'],
+            '6ba7b81b-9dad-11d1-80b4-00c04fd430c8': ['Shadow', 'Quack'],
+            '6ba7b81c-9dad-11d1-80b4-00c04fd430c8': ['Rango', 'Puffy']
+        };
         
         // Update nama hewan berdasarkan ID Klien yang dipilih
         document.getElementById('id-klien').addEventListener('change', function() {
             const namaHewanSelect = document.getElementById('nama-hewan');
             namaHewanSelect.innerHTML = '<option value="" disabled selected>Pilih Nama Hewan</option>';
             
-            // Simulasi data hewan berdasarkan klien
-            const hewanByKlien = {
-                'FDO123': ['Snowy'],
-                'KII123': ['Blacky'],
-                'PKE123': ['Hamseung']
-            };
-            
             const selectedKlien = this.value;
+            
             if (selectedKlien && hewanByKlien[selectedKlien]) {
                 hewanByKlien[selectedKlien].forEach(hewan => {
                     const option = document.createElement('option');
@@ -217,8 +235,17 @@
                     option.textContent = hewan;
                     namaHewanSelect.appendChild(option);
                 });
+                
+                // Enable the nama-hewan dropdown once a client is selected
+                namaHewanSelect.disabled = false;
+            } else {
+                // Disable the dropdown if no client is selected
+                namaHewanSelect.disabled = true;
             }
         });
+        
+        // Default set the nama-hewan dropdown to disabled until client is selected
+        document.getElementById('nama-hewan').disabled = true;
     </script>
 </body>
 </html>

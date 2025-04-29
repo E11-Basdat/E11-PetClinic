@@ -502,9 +502,11 @@
                         <div class="flex space-x-2">
                             <a href="${treatment.updateUrl}" class="bg-blue-800 text-white px-3 py-1 rounded-md text-sm">Update</a>
                             <button 
+                                type="button"
                                 class="bg-red-500 text-white px-3 py-1 rounded-md text-sm delete-btn" 
                                 data-kunjungan="${treatment.idKunjungan}"
                                 data-perawatan="${treatment.jenisPerawatan.split(' - ')[0]}"
+                                onclick="showDeleteConfirmation('${treatment.idKunjungan}', '${treatment.jenisPerawatan.split(' - ')[0]}')"
                             >Delete</button>
                         </div>
                     </td>` : ''}
@@ -512,17 +514,21 @@
                 
                 tbody.appendChild(row);
             });
+        }
 
-            // Attach event listeners to new delete buttons
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    currentKunjungan = this.dataset.kunjungan;
-                    deleteKunjunganEl.textContent = currentKunjungan;
-                    deletePerawatanEl.textContent = this.dataset.perawatan;
-                    document.getElementById('deleteModal').classList.remove('hidden');
-                    document.getElementById('deleteModal').classList.add('flex');
-                });
-            });
+        // Function to show delete confirmation modal
+        function showDeleteConfirmation(kunjunganId, perawatanId) {
+            // Set current kunjungan for delete operation
+            currentKunjungan = kunjunganId;
+            
+            // Update modal text
+            document.getElementById('deleteKunjungan').textContent = kunjunganId;
+            document.getElementById('deletePerawatan').textContent = perawatanId;
+            
+            // Show the modal
+            const deleteModal = document.getElementById('deleteModal');
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
         }
 
         // Helper function to get CSRF token (for real AJAX requests)
