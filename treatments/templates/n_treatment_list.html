@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold">List Treatments</h1>
+        <a href="{% url 'treatments:n_create_treatment' %}" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-md flex items-center">
+            <span class="mr-1">+</span> Create New Treatment
+        </a>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200">
+            <thead>
+                <tr class="bg-gray-100 text-left text-gray-600 text-sm">
+                    <th class="py-3 px-4 border-b">No</th>
+                    <th class="py-3 px-4 border-b">Kunjungan</th>
+                    <th class="py-3 px-4 border-b">ID Klien</th>
+                    <th class="py-3 px-4 border-b">Nama Hewan</th>
+                    <th class="py-3 px-4 border-b">Perawat Hewan</th>
+                    <th class="py-3 px-4 border-b">Dokter Hewan</th>
+                    <th class="py-3 px-4 border-b">Front Desk Officer</th>
+                    <th class="py-3 px-4 border-b">Jenis Perawatan</th>
+                    <th class="py-3 px-4 border-b">Catatan Medis</th>
+                    <th class="py-3 px-4 border-b">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Row 1 -->
+                <tr>
+                    <td class="py-2 px-4 border-b">1</td>
+                    <td class="py-2 px-4 border-b">6ba7b81e-9dad-11d1-80b4-00c04fd430c8</td>
+                    <td class="py-2 px-4 border-b">ID0123</td>
+                    <td class="py-2 px-4 border-b">Snowy</td>
+                    <td class="py-2 px-4 border-b">John</td>
+                    <td class="py-2 px-4 border-b">Dr. Rudi</td>
+                    <td class="py-2 px-4 border-b">Tika</td>
+                    <td class="py-2 px-4 border-b">TRM001 - Dental Care</td>
+                    <td class="py-2 px-4 border-b">Diet</td>
+                    <td class="py-2 px-4 border-b">
+                        <div class="flex space-x-2">
+                            <a href="{% url 'treatments:n_update_treatment' '6ba7b81e-9dad-11d1-80b4-00c04fd430c8' %}" class="bg-blue-800 text-white px-3 py-1 rounded-md text-sm">Update</a>
+                            <button 
+                                class="bg-red-500 text-white px-3 py-1 rounded-md text-sm delete-btn" 
+                                data-kunjungan="6ba7b81e-9dad-11d1-80b4-00c04fd430c8"
+                                data-perawatan="TRM001"
+                            >Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                <!-- Row 2 -->
+                <tr>
+                    <td class="py-2 px-4 border-b">2</td>
+                    <td class="py-2 px-4 border-b">f47ac10b-58cc-4372-a567-0e02b2c3d479</td>
+                    <td class="py-2 px-4 border-b">89753</td>
+                    <td class="py-2 px-4 border-b">Rocky</td>
+                    <td class="py-2 px-4 border-b">Agus</td>
+                    <td class="py-2 px-4 border-b">Dr. Safira</td>
+                    <td class="py-2 px-4 border-b">Tini</td>
+                    <td class="py-2 px-4 border-b">TRM002 - Parasite Control</td>
+                    <td class="py-2 px-4 border-b">Sudah baik</td>
+                    <td class="py-2 px-4 border-b">
+                        <div class="flex space-x-2">
+                            <a href="{% url 'treatments:n_update_treatment' 'f47ac10b-58cc-4372-a567-0e02b2c3d479' %}" class="bg-blue-800 text-white px-3 py-1 rounded-md text-sm">Update</a>
+                            <button 
+                                class="bg-red-500 text-white px-3 py-1 rounded-md text-sm delete-btn" 
+                                data-kunjungan="f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                                data-perawatan="TRM002"
+                            >Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                <!-- Row 3 -->
+                <tr>
+                    <td class="py-2 px-4 border-b">3</td>
+                    <td class="py-2 px-4 border-b">550e8400-e29b-41d4-a716-446655440000</td>
+                    <td class="py-2 px-4 border-b">PK5123</td>
+                    <td class="py-2 px-4 border-b">Hamtarou</td>
+                    <td class="py-2 px-4 border-b">Budi</td>
+                    <td class="py-2 px-4 border-b">Dr. Nanu</td>
+                    <td class="py-2 px-4 border-b">Tono</td>
+                    <td class="py-2 px-4 border-b">TRM003 - Flea Treatment</td>
+                    <td class="py-2 px-4 border-b">Sehat</td>
+                    <td class="py-2 px-4 border-b">
+                        <div class="flex space-x-2">
+                            <a href="{% url 'treatments:n_update_treatment' '550e8400-e29b-41d4-a716-446655440000' %}" class="bg-blue-800 text-white px-3 py-1 rounded-md text-sm">Update</a>
+                            <button 
+                                class="bg-red-500 text-white px-3 py-1 rounded-md text-sm delete-btn" 
+                                data-kunjungan="550e8400-e29b-41d4-a716-446655440000"
+                                data-perawatan="TRM003"
+                            >Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+        <h2 class="text-2xl font-bold text-red-500 mb-4">Delete Treatment</h2>
+        <p class="mb-4">Apakah kamu yakin untuk menghapus Perawatan untuk Kunjungan <span id="deleteKunjungan" class="font-bold text-red-500"></span> dengan Perawatan <span id="deletePerawatan" class="font-bold text-red-500"></span>?</p>
+        <div class="flex justify-end space-x-3">
+            <button id="cancelDelete" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancel</button>
+            <button id="confirmDelete" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Confirm Deletion</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Variables to store current deletion info
+        let currentKunjungan = '';
+        
+        // Get DOM elements
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteKunjunganEl = document.getElementById('deleteKunjungan');
+        const deletePerawatanEl = document.getElementById('deletePerawatan');
+        
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                currentKunjungan = this.dataset.kunjungan;
+                deleteKunjunganEl.textContent = currentKunjungan;
+                deletePerawatanEl.textContent = this.dataset.perawatan;
+                deleteModal.classList.remove('hidden');
+                deleteModal.classList.add('flex');
+            });
+        });
+        
+        // Cancel delete button
+        document.getElementById('cancelDelete').addEventListener('click', function() {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
+        });
+        
+        // Confirm delete button
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            // Make AJAX request to delete
+            fetch(`/treatment/delete/${currentKunjungan}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the row from the table
+                    const row = document.querySelector(`button[data-kunjungan="${currentKunjungan}"]`).closest('tr');
+                    row.parentNode.removeChild(row);
+                    
+                    // Hide the modal
+                    deleteModal.classList.add('hidden');
+                    deleteModal.classList.remove('flex');
+                }
+            });
+        });
+        
+        // Function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

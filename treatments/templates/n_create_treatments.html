@@ -1,0 +1,26 @@
+<!-- filepath: c:\new-basdat\E11-PetClinic\treatments\templates\create_treatments.html -->
+<form method="POST">
+    {% csrf_token %}
+    
+    <label for="kunjungan">Kunjungan:</label>
+    <select id="kunjungan" name="kunjungan" required>
+        {% for kunjungan in form.kunjungan_choices %}
+        <option value="{{ kunjungan.0 }}">{{ kunjungan.1 }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <label for="jenis_perawatan">Jenis Perawatan:</label>
+    <select id="jenis_perawatan" name="jenis_perawatan" required>
+        {% for perawatan in form.perawatan_choices %}
+        <option value="{{ perawatan.0 }}">{{ perawatan.1 }}</option>
+        {% endfor %}
+    </select>
+    <br>
+
+    <label for="catatan_medis">Catatan Medis:</label>
+    <textarea id="catatan_medis" name="catatan_medis" required></textarea>
+    <br>
+
+    <button type="submit">Simpan</button>
+</form>

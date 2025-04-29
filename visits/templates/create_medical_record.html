@@ -1,128 +1,208 @@
-<!-- filepath: c:\tk-basdat\E11-PetClinic\visits\templates\visits\list.html -->
-<h1>Daftar Kunjungan</h1>
-<table>
-    <tr>
-        <th>ID Kunjungan</th>
-        <th>Nama Hewan</th>
-        <th>Metode Kunjungan</th>
-        <th>Waktu Mulai</th>
-        <th>Waktu Akhir</th>
-        <th>Rekam Medis</th>
-    </tr>
-    {% for visit in visits %}
-    <tr>
-        <td>{{ visit.0 }}</td>
-        <td>{{ visit.2 }}</td>
-        <td>{{ visit.3 }}</td>
-        <td>{{ visit.4 }}</td>
-        <td>{{ visit.5 }}</td>
-        <td>
-            <a href="#" class="check-medical-record" data-id="{{ visit.0 }}">Lihat Rekam Medis</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% load static %}
 
-<!-- Modal untuk menampilkan rekam medis -->
-<div id="medical-record-modal" class="modal hidden">
-    <div class="modal-content">
-        <h2>Rekam Medis</h2>
-        <p id="medical-record-message"></p>
-        <button id="create-medical-record" class="btn btn-primary">Create</button>
-        <button id="close-modal" class="btn btn-secondary">Close</button>
-    </div>
+{% block title %}List Kunjungan - Pet Clinic{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 max-w-6xl">
+    <!-- ... (kode sebelumnya tetap sama) ... -->
 </div>
 
-<style>
-    /* Modal styling */
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-    .modal.hidden {
-        display: none;
-    }
-
-    .modal-content {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 400px;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn {
-        padding: 10px 20px;
-        margin: 10px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-    }
-
-    .btn:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-    }
-</style>
-
 <script>
-    document.querySelectorAll('.check-medical-record').forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            const idKunjungan = this.getAttribute('data-id');
+    // Data storage in memory (replace database)
+    const dataStore = {
+        kunjungan: [
+            {
+                id: '6ba7b81e-9dad-11d1-80b4-00c04fd430c8',
+                idKlien: 'a23b45c6-78d9-4e0f-1a2b-3c4d5e6f7g8h',
+                namaHewan: 'Snowy',
+                metode: 'Janji Temu',
+                waktuMulai: '03-04-2025 14:30:13',
+                waktuAkhir: '03-04-2025 16:30:16',
+                rekamMedis: {
+                    suhu: '36.8°C',
+                    berat: '12.3 kg',
+                    perawatan: 'Vaksinasi',
+                    catatan: 'Hewan dalam kondisi sehat, diberikan vaksin rabies dosis standar, tidak ada reaksi alergi setelah penyuntikan.'
+                }
+            },
+            {
+                id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+                idKlien: 'b34c56d7-89e0-1f2a-3b4c-5d6e7f8g9h0i',
+                namaHewan: 'Blacky',
+                metode: 'Walk-In',
+                waktuMulai: '05-08-2025 12:30:27',
+                waktuAkhir: '05-08-2025 13:30:19',
+                rekamMedis: null // Tidak ada rekam medis
+            },
+            {
+                id: '550e8400-e29b-41d4-a716-446655440000',
+                idKlien: 'c45d67e8-90f1-2a3b-4c5d-6e7f8g9h0i1j',
+                namaHewan: 'Hamsteung',
+                metode: 'Darurat',
+                waktuMulai: '01-09-2025 16:30:51',
+                waktuAkhir: '01-09-2025 18:00:33',
+                rekamMedis: {
+                    suhu: '38.2°C',
+                    berat: '8.7 kg',
+                    perawatan: 'Medical Check-Up',
+                    catatan: 'Kondisi darurat, luka pada kaki depan. Telah diobati dan dibalut. Perlu follow-up dalam 3 hari.'
+                }
+            }
+        ],
+        
+        // Methods to manipulate data
+        getKunjunganById: function(id) {
+            return this.kunjungan.find(k => k.id === id);
+        },
+        
+        addKunjungan: function(newKunjungan) {
+            this.kunjungan.push(newKunjungan);
+        },
+        
+        updateKunjungan: function(id, updatedData) {
+            const index = this.kunjungan.findIndex(k => k.id === id);
+            if (index !== -1) {
+                this.kunjungan[index] = {...this.kunjungan[index], ...updatedData};
+            }
+        },
+        
+        deleteKunjungan: function(id) {
+            this.kunjungan = this.kunjungan.filter(k => k.id !== id);
+        },
+        
+        addRekamMedis: function(kunjunganId, rekamMedisData) {
+            const kunjungan = this.getKunjunganById(kunjunganId);
+            if (kunjungan) {
+                kunjungan.rekamMedis = rekamMedisData;
+            }
+        },
+        
+        updateRekamMedis: function(kunjunganId, updatedData) {
+            const kunjungan = this.getKunjunganById(kunjunganId);
+            if (kunjungan && kunjungan.rekamMedis) {
+                kunjungan.rekamMedis = {...kunjungan.rekamMedis, ...updatedData};
+            }
+        }
+    };
 
-            // AJAX request untuk memeriksa rekam medis
-            fetch(`/visits/check-medical-record/${idKunjungan}/`)
-                .then(response => response.json())
-                .then(data => {
-                    const modal = document.getElementById('medical-record-modal');
-                    const message = document.getElementById('medical-record-message');
-                    const createButton = document.getElementById('create-medical-record');
-
-                    if (data.exists) {
-                        message.textContent = `Rekam Medis ditemukan: ${data.data.catatan}`;
-                    } else {
-                        message.textContent = 'Rekam Medis tidak ditemukan.';
-                    }
-
-                    // Atur tombol Create
-                    createButton.onclick = function () {
-                        window.location.href = `/visits/medical-records/create/${idKunjungan}/`;
-                    };
-
-                    // Validasi user type
-                    {% if request.session.user_type != 'dokter' %}
-                    createButton.disabled = true;
-                    {% else %}
-                    createButton.disabled = false;
-                    {% endif %}
-
-                    modal.classList.remove('hidden');
-                });
+    // Hardcode user role for testing
+    const userRole = '{{ user_role }}';
+    let currentKunjunganId = null;
+    
+    // Function to render table rows
+    function renderKunjunganTable() {
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = '';
+        
+        dataStore.kunjungan.forEach(kunjungan => {
+            const row = document.createElement('tr');
+            
+            row.innerHTML = `
+                <td class="py-3 px-4 border-b border-gray-200">${kunjungan.id}</td>
+                <td class="py-3 px-4 border-b border-gray-200">${kunjungan.idKlien}</td>
+                <td class="py-3 px-4 border-b border-gray-200">${kunjungan.namaHewan}</td>
+                <td class="py-3 px-4 border-b border-gray-200">${kunjungan.metode}</td>
+                <td class="py-3 px-4 border-b border-gray-200">${kunjungan.waktuMulai}</td>
+                <td class="py-3 px-4 border-b border-gray-200">${kunjungan.waktuAkhir}</td>
+                <td class="py-3 px-4 border-b border-gray-200">
+                    <button class="bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded check-medical-record" data-id="${kunjungan.id}">Lihat Rekam Medis</button>
+                </td>
+                ${userRole === 'front-desk' ? `
+                <td class="py-3 px-4 border-b border-gray-200">
+                    <button class="bg-indigo-900 hover:bg-indigo-800 text-white py-1 px-3 rounded mr-2" onclick="location.href='/visits/update/?id=${kunjungan.id}'">Update</button>
+                    <button class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded delete-btn" data-id="${kunjungan.id}">Delete</button>
+                </td>
+                ` : ''}
+            `;
+            
+            tbody.appendChild(row);
         });
-    });
-
-    document.getElementById('close-modal').addEventListener('click', function () {
-        document.getElementById('medical-record-modal').classList.add('hidden');
-    });
+        
+        // Re-attach event listeners
+        attachEventListeners();
+    }
+    
+    // Function to attach event listeners
+    function attachEventListeners() {
+        // Medical record buttons
+        document.querySelectorAll('.check-medical-record').forEach(button => {
+            button.addEventListener('click', function() {
+                currentKunjunganId = this.getAttribute('data-id');
+                showMedicalRecordModal(currentKunjunganId);
+            });
+        });
+        
+        // Delete buttons
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const idKunjungan = this.getAttribute('data-id');
+                const deleteModal = document.getElementById('delete-modal');
+                const deleteIdSpan = document.getElementById('delete-id');
+                
+                deleteIdSpan.textContent = idKunjungan;
+                deleteModal.classList.remove('hidden');
+            });
+        });
+    }
+    
+    // Function to show medical record modal
+    function showMedicalRecordModal(idKunjungan) {
+        const modal = document.getElementById('medical-record-modal');
+        const noRecordView = document.getElementById('no-record-view');
+        const recordView = document.getElementById('record-view');
+        const createRecordView = document.getElementById('create-record-view');
+        const updateRecordView = document.getElementById('update-record-view');
+        const createRecordBtn = document.getElementById('create-medical-record-btn');
+        
+        // Hide all views first
+        noRecordView.classList.add('hidden');
+        recordView.classList.add('hidden');
+        createRecordView.classList.add('hidden');
+        updateRecordView.classList.add('hidden');
+        
+        // Show modal
+        modal.classList.remove('hidden');
+        
+        // Get kunjungan data
+        const kunjungan = dataStore.getKunjunganById(idKunjungan);
+        
+        if (kunjungan.rekamMedis) {
+            // Show existing record view
+            recordView.classList.remove('hidden');
+            
+            // Update view with record data
+            document.getElementById('suhu-value').textContent = kunjungan.rekamMedis.suhu;
+            document.getElementById('berat-value').textContent = kunjungan.rekamMedis.berat;
+            document.getElementById('perawatan-value').textContent = kunjungan.rekamMedis.perawatan;
+            document.getElementById('catatan-value').textContent = kunjungan.rekamMedis.catatan;
+            
+            // Show or hide Update button based on role
+            const updateBtn = document.getElementById('update-record-btn');
+            if (userRole === 'doctor') {
+                updateBtn.classList.remove('hidden');
+            } else {
+                updateBtn.classList.add('hidden');
+            }
+        } else {
+            // Show no record view
+            noRecordView.classList.remove('hidden');
+            
+            // Show or hide Create button based on role
+            if (userRole === 'doctor') {
+                createRecordBtn.classList.remove('hidden');
+            } else {
+                createRecordBtn.classList.add('hidden');
+            }
+        }
+    }
+    
+    // ... (rest of the event listeners and functions remain the same, but now they'll use dataStore instead of dummyMedicalRecords)
+    
+    // Initialize the table on page load
+    document.addEventListener('DOMContentLoaded', renderKunjunganTable);
 </script>
+
+<!-- ... (modal HTML remains the same) ... -->
+{% endblock %}

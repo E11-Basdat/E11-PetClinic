@@ -1,9 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medicine List - Pet Clinic</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
@@ -26,7 +30,6 @@
             width: 100%;
         }
         
-        /* Header styles */
         .medicine-header {
             font-size: 2.2rem;
             font-weight: 700;
@@ -44,7 +47,6 @@
             width: 100%;
         }
         
-        /* UPDATED: Search and Add container layout to match reference image */
         .search-add-container {
             display: flex;
             justify-content: space-between;
@@ -54,18 +56,15 @@
             gap: 20px;
         }
         
-        /* UPDATED: Wider search container */
         .search-container {
             flex: 1;
             position: relative;
         }
         
-        /* UPDATED: Add container with larger button */
         .add-container {
             flex: 0 0 auto;
         }
         
-        /* Updated search field styling to match reference */
         #searchInput {
             height: 45px;
             padding-left: 15px;
@@ -74,7 +73,6 @@
             border: 1px solid #ced4da;
         }
         
-        /* Updated button styles to match the green theme in reference */
         .btn-search {
             position: absolute;
             right: 0;
@@ -92,7 +90,6 @@
             border-color: var(--pet-clinic-dark-green);
         }
         
-        /* Updated Add Medicine button to match reference */
         .btn-add {
             background-color: var(--pet-clinic-green);
             border-color: var(--pet-clinic-green);
@@ -110,7 +107,6 @@
             border-color: var(--pet-clinic-dark-green);
         }
         
-        /* Card and container styles */
         .medicine-container {
             width: 100%;
             margin-top: 20px;
@@ -147,7 +143,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        /* Medicine details */
         .medicine-body {
             display: flex;
             flex-direction: column;
@@ -207,7 +202,6 @@
             background-color: #e9ecef;
         }
         
-        /* Footer with stock and actions */
         .medicine-footer {
             display: flex;
             justify-content: space-between;
@@ -250,7 +244,6 @@
             font-size: 16px;
         }
         
-        /* Empty state */
         .empty-message {
             width: 100%;
             text-align: center;
@@ -258,7 +251,6 @@
             color: #6c757d;
         }
         
-        /* Modal Styles */
         .modal-header {
             background-color: var(--pet-clinic-green);
             color: white;
@@ -270,7 +262,7 @@
         }
         
         .btn-create, .btn-update {
-            background-color: #212529;
+            background-color: var(--pet-clinic-green);
             color: white;
             border: none;
         }
@@ -278,10 +270,9 @@
         .btn-cancel {
             background-color: transparent;
             color: #212529;
-            border: none;
+            border: 1px solid #ced4da;
         }
         
-        /* Delete confirmation modal */
         .modal-header.delete-header {
             background-color: #dc3545;
         }
@@ -292,12 +283,10 @@
             border: none;
         }
         
-        /* Input fields */
         .form-control[readonly] {
             background-color: #e9ecef;
         }
         
-        /* Responsive adjustments */
         @media (max-width: 1200px) {
             .medicine-card {
                 flex: 0 0 calc(33.33% - 20px);
@@ -351,7 +340,6 @@
             }
         }
 
-        /* Main card adjustments for full width layout */
         .main-card {
             margin: 0;
             border-radius: 0;
@@ -362,166 +350,218 @@
     </style>
 </head>
 <body>
+{% csrf_token %}
 
 <div class="container-fluid p-0">
     <div class="card main-card">
         <div class="card-body px-0 py-4">
-            <!-- Updated header layout to match reference image -->
             <div class="header-container">
                 <h2 class="text-center medicine-header">LIST MEDICINES</h2>
             </div>
-            
-            <!-- UPDATED: Search and Add button layout to match reference image -->
+    
             <div class="search-add-container">
                 <div class="search-container">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search Medicine...">
-                    <button class="btn btn-search" type="button" onclick="searchMedicines()">
-                        <i class="fas fa-search"></i>
-                    </button>
+                    <form method="GET" action="{% url 'medications:list' %}">
+                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search Medicine..." value="{{ search_query }}">
+                        <button class="btn btn-search" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
                 </div>
                 
                 <div class="add-container">
                     <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
-                        <i class="fas fa-plus me-1"></i> Add New Medicine
+                        <div class="text-center">
+                            <i class="fas fa-plus me-1"></i> Create New Medicine
+                        </div>
                     </button>
                 </div>
             </div>
             
-            <!-- Alert messages section (kept but won't be used) -->
             <div id="alertMessages">
-                <!-- Alert messages section is kept empty -->
+                <div class="container mt-3" id="messageContainer">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
             </div>
 
             <div class="medicine-container" id="medicineGrid">
                 <div class="medicine-row" id="medicineRow">
-                    <!-- Medicines will be loaded dynamically -->
-                    <!-- Empty state message -->
-                    <div id="emptyMessage" class="empty-message w-100">
-                        <p>No medicines found. Click "Add New Medicine" to add medicines to the inventory.</p>
-                    </div>
+                    {% if medicines %}
+                        {% for medicine in medicines %}
+                        <div class="medicine-card">
+                            <div class="card h-100">
+                                <div class="medicine-body">
+                                    <div class="price-tag">
+                                        <span class="medicine-price">Rp {{ medicine.price }}</span>
+                                    </div>
+                                    <div class="medicine-content">
+                                        <h5 class="medicine-name text-center">{{ medicine.name }}</h5>
+                                        <p class="medicine-code text-center">{{ medicine.code }}</p>
+                                        <p class="medicine-dosage text-center">{{ medicine.dosage }}</p>
+                                    </div>
+                                    
+                                    <div class="divider"></div>
+                                    
+                                    <div class="medicine-footer">
+                                        <div class="stock-label">Stock: {{ medicine.stock }}</div>
+                                        <div class="action-icons">
+                                            <a href="#" class="update-icon" onclick="openUpdateModal('{{ medicine.code }}', '{{ medicine.name }}', '{{ medicine.price }}', '{{ medicine.dosage }}'); return false;">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="#" class="update-stock-icon" onclick="openUpdateStockModal('{{ medicine.code }}', '{{ medicine.name }}', {{ medicine.stock }}); return false;">
+                                                <i class="fas fa-cubes"></i>
+                                            </a>
+                                            {% if medicine.canDelete %}
+                                            <a href="#" class="delete-icon" onclick="openDeleteModal('{{ medicine.code }}', '{{ medicine.name }}'); return false;">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                            {% else %}
+                                            <a href="#" class="delete-icon disabled" style="opacity: 0.5; cursor: not-allowed;" onclick="showCannotDeleteMessage(); return false;">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-message">No medicines found. Add a new medicine to get started.</div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Add Medicine Modal - Updated to match reference design -->
 <div class="modal fade" id="addMedicineModal" tabindex="-1" aria-labelledby="addMedicineModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addMedicineModalLabel">Create New Medicine</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="addMedicineModalLabel" style="text-align: center; width: 100%;">Add New Medicine</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form id="addMedicineForm">
+            <form method="POST" action="{% url 'medications:add' %}">
+                {% csrf_token %}
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label for="medicineName" class="form-label">Nama</label>
-                        <input type="text" class="form-control" id="medicineName" placeholder="Ivermectin" required>
+                        <label for="nama" class="form-label">Nama</label>
+                        <input type="text" class="form-control" id="nama" name="nama" required>
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="medicinePrice" class="form-label">Harga Satuan</label>
-                        <input type="number" class="form-control" id="medicinePrice" placeholder="55000" required>
+                        <label for="harga_satuan" class="form-label">Harga Satuan</label>
+                        <input type="number" class="form-control" id="harga_satuan" name="harga_satuan" min="0" required>
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="medicineDosage" class="form-label">Dosis</label>
-                        <input type="text" class="form-control" id="medicineDosage" placeholder="5–10 mg/kg, 1x sehari" required>
+                        <label for="dosis" class="form-label">Dosis</label>
+                        <input type="text" class="form-control" id="dosis" name="dosis" required>
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="medicineStock" class="form-label">Stok Awal</label>
-                        <input type="number" class="form-control" id="medicineStock" placeholder="35" required>
+                        <label for="stok_awal" class="form-label">Stok Awal</label>
+                        <input type="number" class="form-control" id="stok_awal" name="stok_awal" min="0" required>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-end">
-                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-create" onclick="saveMedicine()">Create</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-create">Add Medicine</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Update Medicine Modal - Updated to match reference design -->
 <div class="modal fade" id="updateMedicineModal" tabindex="-1" aria-labelledby="updateMedicineModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="updateMedicineModalLabel">Update Medicine</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="updateMedicineModalLabel" style="text-align: center; width: 100%;">Update Medicine</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form id="updateMedicineForm">
+            <form id="updateMedicineForm" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label for="updateMedicineCode" class="form-label">Kode Obat</label>
-                        <input type="text" class="form-control" id="updateMedicineCode" readonly>
+                        <label for="updateCode" class="form-label">Kode Obat</label>
+                        <input type="text" class="form-control" id="updateCode" name="kode" readonly>
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="updateMedicineName" class="form-label">Nama Obat</label>
-                        <input type="text" class="form-control" id="updateMedicineName" placeholder="Amoxicillin " required>
+                        <label for="updateNama" class="form-label">Nama Obat</label>
+                        <input type="text" class="form-control" id="updateNama" name="nama" required>
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="updateMedicinePrice" class="form-label">Harga Satuan</label>
-                        <input type="number" class="form-control" id="updateMedicinePrice" placeholder="35000" required>
+                        <label for="updateHarga" class="form-label">Harga Satuan</label>
+                        <input type="number" class="form-control" id="updateHarga" name="harga_satuan" min="0" required>
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="updateMedicineDosage" class="form-label">Dosis</label>
-                        <input type="text" class="form-control" id="updateMedicineDosage" placeholder="25" required>
+                        <label for="updateDosis" class="form-label">Dosis</label>
+                        <input type="text" class="form-control" id="updateDosis" name="dosis" placeholder="e.g., 500mg/day" required>
                     </div>
-                    <input type="hidden" id="updateMedicineId">
-                </form>
-            </div>
-            <div class="modal-footer justify-content-end">
-                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-update" onclick="saveUpdatedMedicine()">Update</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-update">Update Medicine</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-<!-- Update Stock Modal - Updated to match reference design -->
+       
 <div class="modal fade" id="updateStockModal" tabindex="-1" aria-labelledby="updateStockModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="updateStockModalLabel">Update Medicine Stock</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form id="updateStockForm">
+            <form id="updateStockForm" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <h6 id="updateStockMedicineName" class="mb-3"></h6>
+                    
                     <div class="mb-3">
-                        <label class="form-label">Medicine Code - Medicine Name</label>
-                        <input type="text" class="form-control" id="stockMedicineInfo" readonly>
+                        <label for="stockValue" class="form-label">Stok</label>
+                        <input type="number" class="form-control" id="stockValue" name="stok" min="0" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="currentStock" class="form-label">Stok</label>
-                        <input type="number" class="form-control" id="stockChange" placeholder="15" required>
-                    </div>
-                    <input type="hidden" id="updateStockMedicineId">
-                    <input type="hidden" id="currentStock">
-                </form>
-            </div>
-            <div class="modal-footer justify-content-end">
-                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-update" onclick="saveUpdatedStock()">Update Stock</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-update">Update Stock</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Delete Medicine Modal - Updated to match reference design -->
-<div class="modal fade" id="deleteMedicineModal" tabindex="-1" aria-labelledby="deleteMedicineModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header delete-header">
-                <h5 class="modal-title text-white" id="deleteMedicineModalLabel">Delete Medicine</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header" style="background-color: white; border-bottom: none;">
+                <h5 class="modal-title" id="deleteConfirmModalLabel" style="color: #dc3545; font-weight: bold; width: 100%;">Delete Medicine</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="deleteMedicineBody">
-                <p>Apakah kamu yakin untuk menghapus Obat <span id="deleteMedicineName" class="fw-bold"></span> dengan Kode <span id="deleteMedicineCode" class="fw-bold"></span>?</p>
+            <div class="modal-body">
+                <p>Apakah kamu yakin untuk menghapus Obat <span id="deleteMedicineName" style="color: #dc3545; font-weight: bold;"></span> dengan Kode <span id="deleteMedicineCode" style="color: #dc3545; font-weight: bold;"></span>?</p>
+                <form id="deleteForm" method="POST" action="">
+                    {% csrf_token %}
+                </form>
             </div>
-            <div class="modal-footer justify-content-end">
-                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-confirm-delete" id="confirmDeleteBtn">Confirm Deletion</button>
+            <div class="modal-footer" style="border-top: none;">
+                <button type="button" class="btn" style="background-color: white; border: 1px solid #ced4da;" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn" id="confirmDeleteBtn" style="background-color: #dc3545; color: white;">Confirm Deletion</button>
             </div>
         </div>
     </div>
@@ -529,315 +569,71 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Variables to store medicine data and counter for IDs
-    let medicines = [];
-    let nextId = 1;
-    
-    // Function to load data from localStorage
-    function loadFromLocalStorage() {
-        const storedMedicines = localStorage.getItem('petClinicMedicines');
-        const storedNextId = localStorage.getItem('petClinicNextId');
+    function showMessage(message, type = 'success') {
+        const messageContainer = document.getElementById('messageContainer');
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        messageContainer.appendChild(alertDiv);
         
-        if (storedMedicines) {
-            medicines = JSON.parse(storedMedicines);
-        }
-        
-        if (storedNextId) {
-            nextId = parseInt(storedNextId);
-        }
+        setTimeout(() => {
+            alertDiv.classList.remove('show');
+            setTimeout(() => alertDiv.remove(), 150);
+        }, 5000);
     }
     
-    // Function to save data to localStorage
-    function saveToLocalStorage() {
-        localStorage.setItem('petClinicMedicines', JSON.stringify(medicines));
-        localStorage.setItem('petClinicNextId', nextId.toString());
+    function showCannotDeleteMessage() {
+        showMessage('This medicine cannot be deleted because it is being used in prescriptions', 'warning');
     }
     
-    // Function to generate medicine code
-    function generateMedicineCode(id) {
-        return 'MED' + String(id).padStart(3, '0');
+    function openUpdateModal(code, name, price, dosage) {
+        document.getElementById('updateCode').value = code;
+        document.getElementById('updateNama').value = name;
+        document.getElementById('updateHarga').value = price;
+        document.getElementById('updateDosis').value = dosage;
+        document.getElementById('updateMedicineForm').action = "{% url 'medications:update' '0000' %}".replace('0000', code);
+        
+        const modal = new bootstrap.Modal(document.getElementById('updateMedicineModal'));
+        modal.show();
     }
     
-    // Function to render medicine cards
-    function renderMedicines() {
-        const medicineRow = document.getElementById('medicineRow');
+    function openUpdateStockModal(code, name, stock) {
+        document.getElementById('updateStockMedicineName').textContent = " " + code + " - " + name;
+        document.getElementById('stockValue').value = stock;
+        document.getElementById('updateStockForm').action = "{% url 'medications:update_stock' '0000' %}".replace('0000', code);
         
-        // Clear existing content
-        medicineRow.innerHTML = '';
-        
-        // Show empty message if no medicines
-        if (medicines.length === 0) {
-            const emptyMessage = document.createElement('div');
-            emptyMessage.id = 'emptyMessage';
-            emptyMessage.className = 'empty-message w-100';
-            emptyMessage.innerHTML = '<p>No medicines found. Click "Add New Medicine" to add medicines to the inventory.</p>';
-            medicineRow.appendChild(emptyMessage);
-            return;
-        }
-        
-        // Render each medicine card
-        medicines.forEach(medicine => {
-            const medicineCode = generateMedicineCode(medicine.id);
-            const card = document.createElement('div');
-            card.className = 'medicine-card';
-            card.innerHTML = `
-                <div class="card h-100">
-                    <div class="medicine-body">
-                        <div class="price-tag">
-                            <span class="medicine-price">Rp ${medicine.price}</span>
-                        </div>
-                        <div class="medicine-content">
-                            <h5 class="medicine-name text-center">${medicine.name}</h5>
-                            <p class="medicine-code text-center">${medicineCode}</p>
-                            <p class="medicine-dosage text-center">${medicine.dosage}</p>
-                        </div>
-                        
-                        <div class="divider"></div>
-                        
-                        <div class="medicine-footer">
-                            <div class="stock-label">Stok: ${medicine.stock}</div>
-                            <div class="action-icons">
-                                <a href="#" onclick="updateMedicine(${medicine.id}); return false;" title="Update">
-                                    <i class="fas fa-pencil-alt update-icon"></i>
-                                </a>
-                                <a href="#" onclick="updateStock(${medicine.id}); return false;" title="Update Stock">
-                                    <i class="fas fa-cube update-stock-icon"></i>
-                                </a>
-                                <a href="#" onclick="confirmDelete(${medicine.id}); return false;" title="Delete">
-                                    <i class="fas fa-trash-alt delete-icon"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            medicineRow.appendChild(card);
-        });
+        const modal = new bootstrap.Modal(document.getElementById('updateStockModal'));
+        modal.show();
     }
     
-    // Function to search medicines
-    function searchMedicines() {
-        const input = document.getElementById('searchInput').value.toUpperCase();
-        const cards = document.getElementsByClassName('medicine-card');
+    function openDeleteModal(code, name) {
+        document.getElementById('deleteMedicineName').textContent = name;
+        document.getElementById('deleteMedicineCode').textContent = code;
+        const form = document.getElementById('deleteForm');
+        form.action = "{% url 'medications:delete' '0000' %}".replace('0000', code);
         
-        for (let i = 0; i < cards.length; i++) {
-            const nameElement = cards[i].querySelector('.medicine-name');
-            if (nameElement) {
-                const textValue = nameElement.textContent || nameElement.innerText;
-                if (textValue.toUpperCase().indexOf(input) > -1) {
-                    cards[i].style.display = '';
-                } else {
-                    cards[i].style.display = 'none';
-                }
-            }
-        }
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        modal.show();
     }
     
-    // Function to save new medicine from the modal
-    function saveMedicine() {
-        // Get form values
-        const name = document.getElementById('medicineName').value;
-        const price = document.getElementById('medicinePrice').value;
-        const dosage = document.getElementById('medicineDosage').value;
-        const stock = document.getElementById('medicineStock').value;
-        
-        // Validate inputs
-        if (!name || !price || !dosage || !stock) {
-            alert('Please fill in all fields');
-            return;
-        }
-        
-        if (isNaN(parseInt(price)) || isNaN(parseInt(stock))) {
-            alert('Price and stock must be valid numbers');
-            return;
-        }
-        
-        // Create medicine object
-        const newMedicine = {
-            id: nextId++,
-            name: name,
-            price: parseInt(price),
-            dosage: dosage,
-            stock: parseInt(stock)
-        };
-        
-        // Add to medicines array
-        medicines.push(newMedicine);
-        
-        // Save to localStorage
-        saveToLocalStorage();
-        
-        // Update display
-        renderMedicines();
-        
-        // Reset form and close modal
-        document.getElementById('addMedicineForm').reset();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addMedicineModal'));
-        modal.hide();
-    }
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        document.getElementById('deleteForm').submit();
+    });
     
-    // Function to prepare confirmation for medicine deletion
-    function confirmDelete(id) {
-        // Find the medicine
-        const medicine = medicines.find(med => med.id === id);
-        
-        if (medicine) {
-            const medicineCode = generateMedicineCode(medicine.id);
-            
-            // Set confirmation modal text
-            document.getElementById('deleteMedicineName').textContent = medicine.name;
-            document.getElementById('deleteMedicineCode').textContent = medicineCode;
-            
-            // Set up the delete action
-            document.getElementById('confirmDeleteBtn').onclick = function() {
-                deleteMedicine(id);
-            };
-            
-            // Show the modal
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteMedicineModal'));
-            deleteModal.show();
-        }
-    }
-    
-    // Function to delete medicine
-    function deleteMedicine(id) {
-        // Remove from array
-        medicines = medicines.filter(medicine => medicine.id !== id);
-        
-        // Save to localStorage
-        saveToLocalStorage();
-        
-        // Update display
-        renderMedicines();
-        
-        // Close modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteMedicineModal'));
-        modal.hide();
-    }
-    
-    // Function to update medicine
-    function updateMedicine(id) {
-        // Find the medicine
-        const medicine = medicines.find(med => med.id === id);
-        
-        if (medicine) {
-            // Fill the form
-            document.getElementById('updateMedicineId').value = medicine.id;
-            document.getElementById('updateMedicineCode').value = generateMedicineCode(medicine.id);
-            document.getElementById('updateMedicineName').value = medicine.name;
-            document.getElementById('updateMedicinePrice').value = medicine.price;
-            document.getElementById('updateMedicineDosage').value = medicine.dosage;
-            
-            // Show the modal
-            const updateModal = new bootstrap.Modal(document.getElementById('updateMedicineModal'));
-            updateModal.show();
-        }
-    }
-    
-    // Function to save updated medicine
-    function saveUpdatedMedicine() {
-        // Get form values
-        const id = parseInt(document.getElementById('updateMedicineId').value);
-        const name = document.getElementById('updateMedicineName').value;
-        const price = document.getElementById('updateMedicinePrice').value;
-        const dosage = document.getElementById('updateMedicineDosage').value;
-        
-        // Validate inputs
-        if (!name || !price || !dosage) {
-            alert('Please fill in all fields');
-            return;
-        }
-        
-        if (isNaN(parseInt(price))) {
-            alert('Price must be a valid number');
-            return;
-        }
-        
-        // Find medicine index
-        const index = medicines.findIndex(med => med.id === id);
-        
-        if (index !== -1) {
-            // Update medicine
-            medicines[index].name = name;
-            medicines[index].price = parseInt(price);
-            medicines[index].dosage = dosage;
-            
-            // Save to localStorage
-            saveToLocalStorage();
-            
-            // Update display
-            renderMedicines();
-            
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('updateMedicineModal'));
-            modal.hide();
-        }
-    }
-    
-    // Function to update stock
-    function updateStock(id) {
-        // Find the medicine
-        const medicine = medicines.find(med => med.id === id);
-        
-        if (medicine) {
-            const medicineCode = generateMedicineCode(medicine.id);
-            
-            // Fill the form
-            document.getElementById('updateStockMedicineId').value = medicine.id;
-            document.getElementById('stockMedicineInfo').value = `${medicineCode} - ${medicine.name}`;
-            document.getElementById('currentStock').value = medicine.stock;
-            document.getElementById('stockChange').value = '';
-            
-            // Show the modal
-            const stockModal = new bootstrap.Modal(document.getElementById('updateStockModal'));
-            stockModal.show();
-        }
-    }
-    
-    // Function to save updated stock
-    function saveUpdatedStock() {
-        // Get form values
-        const id = parseInt(document.getElementById('updateStockMedicineId').value);
-        const stockChange = parseInt(document.getElementById('stockChange').value || 0);
-        const currentStock = parseInt(document.getElementById('currentStock').value);
-        
-        // Validate input
-        if (isNaN(stockChange)) {
-            alert('Stock must be a valid number');
-            return;
-        }
-        
-        // Find medicine index
-        const index = medicines.findIndex(med => med.id === id);
-        
-        if (index !== -1) {
-            // Update stock to the new value (not adding/subtracting)
-            medicines[index].stock = Math.max(0, stockChange);
-            
-            // Save to localStorage
-            saveToLocalStorage();
-            
-            // Update display
-            renderMedicines();
-            
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('updateStockModal'));
-            modal.hide();
-        }
-    }
-    
-    // Initialize the page
     document.addEventListener('DOMContentLoaded', function() {
-        // Load data from localStorage
-        loadFromLocalStorage();
-        
-        // Render medicines
-        renderMedicines();
-        
-        // Search on keyup
-        document.getElementById('searchInput').addEventListener('keyup', searchMedicines);
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 150);
+            }, 5000);
+        });
     });
 </script>
-
 </body>
 </html>
+{% endblock %}
