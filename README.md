@@ -9,3 +9,5 @@
 | Dandi Apriyansyah | 2306165843 | Fitur Kuning |
 | Nasha Zahira | 2306165553 | Fitur Merah |
 
+# Credit
+cr landing page image: https://pin.it/73Nk00t1t
