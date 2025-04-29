@@ -16,6 +16,10 @@
             {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
               <!-- Menu Klien -->
               <a href="{% url 'animals:hewan_list' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Hewan Peliharaan</a>
+              <a href="#" class="{% if request.path == '/visits/visit_list_doctor' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Kunjungan</a>
+              <a href="#" class="{% if '/vaccinations/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Vaksinasi</a>
+
+
             {% elif request.session.user_type == 'front_desk' %}
               <a href="{% url 'animals:jenis_hewan_list' %}" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Jenis Hewan</a>
               <a href="{% url 'treatments:n_treatment_list' %}" class="{% if '/treatments/n_treatment_list/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
@@ -68,8 +72,10 @@
         
         {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
           <!-- Menu Klien (Mobile) -->
-          <a href="{% url 'treatments:n_treatment_list_klien' %}" class="{% if request.path == '/treatments/n_treatment_list_klien' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
           <a href="{% url 'animals:hewan_list' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Kelola Hewan Peliharaan</a>
+          <a href="#" class="{% if request.path == '/visits/visit_list_doctor' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Kunjungan</a>
+          <a href="#" class="{% if '/vaccinations/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Vaksinasi</a>
+
         {% elif request.session.user_type == 'front_desk' %}
           <!-- Menu Front-Desk Officer (Mobile) -->
           <a href="{% url 'animals:jenis_hewan_list' %}" class="block {% if request.path == '//' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Jenis Hewan</a>
