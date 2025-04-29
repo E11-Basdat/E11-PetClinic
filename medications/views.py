@@ -7,61 +7,139 @@ from datetime import datetime
 MEDICINES = [
     {
         'kode': 'MED001',
-        'nama': 'Penicillin',
-        'harga': 45000,
+        'nama': 'Amoxicillin',
+        'harga': 25000,
         'stok': 50,
-        'dosis': '500mg/day',
+        'dosis': '10-20 mg/kg, 2x sehari',
         'can_delete': True
     },
     {
         'kode': 'MED002',
-        'nama': 'Amoxicillin',
-        'harga': 65000,
+        'nama': 'Dexamethasone',
+        'harga': 15000,
         'stok': 30,
-        'dosis': '100mg/day',
-        'can_delete': True  
+        'dosis': '0,1-0,5 mg/kg, 1x sehari',
+        'can_delete': True
     },
     {
         'kode': 'MED003',
-        'nama': 'Antizol',
+        'nama': 'Ketoconazole',
         'harga': 35000,
+        'stok': 20,
+        'dosis': '5-10 mg/kg, 1x sehari',
+        'can_delete': True
+    },
+    {
+        'kode': 'MED004',
+        'nama': 'Metronidazole',
+        'harga': 20000,
         'stok': 40,
-        'dosis': '10mg/day',
-        'can_delete': True  
+        'dosis': '10-25 mg/kg, 2x sehari',
+        'can_delete': True
+    },
+    {
+        'kode': 'MED005',
+        'nama': 'Ivermectin',
+        'harga': 50000,
+        'stok': 25,
+        'dosis': '0,2-0,4 mg/kg',
+        'can_delete': True
+    },
+    {
+        'kode': 'MED006',
+        'nama': 'Antiparasit Topikal',
+        'harga': 45000,
+        'stok': 35,
+        'dosis': 'Oleskan 1x/bulan (sesuai berat badan)',
+        'can_delete': True
+    },
+    {
+        'kode': 'MED007',
+        'nama': 'Antibiotik Telinga',
+        'harga': 30000,
+        'stok': 15,
+        'dosis': '2-3 tetes, 2x sehari',
+        'can_delete': True
+    },
+    {
+        'kode': 'MED008',
+        'nama': 'Ear Cleaner',
+        'harga': 40000,
+        'stok': 50,
+        'dosis': '3-5 tetes, 1-2x/minggu',
+        'can_delete': True
+    },
+    {
+        'kode': 'MED009',
+        'nama': 'Enrofloxacin',
+        'harga': 60000,
+        'stok': 10,
+        'dosis': '5-10 mg/kg, 1x sehari',
+        'can_delete': True
+    },
+    {
+        'kode': 'MED010',
+        'nama': 'Clindamycin',
+        'harga': 55000,
+        'stok': 18,
+        'dosis': '5-10 mg/kg, 2x sehari',
+        'can_delete': True
     }
 ]
 
 TREATMENTS = [
     {
         'kode_perawatan': 'TRM001',
-        'nama_perawatan': 'Dental Care'
+        'nama_perawatan': 'Vaksinasi Rabies',
+        'biaya_perawatan': 325000
     },
     {
         'kode_perawatan': 'TRM002',
-        'nama_perawatan': 'Parasite Control'
+        'nama_perawatan': 'Sterilisasi',
+        'biaya_perawatan': 600000
     },
     {
         'kode_perawatan': 'TRM003',
-        'nama_perawatan': 'Flea Treatment'
+        'nama_perawatan': 'Pembersihan Telinga',
+        'biaya_perawatan': 140000
+    },
+    {
+        'kode_perawatan': 'TRM004',
+        'nama_perawatan': 'Pemeriksaan Umum',
+        'biaya_perawatan': 150000
+    },
+    {
+        'kode_perawatan': 'TRM005',
+        'nama_perawatan': 'Perawatan Luka Ringan',
+        'biaya_perawatan': 125000
     }
 ]
 
-# In-memory data storage untuk resep (PERAWATAN_OBAT)
 PRESCRIPTIONS = [
     {
         'kode_perawatan': 'TRM001',
         'kode_obat': 'MED001',
-        'kuantitas_obat': 3
+        'kuantitas_obat': 2
     },
     {
         'kode_perawatan': 'TRM002',
         'kode_obat': 'MED002',
-        'kuantitas_obat': 4
+        'kuantitas_obat': 3
     },
     {
         'kode_perawatan': 'TRM003',
-        'kode_obat': 'MED003',
+        'kode_obat': 'MED007',
+        'kuantitas_obat': 1
+    },
+    {
+        'kode_perawatan': 'TRM004',
+        'kode_obat': 'MED004',
         'kuantitas_obat': 2
+    },
+    {
+        'kode_perawatan': 'TRM005',
+        'kode_obat': 'MED004',
+        'kuantitas_obat': 1
     }
 ]
 
@@ -80,7 +158,7 @@ def staff_required(view_func):
     return _wrapped_view
 
 def get_medicine_by_id(kode):
-    """Get medicine by ID"""
+    """Get medicine by ID - simple lookup in hardcoded list"""
     for med in MEDICINES:
         if med['kode'] == kode:
             return med
@@ -88,35 +166,27 @@ def get_medicine_by_id(kode):
 
 def is_medicine_used(kode):
     """Check if a medicine is used in prescriptions"""
-    for p in PRESCRIPTIONS:
-        if p['kode_obat'] == kode:
-            return True
-    return False
+    return any(p['kode_obat'] == kode for p in PRESCRIPTIONS)
 
 def get_treatment_by_id(kode):
-    """Get treatment by ID"""
+    """Get treatment by ID - simple lookup in hardcoded list"""
     for t in TREATMENTS:
         if t['kode_perawatan'] == kode:
             return t
     return None
 
 def generate_medicine_code():
-    """Generate a new medicine code"""
+    
+    """Generate a new medicine code for hardcoded data"""
     existing_codes = [m['kode'] for m in MEDICINES]
+    
     if not existing_codes:
         return "MED001"
     
-    max_code = max(existing_codes)
-    code_num = int(max_code[3:])
-    next_code = f"MED{code_num + 1:03d}"
-    return next_code
-
-def calculate_prescription_total(prescription):
-    """Calculate total price for a prescription"""
-    medicine = get_medicine_by_id(prescription['kode_obat'])
-    if medicine:
-        return prescription['kuantitas_obat'] * medicine['harga']
-    return 0
+    max_num = max(int(code[3:]) for code in existing_codes)
+    next_num = max_num + 1
+    
+    return f"MED{next_num:03d}"
 
 @staff_required
 def medicine_list(request):
@@ -128,9 +198,8 @@ def medicine_list(request):
     else:
         medicines = MEDICINES
     
-    medicines_for_template = []
-    for med in medicines:
-        medicines_for_template.append({
+    medicines_for_template = [
+        {
             'id': int(med['kode'][3:]),  
             'code': med['kode'],
             'name': med['nama'],
@@ -138,7 +207,8 @@ def medicine_list(request):
             'stock': med['stok'],
             'dosage': med['dosis'],
             'canDelete': med['can_delete']
-        })
+        } for med in medicines
+    ]
     
     context = {
         'medicines': medicines_for_template,
@@ -149,7 +219,7 @@ def medicine_list(request):
 
 @staff_required
 def add_medicine(request):
-    """View function to add a new medicine."""
+    """View function to add a new medicine to hardcoded data."""
     if request.method == 'POST':
         try:
             nama = request.POST.get('nama')
@@ -157,23 +227,22 @@ def add_medicine(request):
             dosis = request.POST.get('dosis')
             stok = request.POST.get('stok_awal')
             
-            if not nama or not harga or not dosis or not stok:
+            if not all([nama, harga, dosis, stok]):
                 messages.error(request, 'Semua field harus diisi')
                 return render(request, 'add_medicine.html')
             
-            harga = int(harga)
-            stok = int(stok)
-            
-            if harga < 0:
-                messages.error(request, "Harga tidak boleh bernilai negatif")
+            try:
+                harga = int(harga)
+                stok = int(stok)
+            except ValueError:
+                messages.error(request, 'Harga dan stok harus berupa angka')
                 return render(request, 'add_medicine.html')
             
-            if stok < 0:
-                messages.error(request, "Stok tidak boleh bernilai negatif")
+            if harga < 0 or stok < 0:
+                messages.error(request, "Harga dan stok tidak boleh bernilai negatif")
                 return render(request, 'add_medicine.html')
             
             new_code = generate_medicine_code()
-
             new_medicine = {
                 'kode': new_code,
                 'nama': nama,
@@ -188,8 +257,6 @@ def add_medicine(request):
             messages.success(request, f'Obat {nama} berhasil ditambahkan dengan kode {new_code}')
             return redirect('medications:list')
             
-        except ValueError:
-            messages.error(request, 'Harga dan stok harus berupa angka')
         except Exception as e:
             messages.error(request, f'Gagal menambahkan obat: {str(e)}')
     
@@ -197,7 +264,7 @@ def add_medicine(request):
 
 @staff_required
 def update_medicine(request, kode):
-    """View function to update an existing medicine."""
+    """View function to update an existing medicine in hardcoded data."""
     medicine = get_medicine_by_id(kode)
     
     if not medicine:
@@ -207,19 +274,23 @@ def update_medicine(request, kode):
     if request.method == 'POST':
         try:
             nama = request.POST.get('nama')
-            harga = request.POST.get('harga_satuan')  
+            harga = request.POST.get('harga_satuan')
             dosis = request.POST.get('dosis')
-
-            if not nama or not harga or not dosis:
+            
+            if not all([nama, harga, dosis]):
                 messages.error(request, 'Semua field harus diisi')
                 return redirect('medications:list')
-
-            harga = int(harga)
+            
+            try:
+                harga = int(harga)
+            except ValueError:
+                messages.error(request, 'Harga harus berupa angka')
+                return redirect('medications:list')
             
             if harga < 0:
                 messages.error(request, "Harga tidak boleh bernilai negatif")
                 return redirect('medications:list')
-
+            
             medicine['nama'] = nama
             medicine['harga'] = harga
             medicine['dosis'] = dosis
@@ -227,8 +298,6 @@ def update_medicine(request, kode):
             messages.success(request, f'Obat {nama} berhasil diperbarui')
             return redirect('medications:list')
             
-        except ValueError:
-            messages.error(request, 'Harga harus berupa angka')
         except Exception as e:
             messages.error(request, f'Gagal memperbarui obat: {str(e)}')
     
@@ -236,7 +305,7 @@ def update_medicine(request, kode):
 
 @staff_required
 def update_stock(request, kode):
-    """View function to update medicine stock."""
+    """View function to update medicine stock in hardcoded data."""
     medicine = get_medicine_by_id(kode)
     
     if not medicine:
@@ -251,7 +320,11 @@ def update_stock(request, kode):
                 messages.error(request, 'Field stok harus diisi')
                 return redirect('medications:list')
 
-            stok = int(stok)
+            try:
+                stok = int(stok)
+            except ValueError:
+                messages.error(request, 'Stok harus berupa angka')
+                return redirect('medications:list')
             
             if stok < 0:
                 messages.error(request, "Stok tidak boleh bernilai negatif")
@@ -260,20 +333,15 @@ def update_stock(request, kode):
             medicine['stok'] = stok
             
             messages.success(request, f'Stok untuk {medicine["nama"]} berhasil diperbarui')
-            return redirect('medications:list')
             
-        except ValueError:
-            messages.error(request, 'Stok harus berupa angka')
-            return redirect('medications:list')
         except Exception as e:
             messages.error(request, f'Gagal memperbarui stok: {str(e)}')
-            return redirect('medications:list')
     
     return redirect('medications:list')
 
 @staff_required
 def delete_medicine(request, kode):
-    """View function to delete a medicine."""
+    """View function to delete a medicine from hardcoded data."""
     medicine = get_medicine_by_id(kode)
     
     if not medicine:
@@ -289,16 +357,17 @@ def delete_medicine(request, kode):
             MEDICINES[:] = [m for m in MEDICINES if m['kode'] != kode]
             
             messages.success(request, f'Obat {medicine["nama"]} berhasil dihapus')
-            return redirect('medications:list')
-            
         except Exception as e:
             messages.error(request, f'Gagal menghapus obat: {str(e)}')
     
-    return render(request, 'delete_medicine.html', {'medicine': medicine})
+    return redirect('medications:list')
 
 @staff_required
 def prescription_list(request):
-    """View function to display list of prescriptions."""
+    """View function to display list of prescriptions with related data."""
+    
+    search_query = request.GET.get('search', '')
+    
     medicines_list = [m for m in MEDICINES if m['stok'] > 0]
 
     prescriptions_list = []
@@ -318,28 +387,40 @@ def prescription_list(request):
                 'total_harga': total_harga
             })
     
+    if search_query:
+        prescriptions_list = [p for p in prescriptions_list if 
+                             search_query.lower() in p['nama_perawatan'].lower() or
+                             search_query.lower() in p['kode_perawatan'].lower() or
+                             search_query.lower() in p['nama_obat'].lower() or
+                             search_query.lower() in p['kode_obat'].lower()]
+    
     context = {
         'prescriptions': prescriptions_list,
         'medicines': medicines_list,
-        'treatments': TREATMENTS
+        'treatments': TREATMENTS,
+        'search_query': search_query  
     }
     
     return render(request, 'prescription_list.html', context)
 
 @staff_required
 def add_prescription(request):
-    """View function to add a new prescription."""
+    """View function to add a new prescription to hardcoded data."""
     if request.method == 'POST':
         try:
             kode_perawatan = request.POST.get('jenis_perawatan')
             kode_obat = request.POST.get('obat')
             kuantitas = request.POST.get('kuantitas')
 
-            if not kode_perawatan or not kode_obat or not kuantitas:
+            if not all([kode_perawatan, kode_obat, kuantitas]):
                 messages.error(request, 'Semua field harus diisi')
                 return redirect('medications:prescription_list')
 
-            kuantitas = int(kuantitas)
+            try:
+                kuantitas = int(kuantitas)
+            except ValueError:
+                messages.error(request, 'Kuantitas harus berupa angka')
+                return redirect('medications:prescription_list')
 
             medicine = get_medicine_by_id(kode_obat)
             if not medicine:
@@ -355,10 +436,9 @@ def add_prescription(request):
                 messages.error(request, 'Jenis perawatan tidak ditemukan')
                 return redirect('medications:prescription_list')
 
-            for p in PRESCRIPTIONS:
-                if p['kode_perawatan'] == kode_perawatan and p['kode_obat'] == kode_obat:
-                    messages.error(request, 'Resep untuk perawatan dan obat ini sudah ada')
-                    return redirect('medications:prescription_list')
+            if any(p['kode_perawatan'] == kode_perawatan and p['kode_obat'] == kode_obat for p in PRESCRIPTIONS):
+                messages.error(request, 'Resep untuk perawatan dan obat ini sudah ada')
+                return redirect('medications:prescription_list')
 
             new_prescription = {
                 'kode_perawatan': kode_perawatan,
@@ -369,13 +449,10 @@ def add_prescription(request):
             PRESCRIPTIONS.append(new_prescription)
 
             medicine['stok'] -= kuantitas
-
             medicine['can_delete'] = False
             
             messages.success(request, 'Resep berhasil ditambahkan')
             
-        except ValueError:
-            messages.error(request, 'Kuantitas harus berupa angka')
         except Exception as e:
             messages.error(request, f'Gagal menambahkan resep: {str(e)}')
     
@@ -383,7 +460,7 @@ def add_prescription(request):
 
 @staff_required
 def delete_prescription(request):
-    """View function to delete a prescription."""
+    """View function to delete a prescription from hardcoded data."""
     if request.method == 'POST':
         try:
             kode_perawatan = request.POST.get('kode_perawatan')
