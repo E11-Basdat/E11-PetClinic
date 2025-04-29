@@ -247,6 +247,40 @@
             overflow-y: auto;
             background-color: white;
         }
+        
+        .no-results-message {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .no-results-message h4 {
+            color: var(--pet-clinic-green);
+            margin-bottom: 15px;
+        }
+        
+        .no-results-message p {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .btn-clear-search {
+            background-color: var(--pet-clinic-green);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-clear-search:hover {
+            background-color: var(--pet-clinic-dark-green);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -255,16 +289,15 @@
 <div class="container-fluid p-0">
     <div class="card main-card">
         <div class="card-body px-0 py-4">
-            <!-- Header layout -->
+
             <div class="header-container">
                 <h2 class="text-center prescription-header">LIST PRESCRIPTIONS</h2>
             </div>
             
-            <!-- Search and Add button layout -->
             <div class="search-add-container">
                 <div class="search-container">
                     <form method="GET" action="{% url 'medications:prescription_list' %}">
-                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search Prescription..." value="{{ search_query }}">
+                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search by treatment or medicine..." value="{{ search_query }}">
                         <button class="btn btn-search" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
@@ -278,7 +311,6 @@
                 </div>
             </div>
             
-            <!-- Alert messages section -->
             <div id="alertMessages">
                 <div class="container mt-3" id="messageContainer">
                     {% if messages %}
@@ -316,7 +348,7 @@
                                     <td>Rp {{ prescription.total_harga }}</td>
                                     <td>
                                         <div class="action-icons">
-                                            <a href="#" class="delete-icon" onclick="openDeleteModal('{{ prescription.kode_perawatan }}', '{{ prescription.kode_obat }}', '{{ prescription.nama_perawatan }}', '{{ prescription.nama_obat }}'); return false;">
+                                            <a href="#" class="delete-icon" onclick="openDeleteModal('{{ prescription.kode_perawatan }}', '{{ prescription.kode_obat }}'); return false;">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </div>
@@ -325,6 +357,12 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+                {% elif search_query %}
+                    <div class="no-results-message">
+                        <h4>No prescriptions found</h4>
+                        <p>No prescriptions match your search for "{{ search_query }}"</p>
+                        <a href="{% url 'medications:prescription_list' %}" class="btn-clear-search">Clear Search</a>
                     </div>
                 {% else %}
                     <div class="empty-message">No prescriptions found. Add a new prescription to get started.</div>
@@ -382,12 +420,11 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header delete-header">
-                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Delete</h5>
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Delete Prescription</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete prescription for <span id="deletePerawatanName"></span> with medicine <span id="deleteObatName"></span>?</p>
-                <p>This action cannot be undone.</p>
+                <p>Apakah kamu yakin untuk menghapus Prescription untuk Jenis Perawatan <span id="deletePerawatanKode" style="color: #dc3545; font-weight: bold;"></span> dengan Obat <span id="deleteObatKode" style="color: #dc3545; font-weight: bold;"></span>?</p>
                 <form id="deleteForm" method="POST" action="{% url 'medications:delete_prescription' %}">
                     {% csrf_token %}
                     <input type="hidden" name="kode_perawatan" id="kode_perawatan_input">
@@ -396,7 +433,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-confirm-delete" id="confirmDeleteBtn">Delete</button>
+                <button type="button" class="btn btn-confirm-delete" id="confirmDeleteBtn">Confirm Deletion</button>
             </div>
         </div>
     </div>
@@ -421,9 +458,9 @@
         }, 5000);
     }
     
-    function openDeleteModal(kodePerawatan, kodeObat, namaPerawatan, namaObat) {
-        document.getElementById('deletePerawatanName').textContent = `${kodePerawatan} - ${namaPerawatan}`;
-        document.getElementById('deleteObatName').textContent = `${kodeObat} - ${namaObat}`;
+    function openDeleteModal(kodePerawatan, kodeObat) {
+        document.getElementById('deletePerawatanKode').textContent = kodePerawatan;
+        document.getElementById('deleteObatKode').textContent = kodeObat;
         document.getElementById('kode_perawatan_input').value = kodePerawatan;
         document.getElementById('kode_obat_input').value = kodeObat;
         

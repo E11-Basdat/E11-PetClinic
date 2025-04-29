@@ -371,7 +371,9 @@
                 
                 <div class="add-container">
                     <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
-                        <i class="fas fa-plus me-1"></i> Add New Medicine
+                        <div class="text-center">
+                            <i class="fas fa-plus me-1"></i> Create New Medicine
+                        </div>
                     </button>
                 </div>
             </div>
@@ -444,29 +446,29 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addMedicineModalLabel">Add New Medicine</h5>
+                <h5 class="modal-title" id="addMedicineModalLabel" style="text-align: center; width: 100%;">Add New Medicine</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{% url 'medications:add' %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="nama" class="form-label">Medicine Name</label>
+                        <label for="nama" class="form-label">Nama</label>
                         <input type="text" class="form-control" id="nama" name="nama" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="harga_satuan" class="form-label">Price (Rp)</label>
+                        <label for="harga_satuan" class="form-label">Harga Satuan</label>
                         <input type="number" class="form-control" id="harga_satuan" name="harga_satuan" min="0" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="dosis" class="form-label">Dosage</label>
-                        <input type="text" class="form-control" id="dosis" name="dosis" placeholder="e.g., 500mg/day" required>
+                        <label for="dosis" class="form-label">Dosis</label>
+                        <input type="text" class="form-control" id="dosis" name="dosis" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="stok_awal" class="form-label">Initial Stock</label>
+                        <label for="stok_awal" class="form-label">Stok Awal</label>
                         <input type="number" class="form-control" id="stok_awal" name="stok_awal" min="0" required>
                     </div>
                 </div>
@@ -483,29 +485,29 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="updateMedicineModalLabel">Update Medicine</h5>
+                <h5 class="modal-title" id="updateMedicineModalLabel" style="text-align: center; width: 100%;">Update Medicine</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="updateMedicineForm" method="POST">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="updateCode" class="form-label">Medicine Code</label>
+                        <label for="updateCode" class="form-label">Kode Obat</label>
                         <input type="text" class="form-control" id="updateCode" name="kode" readonly>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="updateNama" class="form-label">Medicine Name</label>
+                        <label for="updateNama" class="form-label">Nama Obat</label>
                         <input type="text" class="form-control" id="updateNama" name="nama" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="updateHarga" class="form-label">Price (Rp)</label>
+                        <label for="updateHarga" class="form-label">Harga Satuan</label>
                         <input type="number" class="form-control" id="updateHarga" name="harga_satuan" min="0" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="updateDosis" class="form-label">Dosage</label>
+                        <label for="updateDosis" class="form-label">Dosis</label>
                         <input type="text" class="form-control" id="updateDosis" name="dosis" placeholder="e.g., 500mg/day" required>
                     </div>
                 </div>
@@ -517,7 +519,7 @@
         </div>
     </div>
 </div>
-
+       
 <div class="modal fade" id="updateStockModal" tabindex="-1" aria-labelledby="updateStockModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -531,7 +533,7 @@
                     <h6 id="updateStockMedicineName" class="mb-3"></h6>
                     
                     <div class="mb-3">
-                        <label for="stockValue" class="form-label">Stock</label>
+                        <label for="stockValue" class="form-label">Stok</label>
                         <input type="number" class="form-control" id="stockValue" name="stok" min="0" required>
                     </div>
                 </div>
@@ -547,20 +549,19 @@
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header delete-header">
-                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Delete</h5>
+            <div class="modal-header" style="background-color: white; border-bottom: none;">
+                <h5 class="modal-title" id="deleteConfirmModalLabel" style="color: #dc3545; font-weight: bold; width: 100%;">Delete Medicine</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete <span id="deleteMedicineName"></span>?</p>
-                <p>This action cannot be undone.</p>
+                <p>Apakah kamu yakin untuk menghapus Obat <span id="deleteMedicineName" style="color: #dc3545; font-weight: bold;"></span> dengan Kode <span id="deleteMedicineCode" style="color: #dc3545; font-weight: bold;"></span>?</p>
                 <form id="deleteForm" method="POST" action="">
                     {% csrf_token %}
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-confirm-delete" id="confirmDeleteBtn">Delete</button>
+            <div class="modal-footer" style="border-top: none;">
+                <button type="button" class="btn" style="background-color: white; border: 1px solid #ced4da;" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn" id="confirmDeleteBtn" style="background-color: #dc3545; color: white;">Confirm Deletion</button>
             </div>
         </div>
     </div>
@@ -601,7 +602,7 @@
     }
     
     function openUpdateStockModal(code, name, stock) {
-        document.getElementById('updateStockMedicineName').textContent = name + ' (' + code + ')';
+        document.getElementById('updateStockMedicineName').textContent = " " + code + " - " + name;
         document.getElementById('stockValue').value = stock;
         document.getElementById('updateStockForm').action = "{% url 'medications:update_stock' '0000' %}".replace('0000', code);
         
@@ -611,6 +612,7 @@
     
     function openDeleteModal(code, name) {
         document.getElementById('deleteMedicineName').textContent = name;
+        document.getElementById('deleteMedicineCode').textContent = code;
         const form = document.getElementById('deleteForm');
         form.action = "{% url 'medications:delete' '0000' %}".replace('0000', code);
         
