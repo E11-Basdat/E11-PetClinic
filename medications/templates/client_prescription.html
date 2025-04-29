@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veterinary Treatment Records</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .pet-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Catatan Perawatan Hewan</h2>
+    
+    <div class="pet-info">
+        <p>Berikut adalah riwayat perawatan dan pemberian obat untuk hewan peliharaan Anda:</p>
+        <p><strong>Hewan Terdaftar:</strong> {% for pet in pets %}{{ pet }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Nama Hewan</th>
+                <th>Jenis Perawatan</th>
+                <th>Obat</th>
+                <th>Kuantitas Obat</th>
+                <th>Tanggal Kunjungan</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if prescriptions %}
+                {% for prescription in prescriptions %}
+                <tr>
+                    <td>{{ prescription.pet_name }}</td>
+                    <td>{{ prescription.perawatan.nama_perawatan }}</td>
+                    <td>{{ prescription.obat.nama }}</td>
+                    <td>{{ prescription.kuantitas_obat }}</td>
+                    <td>{{ prescription.visit_date }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5">Tidak ada riwayat perawatan.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    
+    <p><i>Catatan: Halaman ini hanya menampilkan riwayat perawatan untuk hewan peliharaan yang terdaftar atas nama Anda.</i></p>
+</body>
+</html>

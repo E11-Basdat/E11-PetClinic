@@ -15,6 +15,7 @@
             
             {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
               <a href="//" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Hewan Peliharaan</a>
+              <a href="{% url 'medications:client_prescriptions' %}" class="block {% if request.path == '/my-prescriptions/' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Resep Obat Hewan</a>
 
             {% elif request.session.user_type == 'front_desk' %}
               <a href="//" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Jenis Hewan</a>
@@ -66,6 +67,7 @@
         {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
           <!-- Menu Klien (Mobile) -->
           <a href="//" class="block {% if request.path == '//' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Hewan Peliharaan</a>
+          <a href="{% url 'medications:client_prescriptions' %}" class="block {% if request.path == '/my-prescriptions/' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Resep Obat Hewan</a>
         {% elif request.session.user_type == 'front_desk' %}
           <!-- Menu Front-Desk Officer (Mobile) -->
           <a href="//" class="block {% if request.path == '//' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Jenis Hewan</a>
