@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4><i class="fas fa-exclamation-triangle"></i> Konfirmasi Penghapusan</h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <h5 class="alert-heading">Peringatan!</h5>
+                <p>Anda akan menghapus hewan peliharaan berikut:</p>
+                <hr>
+                <p class="mb-0">
+                    <strong>Nama Hewan:</strong> {{ hewan.nama }}<br>
+                    <strong>Pemilik:</strong> {{ hewan.nama_pemilik }}
+                </p>
+            </div>
+            
+            <p class="text-danger">Aksi ini tidak dapat dibatalkan. Apakah Anda yakin ingin melanjutkan?</p>
+            
+            <form method="post" action="{% url 'animals:hewan_delete' hewan.nama hewan.no_identitas_klien %}">
+                {% csrf_token %}
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Ya, Hapus
+                    </button>
+                    <a href="{% url 'animals:hewan_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
