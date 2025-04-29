@@ -1,6 +1,42 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from functools import wraps
+from django.http import JsonResponse
+from django.urls import reverse
+
+def n_treatment_list(request):
+    return render(request, 'n_treatment_list.html', {'user_role': 'else'})
+
+def n_treatment_list_doctor(request):
+    return render(request, 'n_treatment_list.html', {'user_role': 'doctor'})
+
+def n_treatment_list_klien(request):
+    return render(request, 'n_treatment_list.html', {'user_role': 'klien'})
+
+def n_create_treatment(request):
+    if request.method == 'POST':
+        return redirect('treatments:n_treatment_list')
+    return render(request, 'n_treatment_form.html', {'mode': 'create'})
+
+def n_update_treatment(request, kunjungan_id):
+    if request.method == 'POST':
+        return redirect('treatments:n_treatment_list')
+    
+    return render(request, 'n_treatment_form.html', {'mode': 'update', 'kunjungan_id': kunjungan_id})
+
+def n_delete_treatment(request, kunjungan_id):
+    if request.method == 'POST':
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+# ------------------------------------------Batas wilayah ---------------------------------------------------------------
+# ------------------------------------------Batas wilayah ---------------------------------------------------------------
+# ------------------------------------------Batas wilayah ---------------------------------------------------------------
+# ------------------------------------------Batas wilayah ---------------------------------------------------------------
+# ------------------------------------------Batas wilayah ---------------------------------------------------------------
+# ------------------------------------------Batas wilayah ---------------------------------------------------------------
+
 
 TREATMENTS = [
     {
