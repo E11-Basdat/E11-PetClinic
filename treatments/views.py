@@ -4,21 +4,21 @@ from functools import wraps
 from django.http import JsonResponse
 from django.urls import reverse
 
-def treatment_list(request):
-    return render(request, 'treatment_list.html')
+def n_treatment_list(request):
+    return render(request, 'n_treatment_list.html')
 
-def create_treatment(request):
+def n_create_treatment(request):
     if request.method == 'POST':
-        return redirect('treatments:treatment_list')
-    return render(request, 'treatment_form.html', {'mode': 'create'})
+        return redirect('treatments:n_treatment_list')
+    return render(request, 'n_treatment_form.html', {'mode': 'create'})
 
-def update_treatment(request, kunjungan_id):
+def n_update_treatment(request, kunjungan_id):
     if request.method == 'POST':
-        return redirect('treatments:treatment_list')
+        return redirect('treatments:n_treatment_list')
     
-    return render(request, 'treatment_form.html', {'mode': 'update', 'kunjungan_id': kunjungan_id})
+    return render(request, 'n_treatment_form.html', {'mode': 'update', 'kunjungan_id': kunjungan_id})
 
-def delete_treatment(request, kunjungan_id):
+def n_delete_treatment(request, kunjungan_id):
     if request.method == 'POST':
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'}, status=400)
