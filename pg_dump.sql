@@ -55,7 +55,7 @@ FOREIGN KEY (no_front_desk) REFERENCES PEGAWAI(no_pegawai)
 -- 7. TENAGA_MEDIS table
 CREATE TABLE TENAGA_MEDIS (
 no_tenaga_medis UUID PRIMARY KEY,
-no_izin_panggilan VARCHAR(20) UNIQUE NOT NULL,
+no_izin_praktik VARCHAR(20) UNIQUE NOT NULL,
 FOREIGN KEY (no_tenaga_medis) REFERENCES PEGAWAI(no_pegawai)
 );
 
@@ -145,7 +145,7 @@ FOREIGN KEY (kode_obat) REFERENCES OBAT(kode)
 
 -- 18. KUNJUNGAN table
 CREATE TABLE KUNJUNGAN (
-id_kunjungan VARCHAR(15),
+id_kunjungan UUID,
 nama_hewan VARCHAR(50) NOT NULL,
 no_identitas_klien UUID NOT NULL,
 no_front_desk UUID NOT NULL,
@@ -155,8 +155,8 @@ kode_vaksin VARCHAR(6),
 tipe_kunjungan VARCHAR(10) NOT NULL,
 timestamp_awal TIMESTAMP NOT NULL,
 timestamp_akhir TIMESTAMP,
-suhu INT NOT NULL,
-berat_badan NUMERIC(5,2) NOT NULL,
+suhu INT,
+berat_badan NUMERIC(5,2),
 PRIMARY KEY (id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk, no_perawat_hewan, no_dokter_hewan),
 FOREIGN KEY (nama_hewan, no_identitas_klien) REFERENCES HEWAN(nama, no_identitas_klien),
 FOREIGN KEY (no_front_desk) REFERENCES FRONT_DESK(no_front_desk),
@@ -167,7 +167,7 @@ FOREIGN KEY (kode_vaksin) REFERENCES VAKSIN(kode)
 
 -- 19. KUNJUNGAN_KEPERAWATAN table
 CREATE TABLE KUNJUNGAN_KEPERAWATAN (
-id_kunjungan VARCHAR(15),
+id_kunjungan UUID,
 nama_hewan VARCHAR(50),
 no_identitas_klien UUID,
 no_front_desk UUID,

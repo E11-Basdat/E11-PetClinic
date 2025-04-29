@@ -10,6 +10,13 @@
 {% block content %}
 <div class="container mx-auto my-10 px-4 flex justify-center">
     <div class="w-full max-w-4xl">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %} 
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% if user_data.user_type == 'individu' %}
             <!-- Dashboard Klien Individu -->
             <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
@@ -149,7 +156,7 @@
                     </div>
                     <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
                         <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Izin Praktik</div>
-                        <div class="w-full md:w-7/10">{{ user_data.no_izin_panggilan }}</div>
+                        <div class="w-full md:w-7/10">{{ user_data.no_izin_praktik }}</div>
                     </div>
                     <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
                         <div class="w-full md:w-3/10 font-semibold text-stone-700">Email</div>
@@ -188,7 +195,7 @@
                                 {% for sertifikat in user_data.sertifikat %}
                                 <tr class="{% cycle '' 'bg-gray-50' %}">
                                     <td class="border border-gray-300 p-3">{{ forloop.counter }}</td>
-                                    <td class="border border-gray-300 p-3">{{ sertifikat.no_sertifikat }}</td>
+                                    <td class="border border-gray-300 p-3">{{ sertifikat.no_sertifikat_kompetensi }}</td>
                                     <td class="border border-gray-300 p-3">{{ sertifikat.nama_sertifikat }}</td>
                                 </tr>
                                 {% endfor %}
@@ -241,7 +248,7 @@
                     </div>
                     <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
                         <div class="w-full md:w-3/10 font-semibold text-stone-700">Nomor Izin Praktik</div>
-                        <div class="w-full md:w-7/10">{{ user_data.no_izin_panggilan }}</div>
+                        <div class="w-full md:w-7/10">{{ user_data.no_izin_praktik }}</div>
                     </div>
                     <div class="flex flex-col md:flex-row border-b border-gray-200 pb-3 mb-4">
                         <div class="w-full md:w-3/10 font-semibold text-stone-700">Email</div>
@@ -280,7 +287,7 @@
                                 {% for sertifikat in user_data.sertifikat %}
                                 <tr class="{% cycle '' 'bg-gray-50' %}">
                                     <td class="border border-gray-300 p-3">{{ forloop.counter }}</td>
-                                    <td class="border border-gray-300 p-3">{{ sertifikat.no_sertifikat }}</td>
+                                    <td class="border border-gray-300 p-3">{{ sertifikat.no_sertifikat_kompetensi }}</td>
                                     <td class="border border-gray-300 p-3">{{ sertifikat.nama_sertifikat }}</td>
                                 </tr>
                                 {% endfor %}

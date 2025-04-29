@@ -15,7 +15,7 @@ import os
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,7 +43,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
-    'animals'
+    'animals',
+    'medications',
+    'vaccinations',
+    'visits',
+    'treatments',
 ]
 
 MIDDLEWARE = [
@@ -100,6 +104,7 @@ else:
     
     if database_url:
         parsed_url = urlparse(database_url)
+        print("Connecting to:", os.getenv("DATABASE_URL"))
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
@@ -135,13 +140,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'id'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
 USE_TZ = True
+
+# Locale configuration for currency formatting
+import locale
+try:
+    locale.setlocale(locale.LC_ALL, 'id_ID.UTF-8')  # Indonesian locale
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_ALL, 'id_ID')  # Fallback
+    except locale.Error:
+        locale.setlocale(locale.LC_ALL, '')  # Default locale
 
 
 # Static files (CSS, JavaScript, Images)

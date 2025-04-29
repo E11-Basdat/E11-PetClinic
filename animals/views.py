@@ -308,13 +308,17 @@ def hewan_create(request):
     }
 
     if is_client:
-        nama_pemilik = (f"{user_data['nama_depan']} "
-                        f"{user_data.get('nama_tengah','')} "
-                        f"{user_data['nama_belakang']}"
-                        ).replace('  ', ' ')
         if user_data['user_type'] == 'perusahaan':
-            nama_pemilik = user_data['nama_perusahaan']
-        context['nama_pemilik'] = nama_pemilik
+            # cukup ambil nama_perusahaan
+            context['nama_pemilik'] = user_data.get('nama_perusahaan', '')
+        else:                                  # individu
+            context['nama_pemilik'] = " ".join(
+                filter(None, [
+                    user_data.get('nama_depan'),
+                    user_data.get('nama_tengah'),
+                    user_data.get('nama_belakang')
+                ])
+            )
     else:
         with connection.cursor() as cur:
             cur.execute("""
