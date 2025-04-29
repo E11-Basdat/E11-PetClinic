@@ -1,0 +1,139 @@
+{% load static %}
+
+<nav class="bg-gradient-to-r from-stone-900 to-stone-700 shadow-md rounded-lg mx-2 my-2">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex">
+        <a href="{% url 'authentication:dashboard' %}" class="flex-shrink-0 flex items-center">
+          <span class="text-xl font-bold text-white">Pet Clinic</span>
+        </a>
+      </div>
+      
+      <!-- Tombol menu mobile -->
+      <div class="flex items-center -mr-2 sm:hidden">
+        <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-white hover:bg-stone-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-expanded="false" id="mobile-menu-button">
+          <span class="sr-only">Buka menu utama</span>
+          <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Menu desktop -->
+      <div class="hidden sm:flex sm:items-center sm:ml-6">
+        <div class="flex space-x-4">
+          {% if request.session.user_email %}
+            <!-- Dashboard link for all user types -->
+            <a href="{% url 'authentication:dashboard' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Dashboard</a>
+            
+            {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
+              <!-- Menu Klien -->
+              <a href="{% url 'animals:hewan_list' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Hewan Peliharaan Saya</a>
+            {% elif request.session.user_type == 'front_desk' %}
+              <!-- Menu Front-Desk Officer -->
+              <a href="{% url 'animals:jenis_hewan_list' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Jenis Hewan</a>
+              <a href="{% url 'animals:hewan_list' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Hewan Peliharaan</a>
+            {% elif request.session.user_type == 'dokter' %}
+              <!-- Menu Dokter Hewan -->
+              <a href="{% url 'animals:jenis_hewan_list' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Daftar Jenis Hewan</a>
+            {% endif %}
+            
+            <!-- Display user information when logged in -->
+            <span class="text-white px-3 py-2 text-sm font-medium">
+              {% if request.session.user_type == 'individu' %}
+                {{ request.session.nama_depan }} {{ request.session.nama_belakang }}
+              {% elif request.session.user_type == 'perusahaan' %}
+                {{ request.session.nama_perusahaan }}
+              {% else %}
+                {{ request.session.user_email }}
+              {% endif %}
+              <span class="text-stone-300 ml-1">
+                ({% if request.session.user_type == 'individu' %}
+                  Klien
+                {% elif request.session.user_type == 'perusahaan' %}
+                  Perusahaan
+                {% elif request.session.user_type == 'front_desk' %}
+                  Front Desk
+                {% elif request.session.user_type == 'dokter' %}
+                  Dokter
+                {% elif request.session.user_type == 'perawat' %}
+                  Perawat
+                {% endif %})
+              </span>
+            </span>
+            
+            <!-- Tombol Logout untuk semua pengguna yang sudah login -->
+            <a href="{% url 'authentication:logout' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Logout</a>
+          {% else %}
+            <!-- Menu Guest (Belum Login) -->
+            <a href="{% url 'authentication:login' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Login</a>
+            <a href="{% url 'authentication:register' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Registrasi</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu mobile -->
+  <div class="sm:hidden hidden bg-gradient-to-r from-stone-900 to-stone-700 rounded-lg mx-4 mb-4" id="mobile-menu">
+    <div class="px-2 pt-2 pb-3 space-y-1">
+      {% if request.session.user_email %}
+        <!-- Dashboard link for all user types (Mobile) -->
+        <a href="{% url 'authentication:dashboard' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Dashboard</a>
+        
+        {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
+          <!-- Menu Klien (Mobile) -->
+          <a href="{% url 'animals:hewan_list' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Hewan Peliharaan Saya</a>
+        {% elif request.session.user_type == 'front_desk' %}
+          <!-- Menu Front-Desk Officer (Mobile) -->
+          <a href="{% url 'animals:jenis_hewan_list' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Kelola Jenis Hewan</a>
+          <a href="{% url 'animals:hewan_list' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Kelola Hewan Peliharaan</a>
+        {% elif request.session.user_type == 'dokter' %}
+          <!-- Menu Dokter Hewan (Mobile) -->
+          <a href="{% url 'animals:jenis_hewan_list' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Daftar Jenis Hewan</a>
+        {% endif %}
+        
+        <!-- Display user information when logged in (Mobile) -->
+        <span class="block px-3 py-2 text-base font-medium text-white">
+          {% if request.session.user_type == 'individu' %}
+            {{ request.session.nama_depan }} {{ request.session.nama_belakang }}
+          {% elif request.session.user_type == 'perusahaan' %}
+            {{ request.session.nama_perusahaan }}
+          {% else %}
+            {{ request.session.user_email }}
+          {% endif %}
+          <span class="text-stone-300 ml-1">
+            ({% if request.session.user_type == 'individu' %}
+              Klien
+            {% elif request.session.user_type == 'perusahaan' %}
+              Perusahaan
+            {% elif request.session.user_type == 'front_desk' %}
+              Front Desk
+            {% elif request.session.user_type == 'dokter' %}
+              Dokter
+            {% elif request.session.user_type == 'perawat' %}
+              Perawat
+            {% endif %})
+          </span>
+        </span>
+        
+        <!-- Tombol Logout (Mobile) -->
+        <a href="{% url 'authentication:logout' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Logout</a>
+      {% else %}
+        <!-- Menu Guest (Mobile) -->
+        <a href="{% url 'authentication:login' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Login</a>
+        <a href="{% url 'authentication:register' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Registrasi</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Script untuk toggle menu mobile
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  
+  mobileMenuButton.addEventListener('click', function() {
+    mobileMenu.classList.toggle('hidden');
+  });
+</script>

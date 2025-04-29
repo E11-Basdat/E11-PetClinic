@@ -15,7 +15,7 @@ import os
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
+    'animals',
     'medications',
     'vaccinations',
     'visits',
@@ -125,6 +126,7 @@ else:
     
     if database_url:
         parsed_url = urlparse(database_url)
+        print("Connecting to:", os.getenv("DATABASE_URL"))
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
