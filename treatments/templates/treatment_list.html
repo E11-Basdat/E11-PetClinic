@@ -1,180 +1,495 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold">List Treatments</h1>
-        <a href="{% url 'treatments:create_treatment' %}" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-md flex items-center">
-            <span class="mr-1">+</span> Create New Treatment
-        </a>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treatment List</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --color-plum: #88498F;
+      --color-moonstone: #779FA1;
+      --color-dun: #E0CBA8;
+      --color-tomato: #FF6542;
+      --color-eggplant: #564154;
+    }
     
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white border border-gray-200">
-            <thead>
-                <tr class="bg-gray-100 text-left text-gray-600 text-sm">
-                    <th class="py-3 px-4 border-b">No</th>
-                    <th class="py-3 px-4 border-b">Kunjungan</th>
-                    <th class="py-3 px-4 border-b">ID Klien</th>
-                    <th class="py-3 px-4 border-b">Nama Hewan</th>
-                    <th class="py-3 px-4 border-b">Perawat Hewan</th>
-                    <th class="py-3 px-4 border-b">Dokter Hewan</th>
-                    <th class="py-3 px-4 border-b">Front Desk Officer</th>
-                    <th class="py-3 px-4 border-b">Jenis Perawatan</th>
-                    <th class="py-3 px-4 border-b">Catatan Medis</th>
-                    <th class="py-3 px-4 border-b">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Row 1 -->
-                <tr>
-                    <td class="py-2 px-4 border-b">1</td>
-                    <td class="py-2 px-4 border-b">6ba7b81e-9dad-11d1-80b4-00c04fd430c8</td>
-                    <td class="py-2 px-4 border-b">ID0123</td>
-                    <td class="py-2 px-4 border-b">Snowy</td>
-                    <td class="py-2 px-4 border-b">John</td>
-                    <td class="py-2 px-4 border-b">Dr. Rudi</td>
-                    <td class="py-2 px-4 border-b">Tika</td>
-                    <td class="py-2 px-4 border-b">TRM001 - Dental Care</td>
-                    <td class="py-2 px-4 border-b">Diet</td>
-                    <td class="py-2 px-4 border-b">
-                        <div class="flex space-x-2">
-                            <a href="{% url 'treatments:update_treatment' '6ba7b81e-9dad-11d1-80b4-00c04fd430c8' %}" class="bg-blue-800 text-white px-3 py-1 rounded-md text-sm">Update</a>
-                            <button 
-                                class="bg-red-500 text-white px-3 py-1 rounded-md text-sm delete-btn" 
-                                data-kunjungan="6ba7b81e-9dad-11d1-80b4-00c04fd430c8"
-                                data-perawatan="TRM001"
-                            >Delete</button>
-                        </div>
-                    </td>
-                </tr>
-                <!-- Row 2 -->
-                <tr>
-                    <td class="py-2 px-4 border-b">2</td>
-                    <td class="py-2 px-4 border-b">f47ac10b-58cc-4372-a567-0e02b2c3d479</td>
-                    <td class="py-2 px-4 border-b">89753</td>
-                    <td class="py-2 px-4 border-b">Rocky</td>
-                    <td class="py-2 px-4 border-b">Agus</td>
-                    <td class="py-2 px-4 border-b">Dr. Safira</td>
-                    <td class="py-2 px-4 border-b">Tini</td>
-                    <td class="py-2 px-4 border-b">TRM002 - Parasite Control</td>
-                    <td class="py-2 px-4 border-b">Sudah baik</td>
-                    <td class="py-2 px-4 border-b">
-                        <div class="flex space-x-2">
-                            <a href="{% url 'treatments:update_treatment' 'f47ac10b-58cc-4372-a567-0e02b2c3d479' %}" class="bg-blue-800 text-white px-3 py-1 rounded-md text-sm">Update</a>
-                            <button 
-                                class="bg-red-500 text-white px-3 py-1 rounded-md text-sm delete-btn" 
-                                data-kunjungan="f47ac10b-58cc-4372-a567-0e02b2c3d479"
-                                data-perawatan="TRM002"
-                            >Delete</button>
-                        </div>
-                    </td>
-                </tr>
-                <!-- Row 3 -->
-                <tr>
-                    <td class="py-2 px-4 border-b">3</td>
-                    <td class="py-2 px-4 border-b">550e8400-e29b-41d4-a716-446655440000</td>
-                    <td class="py-2 px-4 border-b">PK5123</td>
-                    <td class="py-2 px-4 border-b">Hamtarou</td>
-                    <td class="py-2 px-4 border-b">Budi</td>
-                    <td class="py-2 px-4 border-b">Dr. Nanu</td>
-                    <td class="py-2 px-4 border-b">Tono</td>
-                    <td class="py-2 px-4 border-b">TRM003 - Flea Treatment</td>
-                    <td class="py-2 px-4 border-b">Sehat</td>
-                    <td class="py-2 px-4 border-b">
-                        <div class="flex space-x-2">
-                            <a href="{% url 'treatments:update_treatment' '550e8400-e29b-41d4-a716-446655440000' %}" class="bg-blue-800 text-white px-3 py-1 rounded-md text-sm">Update</a>
-                            <button 
-                                class="bg-red-500 text-white px-3 py-1 rounded-md text-sm delete-btn" 
-                                data-kunjungan="550e8400-e29b-41d4-a716-446655440000"
-                                data-perawatan="TRM003"
-                            >Delete</button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+    body {
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      padding: 20px;
+    }
+    
+    .page-title {
+      font-weight: bold;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: #333;
+    }
+    
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .search-container {
+      position: relative;
+      max-width: 300px;
+    }
+    
+    .search-container .input-group-append button {
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .sort-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .sort-container label {
+      margin-right: 0.5rem;
+      margin-bottom: 0;
+      font-weight: bold;
+    }
+    
+    .add-btn-container .btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      background-color: var(--color-moonstone);
+      border: none;
+    }
+    
+    .add-btn-container .btn:hover {
+      background-color: var(--color-plum);
+    }
+    
+    .col-5-cards {
+      flex: 0 0 20%;
+      max-width: 20%;
+      padding-right: 15px;
+      padding-left: 15px;
+      position: relative;
+      width: 100%;
+      margin-bottom: 30px; 
+    }
+    
+    @media (max-width: 992px) {
+      .col-5-cards {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .col-5-cards {
+        flex: 0 0 50%;
+        max-width: 50%;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .col-5-cards {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+    }
+    
+    .treatment-card {
+      height: 100%;
+      border-radius: 8px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      overflow: hidden;
+      border: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .treatment-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+    
+    .card-plum { background-color: var(--color-plum); color: white; }
+    .card-moonstone { background-color: var(--color-moonstone); color: white; }
+    .card-dun { background-color: var(--color-dun); color: #333; }
+    .card-tomato { background-color: var(--color-tomato); color: white; }
+    .card-eggplant { background-color: var(--color-eggplant); color: white; }
+    
+    .treatment-card .card-header {
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding: 12px 15px;
+      background-color: transparent;
+    }
+    
+    .treatment-card .card-body {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100px;
+    }
+    
+    .treatment-code {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+    
+    .treatment-name {
+      font-weight: bold;
+      margin-bottom: 0;
+      font-size: 1.1rem;
+    }
+    
+    .treatment-price {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    
+    .btn-update {
+      background-color: rgba(255,255,255,0.9);
+      color: #333;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 4px;
+    }
+    
+    .btn-delete {
+      background-color: rgba(255,255,255,0.2);
+      color: inherit;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 4px;
+    }
+    
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+      min-width: 300px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .no-treatments {
+      background-color: var(--color-dun);
+      color: #333;
+      padding: 30px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .modal-header {
+      background-color: var(--color-moonstone);
+      color: white;
+    }
+    
+    .modal .close {
+      color: white;
+      opacity: 0.8;
+    }
+    
+    .modal .close:hover {
+      opacity: 1;
+    }
+    
+    .modal-footer .btn-primary {
+      background-color: var(--color-moonstone);
+      border-color: var(--color-moonstone);
+    }
+    
+    .modal-footer .btn-primary:hover {
+      background-color: var(--color-plum);
+      border-color: var(--color-plum);
+    }
+    
+    .modal-header.bg-danger {
+      background-color: var(--color-tomato) !important;
+    }
+    
+    .modal-footer .btn-danger {
+      background-color: var(--color-tomato);
+      border-color: var(--color-tomato);
+    }
+    
+    .modal-footer .btn-danger:hover {
+      background-color: #e35a39;
+      border-color: #e35a39;
+    }
+    
+    @media (max-width: 768px) {
+      .controls-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .search-container {
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .right-controls {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .sort-container {
+        width: 100%;
+      }
+      
+      .add-btn-container {
+        width: 100%;
+      }
+      
+      .add-btn-container .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="page-title">Treatment List Type</h1>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center">
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-        <h2 class="text-2xl font-bold text-red-500 mb-4">Delete Treatment</h2>
-        <p class="mb-4">Apakah kamu yakin untuk menghapus Perawatan untuk Kunjungan <span id="deleteKunjungan" class="font-bold text-red-500"></span> dengan Perawatan <span id="deletePerawatan" class="font-bold text-red-500"></span>?</p>
-        <div class="flex justify-end space-x-3">
-            <button id="cancelDelete" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancel</button>
-            <button id="confirmDelete" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Confirm Deletion</button>
+    <div class="controls-row">
+      <div class="search-container">
+        <form method="GET" action="{% url 'treatments:treatment_list' %}">
+          <div class="input-group">
+            <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search Treatment..." value="{{ search_query }}">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="right-controls d-flex align-items-center">
+        <div class="sort-container mr-3">
+          <form method="GET" action="{% url 'treatments:treatment_list' %}" id="sortForm">
+            <input type="hidden" name="search" value="{{ search_query }}">
+            <label for="sortBy">Sort By</label>
+            <select id="sortBy" name="sort_by" class="form-control" onchange="document.getElementById('sortForm').submit()">
+              <option value="none" {% if sort_by == 'none' or not sort_by %}selected{% endif %}>Select</option>
+              <option value="price_low_high" {% if sort_by == 'price_low_high' %}selected{% endif %}>Price: Low-High</option>
+              <option value="price_high_low" {% if sort_by == 'price_high_low' %}selected{% endif %}>Price: High-Low</option>
+            </select>
+          </form>
         </div>
+        
+        <div class="add-btn-container">
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTreatmentModal">
+            <i class="fas fa-plus"></i> Add New Treatment
+          </button>
+        </div>
+      </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Variables to store current deletion info
-        let currentKunjungan = '';
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="treatment-cards">
+      <div class="row" id="treatmentCardsContainer">
+        {% if treatments %}
+          {% for treatment in treatments %}
+            <div class="col-5-cards" id="treatment-{{ treatment.kode }}">
+              <div class="card treatment-card 
+                {% if forloop.counter0|divisibleby:5 %}card-plum{% elif forloop.counter0|divisibleby:4 %}card-moonstone{% elif forloop.counter0|divisibleby:3 %}card-dun{% elif forloop.counter0|divisibleby:2 %}card-tomato{% else %}card-eggplant{% endif %}">
+                <div class="card-header">
+                  <div class="treatment-code">{{ treatment.kode }}</div>
+                  <h5 class="treatment-name">{{ treatment.nama }}</h5>
+                </div>
+                <div class="card-body">
+                  <p class="treatment-price">Rp{{ treatment.biaya|floatformat:"0" }}</p>
+                  <div class="action-buttons">
+                    <button class="btn btn-sm btn-update edit-btn" 
+                            data-toggle="modal" 
+                            data-target="#editTreatmentModal"
+                            data-kode="{{ treatment.kode }}" 
+                            data-nama="{{ treatment.nama }}"
+                            data-biaya="{{ treatment.biaya }}">
+                      <i class="fas fa-edit"></i> Update
+                    </button>
+                    <button class="btn btn-sm btn-delete delete-btn"
+                            data-toggle="modal" 
+                            data-target="#deleteTreatmentModal"
+                            data-kode="{{ treatment.kode }}"
+                            data-nama="{{ treatment.nama }}">
+                      <i class="fas fa-trash"></i> Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="col-12">
+            <div class="no-treatments">
+              <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+              <h4>No treatments found</h4>
+              <p>Add a new treatment to get started.</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="addTreatmentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create New Treatment Type</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="{% url 'treatments:treatment_list' %}" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="addNama">Nama</label>
+              <input type="text" class="form-control" id="addNama" name="nama" required>
+            </div>
+            <div class="form-group">
+              <label for="addBiaya">Biaya</label>
+              <input type="number" class="form-control" id="addBiaya" name="biaya" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="editTreatmentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Update Treatment Type</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="{% url 'treatments:treatment_list' %}" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="editKode">Kode Perawatan</label>
+              <input type="text" class="form-control" id="editKode" name="kode" readonly>
+            </div>
+            <div class="form-group">
+              <label for="editNama">Nama Perawatan</label>
+              <input type="text" class="form-control" id="editNama" name="nama" required>
+            </div>
+            <div class="form-group">
+              <label for="editBiaya">Biaya</label>
+              <input type="number" class="form-control" id="editBiaya" name="biaya" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="deleteTreatmentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Delete Treatment Type</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="{% url 'treatments:treatment_list' %}" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="delete">
+          <div class="modal-body">
+            <input type="hidden" id="deleteKode" name="kode">
+            <p>Apakah kamu yakin untuk menghapus jenis perawatan <span id="deleteTreatmentName" class="font-weight-bold text-danger"></span> dengan Kode <span id="deleteTreatmentCode" class="font-weight-bold text-danger"></span>?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger">Confirm Deletion</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $(document).on("click", ".edit-btn", function() {
+        var kode = $(this).data('kode');
+        var nama = $(this).data('nama');
+        var biaya = $(this).data('biaya');
         
-        // Get DOM elements
-        const deleteModal = document.getElementById('deleteModal');
-        const deleteKunjunganEl = document.getElementById('deleteKunjungan');
-        const deletePerawatanEl = document.getElementById('deletePerawatan');
+        $("#editKode").val(kode);
+        $("#editNama").val(nama);
+        $("#editBiaya").val(biaya);
+      });
+      
+      $(document).on("click", ".delete-btn", function() {
+        var kode = $(this).data('kode');
+        var nama = $(this).data('nama');
         
-        // Add event listeners to delete buttons
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                currentKunjungan = this.dataset.kunjungan;
-                deleteKunjunganEl.textContent = currentKunjungan;
-                deletePerawatanEl.textContent = this.dataset.perawatan;
-                deleteModal.classList.remove('hidden');
-                deleteModal.classList.add('flex');
-            });
-        });
-        
-        // Cancel delete button
-        document.getElementById('cancelDelete').addEventListener('click', function() {
-            deleteModal.classList.add('hidden');
-            deleteModal.classList.remove('flex');
-        });
-        
-        // Confirm delete button
-        document.getElementById('confirmDelete').addEventListener('click', function() {
-            // Make AJAX request to delete
-            fetch(`/treatment/delete/${currentKunjungan}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Remove the row from the table
-                    const row = document.querySelector(`button[data-kunjungan="${currentKunjungan}"]`).closest('tr');
-                    row.parentNode.removeChild(row);
-                    
-                    // Hide the modal
-                    deleteModal.classList.add('hidden');
-                    deleteModal.classList.remove('flex');
-                }
-            });
-        });
-        
-        // Function to get CSRF token
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
+        $("#deleteKode").val(kode);
+        $("#deleteTreatmentName").text(nama);
+        $("#deleteTreatmentCode").text(kode);
+      });
+      
+      setTimeout(function() {
+        $(".alert").alert('close');
+      }, 3000);
     });
-</script>
+  </script>
+</body>
+</html>
 {% endblock %}

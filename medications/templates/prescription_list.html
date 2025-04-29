@@ -1,0 +1,450 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription List - Pet Clinic</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --pet-clinic-green: #5a7557;
+            --pet-clinic-dark-green: #4c6349;
+            --pet-clinic-light-green: #8EB897;
+            --price-label-green: #5a7557;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container-fluid {
+            padding: 0;
+            width: 100%;
+        }
+        
+        .prescription-header {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--pet-clinic-green);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        .search-add-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+            padding: 0 20px;
+            gap: 20px;
+        }
+        
+        .search-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        .add-container {
+            flex: 0 0 auto;
+        }
+        
+        #searchInput {
+            height: 45px;
+            padding-left: 15px;
+            border-radius: 4px;
+            width: 100%;
+            border: 1px solid #ced4da;
+        }
+        
+        .btn-search {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 45px;
+            width: 45px;
+            background-color: var(--pet-clinic-green);
+            border-color: var(--pet-clinic-green);
+            color: white;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .btn-search:hover {
+            background-color: var(--pet-clinic-dark-green);
+            border-color: var(--pet-clinic-dark-green);
+        }
+        
+        .btn-add {
+            background-color: var(--pet-clinic-green);
+            border-color: var(--pet-clinic-green);
+            color: white;
+            white-space: nowrap;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 500;
+            height: 45px;
+            border-radius: 4px;
+        }
+        
+        .btn-add:hover {
+            background-color: var(--pet-clinic-dark-green);
+            border-color: var(--pet-clinic-dark-green);
+        }
+        
+        .prescription-container {
+            width: 100%;
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+        
+        .prescription-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .prescription-table th {
+            background-color: var(--pet-clinic-green);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .prescription-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: white;
+        }
+        
+        .prescription-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .action-icons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        
+        .delete-icon {
+            color: #dc3545;
+            font-size: 16px;
+        }
+        
+        .empty-message {
+            width: 100%;
+            text-align: center;
+            padding: 30px 0;
+            color: #6c757d;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            background-color: var(--pet-clinic-green);
+            color: white;
+            border-bottom: none;
+        }
+        
+        .modal-footer {
+            border-top: none;
+        }
+        
+        .btn-create, .btn-update {
+            background-color: var(--pet-clinic-green);
+            color: white;
+            border: none;
+        }
+        
+        .btn-cancel {
+            background-color: transparent;
+            color: #212529;
+            border: 1px solid #ced4da;
+        }
+        
+        .modal-header.delete-header {
+            background-color: #dc3545;
+        }
+        
+        .btn-confirm-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+        
+        .form-control {
+            border-radius: 4px;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .form-control[readonly] {
+            background-color: #e9ecef;
+        }
+        
+        @media (max-width: 992px) {
+            .search-add-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-container {
+                width: 100%;
+            }
+            
+            .add-container {
+                width: 100%;
+            }
+            
+            .btn-add {
+                width: 100%;
+            }
+            
+            .prescription-header {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .prescription-header {
+                font-size: 1.6rem;
+            }
+        }
+
+        .main-card {
+            margin: 0;
+            border-radius: 0;
+            min-height: 100vh;
+            overflow-y: auto;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+{% csrf_token %}
+
+<div class="container-fluid p-0">
+    <div class="card main-card">
+        <div class="card-body px-0 py-4">
+            <!-- Header layout -->
+            <div class="header-container">
+                <h2 class="text-center prescription-header">LIST PRESCRIPTIONS</h2>
+            </div>
+            
+            <!-- Search and Add button layout -->
+            <div class="search-add-container">
+                <div class="search-container">
+                    <form method="GET" action="{% url 'medications:prescription_list' %}">
+                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search Prescription..." value="{{ search_query }}">
+                        <button class="btn btn-search" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="add-container">
+                    <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addPrescriptionModal">
+                        <i class="fas fa-plus me-1"></i> Add New Prescription
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Alert messages section -->
+            <div id="alertMessages">
+                <div class="container mt-3" id="messageContainer">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="prescription-container">
+                {% if prescriptions %}
+                    <div class="table-responsive">
+                        <table class="prescription-table">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Treatment Type</th>
+                                    <th>Medicine</th>
+                                    <th>Quantity</th>
+                                    <th>Total Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prescription in prescriptions %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ prescription.kode_perawatan }} - {{ prescription.nama_perawatan }}</td>
+                                    <td>{{ prescription.kode_obat }} - {{ prescription.nama_obat }}</td>
+                                    <td>{{ prescription.kuantitas_obat }}</td>
+                                    <td>Rp {{ prescription.total_harga }}</td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <a href="#" class="delete-icon" onclick="openDeleteModal('{{ prescription.kode_perawatan }}', '{{ prescription.kode_obat }}', '{{ prescription.nama_perawatan }}', '{{ prescription.nama_obat }}'); return false;">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-message">No prescriptions found. Add a new prescription to get started.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addPrescriptionModal" tabindex="-1" aria-labelledby="addPrescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPrescriptionModalLabel">Add New Prescription</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'medications:add_prescription' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="jenis_perawatan" class="form-label">Treatment Type</label>
+                        <select class="form-control" id="jenis_perawatan" name="jenis_perawatan" required>
+                            <option value="">Select Treatment Type</option>
+                            {% for treatment in treatments %}
+                            <option value="{{ treatment.kode_perawatan }}">{{ treatment.kode_perawatan }} - {{ treatment.nama_perawatan }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="obat" class="form-label">Medicine</label>
+                        <select class="form-control" id="obat" name="obat" required>
+                            <option value="">Select Medicine</option>
+                            {% for medicine in medicines %}
+                            <option value="{{ medicine.kode }}">{{ medicine.kode }} - {{ medicine.nama }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="kuantitas" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="kuantitas" name="kuantitas" min="1" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-create">Add Prescription</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header delete-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete prescription for <span id="deletePerawatanName"></span> with medicine <span id="deleteObatName"></span>?</p>
+                <p>This action cannot be undone.</p>
+                <form id="deleteForm" method="POST" action="{% url 'medications:delete_prescription' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="kode_perawatan" id="kode_perawatan_input">
+                    <input type="hidden" name="kode_obat" id="kode_obat_input">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-confirm-delete" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showMessage(message, type = 'success') {
+        const messageContainer = document.getElementById('messageContainer');
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        messageContainer.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.classList.remove('show');
+            setTimeout(() => alertDiv.remove(), 150);
+        }, 5000);
+    }
+    
+    function openDeleteModal(kodePerawatan, kodeObat, namaPerawatan, namaObat) {
+        document.getElementById('deletePerawatanName').textContent = `${kodePerawatan} - ${namaPerawatan}`;
+        document.getElementById('deleteObatName').textContent = `${kodeObat} - ${namaObat}`;
+        document.getElementById('kode_perawatan_input').value = kodePerawatan;
+        document.getElementById('kode_obat_input').value = kodeObat;
+        
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        modal.show();
+    }
+    
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        document.getElementById('deleteForm').submit();
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 150);
+            }, 5000);
+        });
+    });
+</script>
+</body>
+</html>
+{% endblock %}
