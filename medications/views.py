@@ -18,7 +18,7 @@ MEDICINES = [
         'nama': 'Dexamethasone',
         'harga': 15000,
         'stok': 30,
-        'dosis': '0,1-0,5 mg/kg, 1x sehari',
+        'dosis': '0,1-0,5    mg/kg, 1x sehari',
         'can_delete': True
     },
     {
@@ -90,12 +90,12 @@ MEDICINES = [
 TREATMENTS = [
     {
         'kode_perawatan': 'TRM001',
-        'nama_perawatan': 'Vaksinasi Rabies',
+        'nama_perawatan': 'Perawatan Gigi',
         'biaya_perawatan': 325000
     },
     {
         'kode_perawatan': 'TRM002',
-        'nama_perawatan': 'Sterilisasi',
+        'nama_perawatan': 'Grooming',
         'biaya_perawatan': 600000
     },
     {
@@ -105,7 +105,7 @@ TREATMENTS = [
     },
     {
         'kode_perawatan': 'TRM004',
-        'nama_perawatan': 'Pemeriksaan Umum',
+        'nama_perawatan': 'PPerawatan Kulit dan Bulu',
         'biaya_perawatan': 150000
     },
     {
@@ -499,3 +499,36 @@ def delete_prescription(request):
             messages.error(request, f'Gagal menghapus resep: {str(e)}')
     
     return redirect('medications:prescription_list')
+
+def client_required(view_func):
+    """Decorator to restrict access to clients only."""
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.session.get('user_email'):
+            messages.error(request, "Silakan login terlebih dahulu.")
+            return redirect('authentication:login')
+        
+        if request.session.get('user_type') != 'klien':
+            messages.error(request, "Anda tidak memiliki akses ke halaman ini.")
+            return redirect('authentication:dashboard')
+        
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+USER_TYPES = {
+    'individual': 'Individu',
+    'company': 'Perusahaan'
+}
+
+def client_prescription(request):
+    """
+    View untuk menampilkan resep obat untuk client
+    Hanya menampilkan resep milik client yang sedang login
+    """
+    client_type = 'individual'
+    
+    context = {
+        'client_type': USER_TYPES[client_type]
+    }
+    
+    return render(request, 'client_prescription.html', context)
