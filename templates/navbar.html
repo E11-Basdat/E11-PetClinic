@@ -15,8 +15,8 @@
             
             {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
               <a href="//" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Hewan Peliharaan</a>
-
               <a href="{% url 'treatments:n_treatment_list_klien' %}" class="{% if '/treatments/n_treatment_list_klien/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
+
             {% elif request.session.user_type == 'front_desk' %}
               <a href="//" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Jenis Hewan</a>
               <a href="{% url 'treatments:n_treatment_list' %}" class="{% if '/treatments/n_treatment_list/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
@@ -27,7 +27,6 @@
             {% elif request.session.user_type == 'dokter' %}
               <a href="//" class="{% if request.path == '//' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Jenis Hewan</a>
               <a href="{% url 'treatments:n_treatment_list_doctor' %}" class="{% if '/treatments/n_treatment_list_doctor/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
-              <a href="{% url 'treatments:n_treatment_list' %}" class="{% if '/treatments/n_treatment_list/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
               <a href="{% url 'visits:visit_list_doctor' %}" class="{% if request.path == '/visits/visit_list_doctor' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Kunjungan</a>
               <a href="{% url 'medications:list' %}" class="{% if '/medications/list/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Manajemen Obat</a>
               <a href="{% url 'treatments:treatment_list' %}" class="{% if '/treatments/treatment/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Manajemen Jenis Perawatan</a>
