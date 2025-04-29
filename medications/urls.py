@@ -11,7 +11,6 @@ urlpatterns = [
     path('update_stock/<str:kode>/', views.update_stock, name='update_stock'),
     path('delete/<str:kode>/', views.delete_medicine, name='delete'),
     
-    # Prescription management routes
     path('prescription/list/', views.prescription_list, name='prescription_list'),
     path('prescription/add/', views.add_prescription, name='add_prescription'),
     path('prescription/delete/', views.delete_prescription, name='delete_prescription'),

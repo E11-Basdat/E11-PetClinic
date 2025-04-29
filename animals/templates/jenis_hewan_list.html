@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto p-8">
+  <div class="border border-gray-300 rounded-lg p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold">List Jenis Hewan</h2>
+
+      {% if is_front_desk %}
+      <a href="{% url 'animals:jenis_hewan_create' %}"
+         class="flex items-center space-x-2 bg-[#0F1327] text-white px-4 py-2 rounded hover:bg-[#1c2244] transition">
+        <span class="text-lg">＋</span>
+        <span>Create New Animal Type</span>
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left border-collapse text-center">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-4 py-2">No</th>
+            <th class="border px-4 py-2">ID Jenis</th>
+            <th class="border px-4 py-2">Nama Jenis</th>
+            {% if is_front_desk %}
+            <th class="border px-4 py-2 text-center">Action</th>
+            {% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+            {% for jenis in jenis_hewan_list %}
+              <tr class="hover:bg-gray-50">
+                <td class="border px-4 py-2">{{ forloop.counter }}</td>
+                <td class="border px-4 py-2">{{ jenis.id }}</td>
+                <td class="border px-4 py-2">{{ jenis.nama_jenis }}</td>
+    
+                {% if is_front_desk %}
+                <td class="border px-4 py-2">
+                  <div class="flex justify-center space-x-2">
+                    {# Update #}
+                    <a href="{% url 'animals:jenis_hewan_update' jenis.id %}"
+                       class="px-3 py-1 rounded bg-gray-800 text-white hover:bg-gray-900 transition">
+                      Update
+                    </a>
+    
+                    {# Delete (modal) #}
+                    {% if jenis.can_delete %}
+                      {% url 'animals:jenis_hewan_confirm_delete' jenis.id as del_url %}
+                      <button
+                          class="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition"
+                          data-url="{{ del_url }}?modal=true"
+                          onclick="openTypeDeleteModal(this)">
+                        Delete
+                      </button>
+                    {% else %}
+                      <button class="px-3 py-1 rounded bg-red-300 text-white cursor-not-allowed" disabled>
+                        Delete
+                      </button>
+                    {% endif %}
+                  </div>
+                </td>
+                {% endif %}
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="{% if is_front_desk %}4{% else %}3{% endif %}"
+                    class="border px-6 py-6 text-center text-gray-500">
+                  Tidak ada data jenis hewan
+                </td>
+              </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# ───────────  MODAL  ─────────── #}
+<div id="typeDeleteModal"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div id="typeDeleteContent" class="p-6"></div>
+  </div>
+</div>
+
+<script>
+    function openTypeDeleteModal(btn){
+      fetch(btn.dataset.url)
+        .then(r => r.text())
+        .then(html=>{
+          document.getElementById('typeDeleteContent').innerHTML = html;
+          document.getElementById('typeDeleteModal').classList.remove('hidden');
+          attachDeleteTypeHandler();
+        });
+    }
+    
+    function attachDeleteTypeHandler(){
+      const form = document.querySelector('#typeDeleteContent form');
+      if(!form) return;
+      form.addEventListener('submit', e=>{
+        e.preventDefault();
+        const fd = new FormData(form);
+        fetch(form.action + '?modal=true', {
+          method:'POST',
+          body:fd,
+          headers:{'X-CSRFToken': fd.get('csrfmiddlewaretoken')}
+        })
+        .then(r=>r.json())
+        .then(d=>{
+          if(d.message==='success'){
+            closeTypeDeleteModal();
+            window.location.reload();
+          }else if(d.error){
+            alert(d.error);
+          }
+        })
+        .catch(()=>alert('Terjadi kesalahan'));
+      });
+    }
+    
+    function closeTypeDeleteModal(){
+      document.getElementById('typeDeleteModal').classList.add('hidden');
+      document.getElementById('typeDeleteContent').innerHTML='';
+    }
+    </script>
+{% endblock %}

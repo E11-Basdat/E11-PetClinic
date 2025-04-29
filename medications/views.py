@@ -515,125 +515,20 @@ def client_required(view_func):
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
-USER_CLIENTS = {
-    'johndoe@example.com': 'c3073b2a-9fc2-47b6-b358-1912aefc4442',
-    'janedoe@example.com': '550e8400-e29b-41d4-a716-446655440000',
-    'bobsmith@example.com': 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-    'alicejones@example.com': '6a33b35c-9c8f-4ca0-9cf6-dce21e3d19a2',
-    'mikelee@example.com': 'b6f8c3d2-e87a-4a1f-bc16-3c0a01837a8b'
+USER_TYPES = {
+    'individual': 'Individu',
+    'company': 'Perusahaan'
 }
-
-# Mock Client Pets
-# Maps client IDs to their pets
-CLIENT_PETS = {
-    'c3073b2a-9fc2-47b6-b358-1912aefc4442': ['Coco', 'Max'],
-    '550e8400-e29b-41d4-a716-446655440000': ['Snowy', 'Luna'],
-    'f47ac10b-58cc-4372-a567-0e02b2c3d479': ['Blacky', 'Rex'],
-    '6a33b35c-9c8f-4ca0-9cf6-dce21e3d19a2': ['Luna', 'Charlie'],
-    'b6f8c3d2-e87a-4a1f-bc16-3c0a01837a8b': ['Bubbles', 'Rocky'],
-}
-
-# Mock Prescription Data
-# A list of all prescriptions in the system
-PRESCRIPTIONS = [
-    {
-        'id': '001',
-        'client_id': 'c3073b2a-9fc2-47b6-b358-1912aefc4442',
-        'pet_name': 'Coco',
-        'perawatan': {'kode': 'TRM003', 'nama_perawatan': 'TRM003 - Pemeriksaan Telinga'},
-        'obat': {'kode': 'MED003', 'nama': 'MED003 - Amitraz'},
-        'kuantitas_obat': 2,
-        'visit_date': '2025-04-15'
-    },
-    {
-        'id': '002',
-        'client_id': 'c3073b2a-9fc2-47b6-b358-1912aefc4442',
-        'pet_name': 'Max',
-        'perawatan': {'kode': 'TRM001', 'nama_perawatan': 'TRM001 - Perawatan Gigi'},
-        'obat': {'kode': 'MED001', 'nama': 'MED001 - Penicillin'},
-        'kuantitas_obat': 3,
-        'visit_date': '2025-04-10'
-    },
-    {
-        'id': '003',
-        'client_id': '550e8400-e29b-41d4-a716-446655440000',
-        'pet_name': 'Snowy',
-        'perawatan': {'kode': 'TRM002', 'nama_perawatan': 'TRM002 - Parasite Control'},
-        'obat': {'kode': 'MED002', 'nama': 'MED002 - Aminophyllin'},
-        'kuantitas_obat': 4,
-        'visit_date': '2025-04-20'
-    },
-    {
-        'id': '004',
-        'client_id': 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-        'pet_name': 'Blacky',
-        'perawatan': {'kode': 'TRM001', 'nama_perawatan': 'TRM001 - Perawatan Gigi'},
-        'obat': {'kode': 'MED001', 'nama': 'MED001 - Penicillin'},
-        'kuantitas_obat': 3,
-        'visit_date': '2025-04-18'
-    },
-    {
-        'id': '005',
-        'client_id': 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-        'pet_name': 'Rex',
-        'perawatan': {'kode': 'TRM002', 'nama_perawatan': 'TRM002 - Parasite Control'},
-        'obat': {'kode': 'MED002', 'nama': 'MED002 - Aminophyllin'},
-        'kuantitas_obat': 4,
-        'visit_date': '2025-04-12'
-    },
-    {
-        'id': '006',
-        'client_id': '6a33b35c-9c8f-4ca0-9cf6-dce21e3d19a2',
-        'pet_name': 'Luna',
-        'perawatan': {'kode': 'TRM004', 'nama_perawatan': 'TRM004 - Perawatan Kulit dan Bulu'},
-        'obat': {'kode': 'MED004', 'nama': 'MED004 - Chlorhexidine'},
-        'kuantitas_obat': 1,
-        'visit_date': '2025-04-25'
-    },
-    {
-        'id': '007',
-        'client_id': 'b6f8c3d2-e87a-4a1f-bc16-3c0a01837a8b',
-        'pet_name': 'Bubbles',
-        'perawatan': {'kode': 'TRM005', 'nama_perawatan': 'TRM005 - Perawatan Luka Ringan'},
-        'obat': {'kode': 'MED005', 'nama': 'MED005 - Betadine'},
-        'kuantitas_obat': 2,
-        'visit_date': '2025-04-22'
-    }
-]
 
 def client_prescription(request):
     """
-    View to display prescription data for the logged-in client using mock data.
-    In a real application, this would query the database instead.
+    View untuk menampilkan resep obat untuk client
+    Hanya menampilkan resep milik client yang sedang login
     """
-    
-    # Get the user's email
-    user_email = request.user.email
-    
-    # For testing without a real logged-in user
-    # Uncomment the line below and set an email to test
-    # user_email = 'johndoe@example.com'
-    
-    # Get the client ID for this user from our mock data
-    client_id = USER_CLIENTS.get(user_email)
-    
-    if not client_id:
-        # If user not found in our mock data, return empty context
-        return render(request, 'client_prescription.html', {'prescriptions': []})
-    
-    # Filter prescriptions for this client
-    client_prescriptions = [
-        prescription for prescription in PRESCRIPTIONS
-        if prescription['client_id'] == client_id
-    ]
-    
-    # Sort by visit date (newest first)
-    client_prescriptions.sort(key=lambda x: x['visit_date'], reverse=True)
+    client_type = 'individual'
     
     context = {
-        'prescriptions': client_prescriptions,
-        'client_id': client_id,
-        'pets': CLIENT_PETS.get(client_id, [])
+        'client_type': USER_TYPES[client_type]
     }
     
     return render(request, 'client_prescription.html', context)
