@@ -15,12 +15,12 @@ def n_treatment_list_klien(request):
 
 def n_create_treatment(request):
     if request.method == 'POST':
-        return redirect('treatments:n_treatment_list')
+        return redirect('treatments:n_treatment_list_doctor')
     return render(request, 'n_treatment_form.html', {'mode': 'create'})
 
 def n_update_treatment(request, kunjungan_id):
     if request.method == 'POST':
-        return redirect('treatments:n_treatment_list')
+        return redirect('treatments:n_treatment_list_doctor')
     
     return render(request, 'n_treatment_form.html', {'mode': 'update', 'kunjungan_id': kunjungan_id})
 

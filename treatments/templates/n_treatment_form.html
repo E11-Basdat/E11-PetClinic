@@ -61,7 +61,7 @@
             
             <!-- Buttons -->
             <div class="flex justify-end space-x-3">
-                <a href="{% url 'treatments:n_treatment_list' %}" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancel</a>
+                <a href="{% url 'treatments:n_treatment_list_doctor' %}" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">Cancel</a>
                 <button type="submit" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded">
                     {% if mode == 'update' %}Update{% else %}Create{% endif %}
                 </button>
