@@ -41,31 +41,31 @@ def n_delete_treatment(request, kunjungan_id):
 TREATMENTS = [
     {
         'kode': 'TRM001',
-        'nama': 'Dental Care',
+        'nama': 'Perawatan Gigi',
         'biaya': 300000,
         'can_delete': True
     },
     {
         'kode': 'TRM002',
-        'nama': 'Parasite Control',
+        'nama': 'Grooming',
         'biaya': 200000,
         'can_delete': True
     },
     {
         'kode': 'TRM003',
-        'nama': 'Flea Treatment',
+        'nama': 'Perawatan Kulit dan Bulu',
         'biaya': 180000,
         'can_delete': True
     },
     {
         'kode': 'TRM004',
-        'nama': 'Wound Cleaning',
+        'nama': 'Pemeriksaan Umum',
         'biaya': 150000,
         'can_delete': True
     },
     {
         'kode': 'TRM005',
-        'nama': 'Eye Treatment',
+        'nama': 'Perawatan Luka Ringan',
         'biaya': 175000,
         'can_delete': True
     }

@@ -506,7 +506,7 @@
                                 class="bg-red-500 text-white px-3 py-1 rounded-md text-sm delete-btn" 
                                 data-kunjungan="${treatment.idKunjungan}"
                                 data-perawatan="${treatment.jenisPerawatan.split(' - ')[0]}"
-                                onclick="handleDelete('${treatment.idKunjungan}', '${treatment.jenisPerawatan.split(' - ')[0]}')"
+                                onclick="showDeleteConfirmation('${treatment.idKunjungan}', '${treatment.jenisPerawatan.split(' - ')[0]}')"
                             >Delete</button>
                         </div>
                     </td>` : ''}
@@ -514,59 +514,21 @@
                 
                 tbody.appendChild(row);
             });
+        }
 
-                // Tambahkan fungsi handleDelete
-          function handleDelete(kunjunganId, perawatan) {
-              currentKunjungan = kunjunganId;
-              document.getElementById('deleteKunjungan').textContent = kunjunganId;
-              document.getElementById('deletePerawatan').textContent = perawatan;
-              const deleteModal = document.getElementById('deleteModal');
-              deleteModal.classList.remove('hidden');
-              deleteModal.classList.add('flex');
-          }
-  
-          // Move event listeners outside of renderTreatmentTable
-          document.addEventListener('DOMContentLoaded', function() {
-              // Initial render
-              renderTreatmentTable();
-              
-              // Cancel delete button
-              document.getElementById('cancelDelete').addEventListener('click', function() {
-                  const deleteModal = document.getElementById('deleteModal');
-                  deleteModal.classList.add('hidden');
-                  deleteModal.classList.remove('flex');
-              });
-  
-              // Confirm delete button
-              document.getElementById('confirmDelete').addEventListener('click', function() {
-                  // Delete from array
-                  const index = treatmentsData.findIndex(t => t.idKunjungan === currentKunjungan);
-                  if (index !== -1) {
-                      treatmentsData.splice(index, 1);
-                      renderTreatmentTable();
-                  }
-                  
-                  // Hide modal
-                  const deleteModal = document.getElementById('deleteModal');
-                  deleteModal.classList.add('hidden');
-                  deleteModal.classList.remove('flex');
-                  
-                  // Show success message
-                  alert('Treatment berhasil dihapus!');
-              });
-          });
-        
-
-                // Attach event listeners to new delete buttons
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    currentKunjungan = this.dataset.kunjungan;
-                    deleteKunjunganEl.textContent = currentKunjungan;
-                    deletePerawatanEl.textContent = this.dataset.perawatan;
-                    document.getElementById('deleteModal').classList.remove('hidden');
-                    document.getElementById('deleteModal').classList.add('flex');
-                });
-            });
+        // Function to show delete confirmation modal
+        function showDeleteConfirmation(kunjunganId, perawatanId) {
+            // Set current kunjungan for delete operation
+            currentKunjungan = kunjunganId;
+            
+            // Update modal text
+            document.getElementById('deleteKunjungan').textContent = kunjunganId;
+            document.getElementById('deletePerawatan').textContent = perawatanId;
+            
+            // Show the modal
+            const deleteModal = document.getElementById('deleteModal');
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
         }
 
         // Helper function to get CSRF token (for real AJAX requests)
