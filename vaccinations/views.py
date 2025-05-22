@@ -605,3 +605,145 @@ def delete_vaccine(request, kode):
         messages.error(request, f"Gagal menghapus data vaksin: {str(e)}")
     
     return redirect('vaccine_list')
+
+def klien_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        
+        if not request.session.get('user_email'):
+            messages.error(request, "Silakan login terlebih dahulu.")
+            return redirect('login')
+        
+        user_type = request.session.get('user_type')
+        if user_type != 'individu' and user_type != 'perusahaan':
+            messages.error(request, "Anda tidak memiliki akses ke halaman ini.")
+            print(f"User type: {user_type}")
+            return redirect('authentication:dashboard')
+        
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+def get_client_id(request):
+    """Get client ID from session"""
+    user_email = request.session.get('user_email')
+    
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT no_identitas
+            FROM PETCLINIC.KLIEN
+            WHERE email = %s
+        """, [user_email])
+        result = cursor.fetchone()
+    
+    return result[0] if result else None
+
+def get_client_pets(client_id):
+    """Get list of pets owned by the client"""
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT nama
+            FROM PETCLINIC.HEWAN
+            WHERE no_identitas_klien = %s
+            ORDER BY nama
+        """, [client_id])
+        
+        pets = cursor.fetchall()
+        pet_list = []
+        
+        for row in pets:
+            pet_list.append({
+                'nama': row[0]
+            })
+    
+    return pet_list
+
+def get_all_vaccines():
+    """Get list of all vaccines"""
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT kode, nama
+            FROM PETCLINIC.VAKSIN
+            ORDER BY nama
+        """)
+        
+        vaccines = cursor.fetchall()
+        vaccine_list = []
+        
+        for row in vaccines:
+            vaccine_list.append({
+                'kode': row[0],
+                'nama': row[1]
+            })
+    
+    return vaccine_list
+
+def get_client_vaccinations(request):
+    """Get vaccinations for a client's pets with optional filters"""
+    client_id = get_client_id(request)
+    pet_filter = request.GET.get('pet_filter')
+    vaccine_filter = request.GET.get('vaccine_filter')
+    
+    query = """
+        SELECT k.id_kunjungan, k.nama_hewan, v.nama as nama_vaksin, 
+               v.kode as id_vaksin, v.harga, k.timestamp_awal
+        FROM PETCLINIC.KUNJUNGAN k
+        JOIN PETCLINIC.VAKSIN v ON k.kode_vaksin = v.kode
+        WHERE k.no_identitas_klien = %s
+        AND k.kode_vaksin IS NOT NULL
+    """
+    
+    params = [client_id]
+    
+    if pet_filter:
+        query += " AND k.nama_hewan = %s"
+        params.append(pet_filter)
+    
+    if vaccine_filter:
+        query += " AND v.kode = %s"
+        params.append(vaccine_filter)
+    
+    query += " ORDER BY k.timestamp_awal DESC"
+    
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        vaccinations = cursor.fetchall()
+        
+        vaccination_list = []
+        for row in vaccinations:
+            try:
+                harga = row[4]
+                formatted_harga = f"Rp{locale.format_string('%d', float(harga), grouping=True)}"
+            except (ValueError, TypeError):
+                formatted_harga = f"Rp{row[4]}"
+                
+            vaccination_list.append({
+                'id_kunjungan': row[0],
+                'nama_hewan': row[1],
+                'nama_vaksin': row[2],
+                'id_vaksin': row[3],
+                'harga': formatted_harga,
+                'tanggal_kunjungan': row[5]
+            })
+    
+    return vaccination_list
+
+@klien_required
+def client_vaccination_list(request):
+    client_id = get_client_id(request)
+    
+    if not client_id:
+        messages.error(request, "Data klien tidak ditemukan")
+        return redirect('authentication:dashboard')
+    
+    vaccinations = get_client_vaccinations(request)
+    pets = get_client_pets(client_id)
+    vaccines = get_all_vaccines()
+    
+    context = {
+        'vaccinations': vaccinations,
+        'pets': pets,
+        'vaccines': vaccines,
+        'pet_filter': request.GET.get('pet_filter', ''),
+        'vaccine_filter': request.GET.get('vaccine_filter', '')
+    }
+    return render(request, 'vaccinations/client_vaccination_list.html', context)
