@@ -15,7 +15,7 @@ import os
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,8 +30,8 @@ SECRET_KEY = 'django-insecure-2wx8s*925e#z1tb#fulhsn9=3roeom!@-*notw9dkai958au8m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
+# ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -43,10 +43,38 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
+    'animals',
+    'medications',
+    'vaccinations',
+    'visits',
+    'treatments',
 ]
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',  # Ubah level ke DEBUG
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',  # Ubah level ke DEBUG
+#             'propagate': True,
+#         },
+#         '': {  # Root logger
+#             'handlers': ['console'],
+#             'level': 'DEBUG',  # Ubah level ke DEBUG
+#         },
+#     },
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,36 +107,39 @@ WSGI_APPLICATION = 'petclinic.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Cek apakah ini environment production
-IS_PRODUCTION = os.getenv('DJANGO_ENV') == 'production'
+# IS_PRODUCTION = os.getenv('DJANGO_ENV') == 'production'
 
-if IS_PRODUCTION:
-    # Konfigurasi database untuk production (contoh: Kawung)
-    DATABASES = {
-        'default': {
-            'ENGINE': os.getenv('ENGINE', 'django.db.backends.postgresql'),
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST'),
-            'PORT': os.getenv('DB_PORT', '5432'),
-        }
+# if IS_PRODUCTION:
+    # Konfigurasi database untuk production 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get("DB_NAME"),
+        'USER': os.environ.get("DB_USER"),
+        'PASSWORD': os.environ.get("DB_PASSWORD"),
+        'HOST': os.environ.get("DB_HOST"),
+        'PORT': os.environ.get("DB_PORT"),
     }
-else:
-    # Untuk development: prioritas pakai DATABASE_URL dari Supabase
-    database_url = os.getenv('DATABASE_URL')
+}
+
+# else:
+#     # Untuk development: prioritas pakai DATABASE_URL dari Supabase
+#     database_url = os.getenv('DATABASE_URL')
     
-    if database_url:
-        parsed_url = urlparse(database_url)
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': parsed_url.path[1:],  # Remove leading '/'
-                'USER': parsed_url.username,
-                'PASSWORD': parsed_url.password,
-                'HOST': parsed_url.hostname,
-                'PORT': parsed_url.port or '5432',
-            }
-        }
+#     if database_url:
+#         parsed_url = urlparse(database_url)
+#         print(parsed_url.path[1:])
+#         print("Connecting to:", os.getenv("DATABASE_URL"))
+#         DATABASES = {
+#             'default': {
+#                 'ENGINE': 'django.db.backends.postgresql',
+#                 'NAME': parsed_url.path[1:],  # Remove leading '/'
+#                 'USER': parsed_url.username,
+#                 'PASSWORD': parsed_url.password,
+#                 'HOST': parsed_url.hostname,
+#                 'PORT': parsed_url.port or '5432',
+#             }
+#         }
 
 
 
@@ -134,20 +165,34 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'id'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
 USE_TZ = True
+
+# Locale configuration for currency formatting
+import locale
+try:
+    locale.setlocale(locale.LC_ALL, 'id_ID.UTF-8')  # Indonesian locale
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_ALL, 'id_ID')  # Fallback
+    except locale.Error:
+        locale.setlocale(locale.LC_ALL, '')  # Default locale
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+# STATICFILES_DIRS = [BASE_DIR / 'static']
+
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

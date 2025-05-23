@@ -2,15 +2,58 @@
 
 <nav class="bg-gradient-to-r from-stone-900 to-stone-700 shadow-md rounded-lg mx-2 my-2">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between h-16">
-      <div class="flex">
-        <a class="flex-shrink-0 flex items-center">
-          <span class="text-xl font-bold text-white">Pet Clinic</span>
-        </a>
+    <div class="flex items-center justify-between h-20">
+      
+      <div class="flex-shrink-0 flex items-center">
+        <span class="text-white text-sm font-bold"></span>
       </div>
       
-      <!-- Tombol menu mobile -->
-      <div class="flex items-center -mr-2 sm:hidden">
+      <div class="hidden sm:flex sm:items-center">
+        <div class="flex space-x-4">
+          {% if request.session.user_email %}
+            <a href="{% url 'authentication:dashboard' %}" class="{% if request.path == '/dashboard/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Dashboard</a>
+            
+            {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
+              <a href="{% url 'animals:hewan_list' %}" class="{% if request.path == '/animals/hewan_list/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Hewan Peliharaan</a>
+              <a href="{% url 'medications:client_prescriptions' %}" class="block {% if request.path == '/my-prescriptions/' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Resep Obat Hewan</a>
+              <a href="{% url 'treatments:n_treatment_list_klien' %}" class="{% if '/treatments/n_treatment_list_klien/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
+
+              <a href="#" class="{% if request.path == '/visits/visit_list_doctor' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Kunjungan</a>
+              <a href="{% url 'client_vaccination_list' %}" class="{% if '/vaccinations/client/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Vaksinasi</a>
+
+            {% elif request.session.user_type == 'front_desk' %}
+              <a href="{% url 'animals:jenis_hewan_list' %}" class="{% if request.path == '/animals/jenis_hewan_list/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Jenis Hewan</a>
+              <a href="{% url 'treatments:n_treatment_list' %}" class="{% if '/treatments/n_treatment_list/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
+              <a href="{% url 'animals:hewan_list' %}" class="{% if request.path == '/animals/hewan_list/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Hewan Peliharaan</a>
+              <a href="{% url 'visits:visit_list_fd' %}" class="{% if '/visits/visit_list_fd' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Kelola Kunjungan</a>
+              <a href="{% url 'authentication:list_client' %}" class="{% if '/list-client/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Klien</a>
+
+            {% elif request.session.user_type == 'dokter' %}
+              <a href="{% url 'animals:jenis_hewan_list' %}" class="{% if request.path == '/animals/jenis_hewan_list/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Jenis Hewan</a>
+              <a href="{% url 'treatments:n_treatment_list_doctor' %}" class="{% if '/treatments/n_treatment_list_doctor/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
+              <a href="{% url 'visits:visit_list_doctor' %}" class="{% if request.path == '/visits/visit_list_doctor' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Daftar Kunjungan</a>
+              <a href="{% url 'medications:list' %}" class="{% if '/medications/list/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Manajemen Obat</a>
+              <a href="{% url 'treatments:treatment_list' %}" class="{% if '/treatments/treatment/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Manajemen Jenis Perawatan</a>
+              <a href="{% url 'medications:prescription_list' %}" class="{% if '/medications/prescriptions/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Manajemen Pemberian Obat</a>
+              <a href="{% url 'vaccination_list' %}" class="{% if '/vaccinations/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Manajemen Vaksinasi Hewan</a>
+
+            {% elif request.session.user_type == 'perawat' %}
+              <a href="{% url 'medications:list' %}" class="{% if '/medications/medicine/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Manajemen Obat</a>
+              <a href="{% url 'treatments:n_treatment_list' %}" class="{% if '/treatments/n_treatment_list/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Perawatan Hewan</a>
+              <a href="{% url 'treatments:treatment_list' %}" class="{% if '/treatments/treatment/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Manajemen Jenis Perawatan</a>
+              <a href="{% url 'vaccine_list' %}" class="{% if '/vaccinations/list-vaccines' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Manajemen Vaksin</a>
+            {% endif %}
+            
+            <a href="{% url 'authentication:logout' %}" class="{% if request.path == '/logout/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Logout</a>
+          {% else %}
+            <!-- Only show login and register links for guest users -->
+            <a href="{% url 'authentication:login' %}" class="{% if request.path == '/login/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Login</a>
+            <a href="{% url 'authentication:register' %}" class="{% if request.path == '/register/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-sm font-medium transition duration-300 text-center">Registrasi</a>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="flex items-center sm:hidden">
         <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-white hover:bg-stone-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-expanded="false" id="mobile-menu-button">
           <span class="sr-only">Buka menu utama</span>
           <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -18,119 +61,53 @@
           </svg>
         </button>
       </div>
-      
-      <!-- Menu desktop -->
-      <div class="hidden sm:flex sm:items-center sm:ml-6">
-        <div class="flex space-x-4">
-          {% if request.session.user_email %}
-            <!-- Dashboard link for all user types -->
-            <a href="{% url 'authentication:dashboard' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Dashboard</a>
-            
-            {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
-              <!-- Menu Klien -->
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Hewan Peliharaan</a>
-            {% elif request.session.user_type == 'front_desk' %}
-              <!-- Menu Front-Desk Officer -->
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Jenis Hewan</a>
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Hewan Peliharaan</a>
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Kunjungan</a>
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Daftar Klien</a>
-            {% elif request.session.user_type == 'dokter' %}
-              <!-- Menu Dokter Hewan -->
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Daftar Jenis Hewan</a>
-              <a href="/s/" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Kelola Rekam Medis</a>
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Obat</a>
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Jenis Perawatan</a>
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Pemberian Obat</a>
-              <a href="/" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Vaksinasi Hewan</a>
-            {% elif request.session.user_type == 'perawat' %}
-              <!-- Menu Perawat Hewan -->
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Obat</a>
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Jenis Perawatan</a>
-              <a href="//" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Manajemen Vaksin</a>
-            {% endif %}
-            
-            <!-- Display user information when logged in -->
-            <span class="text-white px-3 py-2 text-sm font-medium">
-              {{ request.session.user_email }}
-              {% if request.session.user_type == 'individu' %}
-                (Individu)
-              {% elif request.session.user_type == 'perusahaan' %}
-                (Perusahaan)
-              {% elif request.session.user_type == 'front_desk' %}
-                (Front Desk)
-              {% elif request.session.user_type == 'dokter' %}
-                (Dokter)
-              {% elif request.session.user_type == 'perawat' %}
-                (Perawat)
-              {% endif %}
-            </span>
-            
-            <!-- Tombol Logout untuk semua pengguna yang sudah login -->
-            <a href="{% url 'authentication:logout' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Logout</a>
-          {% else %}
-            <!-- Menu Guest (Belum Login) -->
-            <a href="{% url 'authentication:login' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Login</a>
-            <a href="{% url 'authentication:register' %}" class="text-white hover:text-stone-200 px-3 py-2 text-sm font-medium border-b border-transparent hover:border-white transition duration-300">Registrasi</a>
-          {% endif %}
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- Menu mobile -->
   <div class="sm:hidden hidden bg-gradient-to-r from-stone-900 to-stone-700 rounded-lg mx-4 mb-4" id="mobile-menu">
     <div class="px-2 pt-2 pb-3 space-y-1">
       {% if request.session.user_email %}
         <!-- Dashboard link for all user types (Mobile) -->
-        <a href="{% url 'authentication:dashboard' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Dashboard</a>
+        <a href="{% url 'authentication:dashboard' %}" class="block {% if request.path == '/dashboard/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Dashboard</a>
         
         {% if request.session.user_type == 'individu' or request.session.user_type == 'perusahaan' %}
           <!-- Menu Klien (Mobile) -->
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Kelola Hewan Peliharaan</a>
+          <a href="{% url 'animals:hewan_list' %}" class="block {% if request.path == '/animals/hewan_list/' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Hewan Peliharaan</a>
+          <a href="{% url 'medications:client_prescriptions' %}" class="block {% if request.path == '/my-prescriptions/' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Resep Obat Hewan</a>
+          <a href="{% url 'treatments:n_treatment_list_klien' %}" class="block {% if request.path == '/treatments/n_treatment_list_klien' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Perawatan Hewan</a>
+          <a href="#" class="block {% if request.path == '/visits/visit_list_doctor' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Daftar Kunjungan</a>
+          <a href="{% url 'client_vaccination_list' %}" class="block {% if '/vaccinations/client/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Daftar Vaksinasi</a>
+
         {% elif request.session.user_type == 'front_desk' %}
           <!-- Menu Front-Desk Officer (Mobile) -->
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Kelola Jenis Hewan</a>
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Kelola Hewan Peliharaan</a>
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Kelola Kunjungan</a>
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Daftar Klien</a>
+          <a href="{% url 'animals:jenis_hewan_list' %}" class="block {% if request.path == '/animals/jenis_hewan_list/' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Jenis Hewan</a>
+          <a href="{% url 'animals:hewan_list' %}" class="block {% if request.path == '/animals/hewan_list/' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Hewan Peliharaan</a>
+          <a href="{% url 'treatments:n_treatment_list' %}" class="block {% if request.path == '/treatments/n_treatment_list' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Perawatan Hewan</a>
+          <a href="{% url 'authentication:list_client' %}" class="block {% if '/list-client/' in request.path %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Daftar Klien</a>
+          <a href="{% url 'visits:visit_list_fd' %}" class="block {% if '/visits/visit_list_fd' in request.path %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Kelola Kunjungan</a>
         {% elif request.session.user_type == 'dokter' %}
           <!-- Menu Dokter Hewan (Mobile) -->
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Daftar Jenis Hewan</a>
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Kelola Rekam Medis</a>
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Manajemen Obat</a>
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Manajemen Jenis Perawatan</a>
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Manajemen Pemberian Obat</a>
-          <a href="/" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Manajemen Vaksinasi Hewan</a>
+          <a href="{% url 'animals:jenis_hewan_list' %}" class="block {% if request.path == '/animals/jenis_hewan_list/' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Daftar Jenis Hewan</a>
+          <a href="{% url 'treatments:n_treatment_list_doctor' %}" class="block {% if request.path == '/treatments/n_treatment_list_doctor' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Perawatan Hewan</a>
+          <a href="{% url 'visits:visit_list_doctor' %}" class="block {% if request.path == '/visits/visit_list_doctor' %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Daftar Kunjungan</a>
+          <a href="{% url 'medications:list' %}" class="block {% if '/medications/list/' in request.path %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Manajemen Obat</a>
+          <a href="{% url 'treatments:treatment_list' %}" class="block {% if '/treatments/treatment/' in request.path %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Manajemen Jenis Perawatan</a>
+          <a href="{% url 'medications:prescription_list' %}" class="block {% if '/medications/prescriptions/' in request.path %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Manajemen Pemberian Obat</a>
+          <a href="{% url 'vaccination_list' %}" class="block {% if '/vaccinations/' in request.path %}bg-stone-600 text-white{% else %}text-white hover:text-stone-200{% endif %} px-3 py-2 text-base font-medium border-b border-transparent hover:border-white transition duration-300 text-center">Manajemen Vaksinasi Hewan</a>
         {% elif request.session.user_type == 'perawat' %}
           <!-- Menu Perawat Hewan (Mobile) -->
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Manajemen Obat</a>
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Manajemen Jenis Perawatan</a>
-          <a href="//" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Manajemen Vaksin</a>
+          <a href="{% url 'medications:list' %}" class="block {% if '/medications/medicine/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Manajemen Obat</a>
+          <a href="{% url 'treatments:n_treatment_list' %}" class="block {% if '/treatments/n_treatment_list/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Perawatan Hewan</a>
+          <a href="{% url 'treatments:treatment_list' %}" class="block {% if '/treatments/treatment/' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Manajemen Jenis Perawatan</a>
+          <a href="{% url 'vaccine_list' %}" class="block {% if '/vaccinations/list-vaccines' in request.path %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Manajemen Vaksin</a>
         {% endif %}
         
-        <!-- Display user information when logged in (Mobile) -->
-        <span class="block px-3 py-2 text-base font-medium text-white">
-          {{ request.session.user_email }}
-          {% if request.session.user_type == 'individu' %}
-            (Individu)
-          {% elif request.session.user_type == 'perusahaan' %}
-            (Perusahaan)
-          {% elif request.session.user_type == 'front_desk' %}
-            (Front Desk)
-          {% elif request.session.user_type == 'dokter' %}
-            (Dokter)
-          {% elif request.session.user_type == 'perawat' %}
-            (Perawat)
-          {% endif %}
-        </span>
-        
         <!-- Tombol Logout (Mobile) -->
-        <a href="{% url 'authentication:logout' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Logout</a>
+        <a href="{% url 'authentication:logout' %}" class="block {% if request.path == '/logout/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Logout</a>
       {% else %}
-        <!-- Menu Guest (Mobile) -->
-        <a href="{% url 'authentication:login' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Login</a>
-        <a href="{% url 'authentication:register' %}" class="block px-3 py-2 text-base font-medium text-white hover:text-stone-200 border-b border-transparent hover:border-white transition duration-300">Registrasi</a>
+        <!-- Only show login and register links for guest users (Mobile) -->
+        <a href="{% url 'authentication:login' %}" class="block {% if request.path == '/login/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Login</a>
+        <a href="{% url 'authentication:register' %}" class="block {% if request.path == '/register/' %}text-white border-b-2 border-white{% else %}text-white hover:text-stone-200 border-b border-transparent hover:border-white{% endif %} px-3 py-2 text-base font-medium transition duration-300 text-center">Registrasi</a>
       {% endif %}
     </div>
   </div>

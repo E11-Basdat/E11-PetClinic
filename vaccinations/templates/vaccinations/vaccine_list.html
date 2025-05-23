@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}List Vaccine{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="w-full">
+        <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="bg-white/20 text-center">
+                <h1 class="text-stone-900 text-2xl font-bold pt-5 py-5">List Vaccine</h1>
+            </div>
+            
+            {% if messages %}
+            <div class="messages p-4">
+                {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}bg-red-100 border-l-4 border-red-500 text-red-700{% elif message.tags == 'success' %}bg-stone-100 border-l-4 border-stone-500 text-stone-700{% else %}bg-stone-50 border-l-4 border-stone-400 text-stone-600{% endif %} p-4 mb-3 rounded">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+               
+            <div class="flex justify-between items-center p-4 bg-white/30 border-b border-gray-200">
+                <form method="GET" action="." class="flex items-center">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        placeholder="Search by name..." 
+                        value="{{ request.GET.search|default:'' }}"
+                        class="border border-stone-300 rounded-l px-4 py-2 focus:outline-none focus:ring-2 focus:ring-stone-500 text-sm"
+                    >
+                    <button type="submit" class="bg-stone-600 text-white px-4 py-2 rounded-r text-sm transition duration-300 hover:bg-stone-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-white" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.387 4.387a1 1 0 01-1.414 1.414l-4.387-4.387zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </form>
+                <a href="{% url 'add_vaccine' %}" class="bg-stone-800 text-white px-4 py-2 rounded text-sm transition duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg> 
+                    Add New Vaccine
+                </a>
+            </div>
+            
+            
+            <div class="p-5">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bgborder-collapse text-center text-sm">
+                        <thead>
+                            <tr>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">No</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">ID Vaksin</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Nama Vaksin</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Harga</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Stok</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vaccine in vaccines %}
+                            <tr class="{% cycle '' 'bg-gray-50' %}">
+                                <td class="border border-stone-300 p-3">{{ forloop.counter }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccine.kode }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccine.nama }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccine.harga }}</td>
+                                <td class="border border-stone-300 p-3">{{ vaccine.stok }}</td>
+                                <td class="border border-stone-300 p-3">
+                                    <a href="{% url 'update_stock' vaccine.kode %}" class="bg-stone-500 text-white px-3 py-1 rounded text-xs inline-block mb-1 md:mb-0 md:mr-1">
+                                        <i class="fas fa-cubes"></i> Update Stock
+                                    </a>
+                                    <a href="{% url 'update_vaccine' vaccine.kode %}" class="bg-stone-800 text-white px-3 py-1 rounded text-xs inline-block mb-1 md:mb-0 md:mr-1">
+                                        <i class="fas fa-edit"></i> Update
+                                    </a>
+                                    <button onclick="deleteVaccine('{{ vaccine.kode }}', '{{ vaccine.nama }}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs inline-block">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center border border-stone-300 p-4">Tidak ada data vaksin yang tersedia</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h2 class="text-xl font-bold mb-4">Error</h2>
+        <p id="errorMessage" class="mb-6 text-red-600"></p>
+        <div class="flex justify-end">
+            <button onclick="closeErrorModal()" class="bg-stone-600 text-white px-4 py-2 rounded">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function closeErrorModal() {
+        document.getElementById('errorModal').classList.add('hidden');
+    }
+
+    function showError(message) {
+        if (message.includes('CONTEXT:')) {
+            message = message.split('CONTEXT:')[0].trim();
+        }
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorModal').classList.remove('hidden');
+    }
+
+    async function deleteVaccine(vaccineCode, vaccineName) {
+        try {
+            const response = await fetch(`/vaccinations/delete-vaccine/${vaccineCode}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.reload();
+            } else {
+                let errorMsg = data.message || 'Gagal menghapus vaksin';
+               
+                if (errorMsg.includes('CONTEXT:')) {
+                    errorMsg = errorMsg.split('CONTEXT:')[0].trim();
+                }
+                showError(errorMsg);
+            }
+        } catch (error) {
+            showError('Terjadi kesalahan saat menghapus vaksin');
+        }
+    }
+</script>
+{% endblock %}

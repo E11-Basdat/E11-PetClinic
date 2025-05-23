@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update Kunjungan - Pet Clinic{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Update Kunjungan</h1>
+
+    <form id="kunjungan-form" action="/update/" method="post" class="bg-white p-6 rounded-lg shadow-md">
+        <input type="hidden" id="id-kunjungan" name="id_kunjungan" value="">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="flex flex-col">
+                <label for="id-klien" class="mb-2 text-gray-700 font-semibold">ID Klien</label>
+                <select id="id-klien" name="id_klien" class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
+                    <option value="" disabled selected>Pilih ID Klien</option>
+                    <option value="" disabled selected>Pilih Nama Hewan</option>
+                    <option value="Blacky">Blacky</option>
+                    <option value="Snowy">Snowy</option>
+                    <option value="Coco">Coco</option>
+                    <option value="Luna">Luna</option>
+                    <option value="Bubbles">Bubbles</option>
+                    <option value="Spike">Spike</option>
+                    <option value="Bella">Bella</option>
+                    <option value="Sky">Sky</option>
+                    <option value="Rocky">Rocky</option>
+                    <option value="Kiwi">Kiwi</option>
+                    <option value="Nemo">Nemo</option>
+                    <option value="Axel">Axel</option>
+                    <option value="Milo">Milo</option>
+                    <option value="Polly">Polly</option>
+                    <option value="Draco">Draco</option>
+                    <option value="Puffy">Puffy</option>
+                    <option value="Ginger">Ginger</option>
+                    <option value="Quack">Quack</option>
+                    <option value="Shadow">Shadow</option>
+                    <option value="Rango">Rango</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col">
+                <label for="nama-hewan" class="mb-2 text-gray-700 font-semibold">Nama Hewan</label>
+                <select id="nama-hewan" name="nama_hewan" class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
+                    <option value="" disabled selected>Pilih Nama Hewan</option>
+                    <option value="" disabled selected>Pilih Nama Hewan</option>
+                    <option value="Blacky">Blacky</option>
+                    <option value="Snowy">Snowy</option>
+                    <option value="Coco">Coco</option>
+                    <option value="Luna">Luna</option>
+                    <option value="Bubbles">Bubbles</option>
+                    <option value="Spike">Spike</option>
+                    <option value="Bella">Bella</option>
+                    <option value="Sky">Sky</option>
+                    <option value="Rocky">Rocky</option>
+                    <option value="Kiwi">Kiwi</option>
+                    <option value="Nemo">Nemo</option>
+                    <option value="Axel">Axel</option>
+                    <option value="Milo">Milo</option>
+                    <option value="Polly">Polly</option>
+                    <option value="Draco">Draco</option>
+                    <option value="Puffy">Puffy</option>
+                    <option value="Ginger">Ginger</option>
+                    <option value="Quack">Quack</option>
+                    <option value="Shadow">Shadow</option>
+                    <option value="Rango">Rango</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="flex flex-col">
+                <label for="metode-kunjungan" class="mb-2 text-gray-700 font-semibold">Metode Kunjungan</label>
+                <select id="metode-kunjungan" name="metode_kunjungan" class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
+                    <option value="" disabled selected>Pilih Metode Kunjungan</option>
+                    <option value="Janji Temu">Janji Temu</option>
+                    <option value="Walk-In">Walk-In</option>
+                    <option value="Darurat">Darurat</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col">
+                <label for="waktu-mulai" class="mb-2 text-gray-700 font-semibold">Waktu Mulai Penanganan</label>
+                <input type="datetime-local" id="waktu-mulai" name="waktu_mulai" class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
+            </div>
+
+            <div class="flex flex-col">
+                <label for="waktu-selesai" class="mb-2 text-gray-700 font-semibold">Waktu Selesai Penanganan</label>
+                <input type="datetime-local" id="waktu-selesai" name="waktu_selesai" class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
+            </div>
+        </div>
+
+        <div class="flex gap-4 mt-6">
+            <button type="button" onclick="history.back()" class="bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-6 rounded-lg">
+                Cancel
+            </button>
+            <button type="submit" class="bg-blue-900 hover:bg-blue-950 text-white font-semibold py-2 px-6 rounded-lg">
+                Update
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Ambil ID kunjungan dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const kunjunganId = urlParams.get('id');
+
+    // Data dummy hardcode
+    const kunjunganData = {
+        '6ba7b81e-9dad-11d1-80b4-00c04fd430c8': {
+            id_klien: 'a23b45c6-78d9-4e0f-1a2b-3c4d5e6f7g8h',
+            nama_hewan: 'Snowy',
+            metode_kunjungan: 'Janji Temu',
+            waktu_mulai: '2025-04-03T14:30',
+            waktu_selesai: '2025-04-03T16:30'
+        },
+        'f47ac10b-58cc-4372-a567-0e02b2c3d479': {
+            id_klien: 'KII123',
+            nama_hewan: 'Blacky',
+            metode_kunjungan: 'Walk-In',
+            waktu_mulai: '2025-08-05T12:30',
+            waktu_selesai: '2025-08-05T13:30'
+        },
+        '550e8400-e29b-41d4-a716-446655440000': {
+            id_klien: 'PKE123',
+            nama_hewan: 'Hamseung',
+            metode_kunjungan: 'Darurat',
+            waktu_mulai: '2025-09-01T16:30',
+            waktu_selesai: '2025-09-01T18:00'
+        }
+    };
+
+    // Kalau ada id kunjungan, isi form-nya
+    if (kunjunganId && kunjunganData[kunjunganId]) {
+        const data = kunjunganData[kunjunganId];
+
+        document.getElementById('id-kunjungan').value = kunjunganId;
+        document.getElementById('id-klien').value = data.id_klien;
+        document.getElementById('nama-hewan').value = data.nama_hewan;
+        document.getElementById('metode-kunjungan').value = data.metode_kunjungan;
+        document.getElementById('waktu-mulai').value = data.waktu_mulai;
+        document.getElementById('waktu-selesai').value = data.waktu_selesai;
+    }
+</script>
+{% endblock %}
