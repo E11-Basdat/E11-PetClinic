@@ -72,11 +72,9 @@
                                     <a href="{% url 'update_vaccine' vaccine.kode %}" class="bg-stone-800 text-white px-3 py-1 rounded text-xs inline-block mb-1 md:mb-0 md:mr-1">
                                         <i class="fas fa-edit"></i> Update
                                     </a>
-                                    {% if vaccine.can_delete %}
-                                    <button onclick="openDeleteModal('{{ vaccine.kode }}', '{{ vaccine.nama }}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs inline-block">
+                                    <button onclick="deleteVaccine('{{ vaccine.kode }}', '{{ vaccine.nama }}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs inline-block">
                                         <i class="fas fa-trash"></i> Delete
                                     </button>
-                                    {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
@@ -92,32 +90,57 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+<!-- Error Modal -->
+<div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
     <div class="bg-white rounded-lg p-6 max-w-md w-full">
-        <h2 class="text-xl font-bold mb-4">Delete Vaccine</h2>
-        <p class="mb-6">Apakah kamu yakin untuk menghapus Vaksin <span id="vaccineName" class="font-bold"></span> dengan <span id="vaccineCode" class="font-bold"></span>?</p>
-        <div class="flex justify-end space-x-3">
-            <button onclick="closeDeleteModal()" class="bg-gray-300 px-4 py-2 rounded text-gray-800">
-                Cancel
+        <h2 class="text-xl font-bold mb-4">Error</h2>
+        <p id="errorMessage" class="mb-6 text-red-600"></p>
+        <div class="flex justify-end">
+            <button onclick="closeErrorModal()" class="bg-stone-600 text-white px-4 py-2 rounded">
+                OK
             </button>
-            <a id="deleteLink" href="#" class="bg-red-600 text-white px-4 py-2 rounded">
-                Confirm Deletion
-            </a>
         </div>
     </div>
 </div>
 
 <script>
-    function openDeleteModal(vaccineCode, vaccineName) {
-        document.getElementById('vaccineName').textContent = vaccineName;
-        document.getElementById('vaccineCode').textContent = vaccineCode;
-        document.getElementById('deleteLink').href = "{% url 'delete_vaccine' 0 %}".replace('0', vaccineCode);
-        document.getElementById('deleteModal').classList.remove('hidden');
+    function closeErrorModal() {
+        document.getElementById('errorModal').classList.add('hidden');
     }
-    
-    function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.add('hidden');
+
+    function showError(message) {
+        if (message.includes('CONTEXT:')) {
+            message = message.split('CONTEXT:')[0].trim();
+        }
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorModal').classList.remove('hidden');
+    }
+
+    async function deleteVaccine(vaccineCode, vaccineName) {
+        try {
+            const response = await fetch(`/vaccinations/delete-vaccine/${vaccineCode}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.reload();
+            } else {
+                let errorMsg = data.message || 'Gagal menghapus vaksin';
+               
+                if (errorMsg.includes('CONTEXT:')) {
+                    errorMsg = errorMsg.split('CONTEXT:')[0].trim();
+                }
+                showError(errorMsg);
+            }
+        } catch (error) {
+            showError('Terjadi kesalahan saat menghapus vaksin');
+        }
     }
 </script>
 {% endblock %}

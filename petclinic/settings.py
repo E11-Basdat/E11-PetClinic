@@ -109,7 +109,7 @@ WSGI_APPLICATION = 'petclinic.wsgi.application'
 IS_PRODUCTION = os.getenv('DJANGO_ENV') == 'production'
 
 if IS_PRODUCTION:
-    # Konfigurasi database untuk production (contoh: Kawung)
+    # Konfigurasi database untuk production 
     DATABASES = {
         'default': {
             'ENGINE': os.getenv('ENGINE', 'django.db.backends.postgresql'),
