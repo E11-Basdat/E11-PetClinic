@@ -198,4 +198,4 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ['e11-petclinic-production.up.railway.app'] 
+CSRF_TRUSTED_ORIGINS = ['https://e11-petclinic-production.up.railway.app'] 
