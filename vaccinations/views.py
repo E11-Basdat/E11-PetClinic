@@ -218,18 +218,6 @@ def get_vaccine_by_id(kode):
         
         return None
 
-def is_vaccine_used(kode):
-    """Check if vaccine has been used in vaccinations"""
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT COUNT(*)
-            FROM PETCLINIC.KUNJUNGAN k
-            WHERE k.kode_vaksin = %s
-        """, [kode])
-        
-        count = cursor.fetchone()[0]
-        return count > 0
-
 def generate_vaccine_code():
     """Generate a new vaccine code"""
     with connection.cursor() as cursor:
@@ -279,7 +267,7 @@ def add_vaccination(request):
                     messages.error(request, "Kunjungan ini sudah memiliki vaksinasi")
                     return redirect('add_vaccination')
                 
-                # Tambahkan vaksinasi - trigger akan menangani stok
+                
                 cursor.execute("""
                     UPDATE PETCLINIC.KUNJUNGAN 
                     SET kode_vaksin = %s
@@ -331,7 +319,7 @@ def update_vaccination(request, id_kunjungan):
                 
                 old_vaccine = visit_data[10]
                 
-                # Jika vaksin berbeda, update - trigger akan menangani stok
+                
                 if old_vaccine != kode_vaksin:
                     cursor.execute("""
                         UPDATE PETCLINIC.KUNJUNGAN
@@ -400,7 +388,7 @@ def delete_vaccination(request, id_kunjungan):
                 
             vaccine_name = result[1]
             
-            # Set kode_vaksin ke NULL - trigger akan menangani stok
+            
             cursor.execute("""
                 UPDATE PETCLINIC.KUNJUNGAN
                 SET kode_vaksin = NULL
@@ -545,7 +533,7 @@ def delete_vaccine(request, kode):
                 WHERE kode = %s
             """, [kode])
         
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'message': f'Vaksin {vaccine["nama"]} berhasil dihapus'})
         
     except Exception as e:
         error_message = str(e)
@@ -569,6 +557,58 @@ def klien_required(view_func):
         
         return view_func(request, *args, **kwargs)
     return _wrapped_view
+
+@require_POST
+@perawat_required
+def check_vaccine_delete(request, kode):
+    """Check if vaccine can be deleted"""
+    try:
+        vaccine = get_vaccine_by_id(kode)
+        
+        if not vaccine:
+            return JsonResponse({'success': False, 'can_delete': False, 'message': 'Data vaksin tidak ditemukan'})
+
+        with connection.cursor() as cursor:
+            
+            cursor.execute("BEGIN;")
+            
+            try:
+                
+                cursor.execute("""
+                    DELETE FROM PETCLINIC.VAKSIN
+                    WHERE kode = %s
+                """, [kode])
+                
+                
+                
+                cursor.execute("ROLLBACK;")
+                
+                return JsonResponse({
+                    'success': True, 
+                    'can_delete': True, 
+                    'vaccine_name': vaccine['nama']
+                })
+                
+            except Exception as delete_error:
+                
+                cursor.execute("ROLLBACK;")
+                
+                error_message = str(delete_error)
+                if "CONTEXT:" in error_message:
+                    error_message = clean_error_message(error_message)
+                
+                return JsonResponse({
+                    'success': True, 
+                    'can_delete': False, 
+                    'message': error_message
+                })
+        
+    except Exception as e:
+        error_message = str(e)
+        if "ERROR:" in error_message:
+            return JsonResponse({'success': False, 'can_delete': False, 'message': clean_error_message(error_message)})
+        return JsonResponse({'success': False, 'can_delete': False, 'message': clean_error_message(error_message)})
+    
 
 def get_client_id(request):
     """Get client ID from session"""

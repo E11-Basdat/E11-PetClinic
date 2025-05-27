@@ -103,9 +103,34 @@
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h2 class="text-xl font-bold mb-4">Konfirmasi Penghapusan</h2>
+        <p id="confirmMessage" class="mb-6 text-gray-700">
+            Apakah kamu yakin untuk menghapus Vaksin <span id="vaccineName" class="font-bold"></span> dengan <span id="vaccineCode" class="font-bold"></span>?
+        </p>
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeConfirmModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                Batal
+            </button>
+            <button id="confirmDeleteBtn" onclick="confirmDelete()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+    let vaccineToDelete = null;
+
     function closeErrorModal() {
         document.getElementById('errorModal').classList.add('hidden');
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.add('hidden');
+        vaccineToDelete = null;
     }
 
     function showError(message) {
@@ -116,9 +141,41 @@
         document.getElementById('errorModal').classList.remove('hidden');
     }
 
+    function showConfirmation(vaccineCode, vaccineName) {
+        document.getElementById('vaccineName').textContent = vaccineName;
+        document.getElementById('vaccineCode').textContent = vaccineCode;
+        document.getElementById('confirmModal').classList.remove('hidden');
+        vaccineToDelete = { code: vaccineCode, name: vaccineName };
+    }
+
     async function deleteVaccine(vaccineCode, vaccineName) {
         try {
-            const response = await fetch(`/vaccinations/delete-vaccine/${vaccineCode}/`, {
+            const checkResponse = await fetch(`/vaccinations/check-vaccine-delete/${vaccineCode}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const checkData = await checkResponse.json();
+
+            if (!checkData.can_delete) {
+                showError(checkData.message);
+                return;
+            }
+            showConfirmation(vaccineCode, checkData.vaccine_name);
+
+        } catch (error) {
+            showError('Terjadi kesalahan saat memeriksa vaksin');
+        }
+    }
+
+    async function confirmDelete() {
+        if (!vaccineToDelete) return;
+
+        try {
+            const response = await fetch(`/vaccinations/delete-vaccine/${vaccineToDelete.code}/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}',
@@ -129,8 +186,10 @@
             const data = await response.json();
 
             if (data.success) {
+                closeConfirmModal();
                 window.location.reload();
             } else {
+                closeConfirmModal();
                 let errorMsg = data.message || 'Gagal menghapus vaksin';
                
                 if (errorMsg.includes('CONTEXT:')) {
@@ -139,6 +198,7 @@
                 showError(errorMsg);
             }
         } catch (error) {
+            closeConfirmModal();
             showError('Terjadi kesalahan saat menghapus vaksin');
         }
     }
