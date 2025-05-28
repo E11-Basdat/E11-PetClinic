@@ -671,6 +671,11 @@ def get_client_vaccinations(request):
     vaccine_filter = request.GET.get('vaccine_filter')
     
     query = """
+        SELECT k.id_kunjungan, k.nama_hewan, v.nama as nama_vaksin, v.kode as id_vaksin, 
+               v.harga, k.timestamp_awal
+        FROM PETCLINIC.KUNJUNGAN k
+        JOIN PETCLINIC.VAKSIN v ON k.kode_vaksin = v.kode
+        WHERE k.no_identitas_klien = %s AND k.kode_vaksin IS NOT NULL
     """
     
     params = [client_id]
