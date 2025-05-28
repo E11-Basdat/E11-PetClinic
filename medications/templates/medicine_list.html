@@ -47,47 +47,12 @@
             width: 100%;
         }
         
-        .search-add-container {
+        .add-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             width: 100%;
             margin-top: 20px;
             padding: 0 20px;
-            gap: 20px;
-        }
-        
-        .search-container {
-            flex: 1;
-            position: relative;
-        }
-        
-        .add-container {
-            flex: 0 0 auto;
-        }
-        
-        #searchInput {
-            height: 45px;
-            padding-left: 15px;
-            border-radius: 4px;
-            width: 100%;
-            border: 1px solid #ced4da;
-        }
-        
-        .btn-search {
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 45px;
-            width: 45px;
-            background-color: var(--pet-clinic-green);
-            border-color: var(--pet-clinic-green);
-            color: white;
-            border-radius: 0 4px 4px 0;
-        }
-        
-        .btn-search:hover {
-            background-color: var(--pet-clinic-dark-green);
-            border-color: var(--pet-clinic-dark-green);
         }
         
         .btn-add {
@@ -300,17 +265,8 @@
         }
         
         @media (max-width: 768px) {
-            .search-add-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .search-container {
-                width: 100%;
-            }
-            
             .add-container {
-                width: 100%;
+                padding: 0 20px;
             }
             
             .btn-add {
@@ -359,23 +315,12 @@
                 <h2 class="text-center medicine-header">LIST MEDICINES</h2>
             </div>
     
-            <div class="search-add-container">
-                <div class="search-container">
-                    <form method="GET" action="{% url 'medications:list' %}">
-                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search Medicine..." value="{{ search_query }}">
-                        <button class="btn btn-search" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </form>
-                </div>
-                
-                <div class="add-container">
-                    <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
-                        <div class="text-center">
-                            <i class="fas fa-plus me-1"></i> Create New Medicine
-                        </div>
-                    </button>
-                </div>
+            <div class="add-container">
+                <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+                    <div class="text-center">
+                        <i class="fas fa-plus me-1"></i> Create New Medicine
+                    </div>
+                </button>
             </div>
             
             <div id="alertMessages">
@@ -399,27 +344,27 @@
                             <div class="card h-100">
                                 <div class="medicine-body">
                                     <div class="price-tag">
-                                        <span class="medicine-price">Rp {{ medicine.price }}</span>
+                                        <span class="medicine-price">{{ medicine.harga }}</span>
                                     </div>
                                     <div class="medicine-content">
-                                        <h5 class="medicine-name text-center">{{ medicine.name }}</h5>
-                                        <p class="medicine-code text-center">{{ medicine.code }}</p>
-                                        <p class="medicine-dosage text-center">{{ medicine.dosage }}</p>
+                                        <h5 class="medicine-name text-center">{{ medicine.nama }}</h5>
+                                        <p class="medicine-code text-center">{{ medicine.kode }}</p>
+                                        <p class="medicine-dosage text-center">{{ medicine.dosis }}</p>
                                     </div>
                                     
                                     <div class="divider"></div>
                                     
                                     <div class="medicine-footer">
-                                        <div class="stock-label">Stock: {{ medicine.stock }}</div>
+                                        <div class="stock-label">Stock: {{ medicine.stok }}</div>
                                         <div class="action-icons">
-                                            <a href="#" class="update-icon" onclick="openUpdateModal('{{ medicine.code }}', '{{ medicine.name }}', '{{ medicine.price }}', '{{ medicine.dosage }}'); return false;">
+                                            <a href="#" class="update-icon" onclick="openUpdateModal('{{ medicine.kode }}', '{{ medicine.nama }}', '{{ medicine.harga_raw }}', '{{ medicine.dosis }}'); return false;">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="#" class="update-stock-icon" onclick="openUpdateStockModal('{{ medicine.code }}', '{{ medicine.name }}', {{ medicine.stock }}); return false;">
+                                            <a href="#" class="update-stock-icon" onclick="openUpdateStockModal('{{ medicine.kode }}', '{{ medicine.nama }}', {{ medicine.stok }}); return false;">
                                                 <i class="fas fa-cubes"></i>
                                             </a>
-                                            {% if medicine.canDelete %}
-                                            <a href="#" class="delete-icon" onclick="openDeleteModal('{{ medicine.code }}', '{{ medicine.name }}'); return false;">
+                                            {% if medicine.can_delete %}
+                                            <a href="#" class="delete-icon" onclick="openDeleteModal('{{ medicine.kode }}', '{{ medicine.nama }}'); return false;">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                             {% else %}
@@ -442,6 +387,7 @@
     </div>
 </div>
 
+<!-- Add Medicine Modal -->
 <div class="modal fade" id="addMedicineModal" tabindex="-1" aria-labelledby="addMedicineModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -449,7 +395,7 @@
                 <h5 class="modal-title" id="addMedicineModalLabel" style="text-align: center; width: 100%;">Add New Medicine</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{% url 'medications:add' %}">
+            <form method="POST" action="{% url 'medications:add_medicine' %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
@@ -458,8 +404,8 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="harga_satuan" class="form-label">Harga Satuan</label>
-                        <input type="number" class="form-control" id="harga_satuan" name="harga_satuan" min="0" required>
+                        <label for="harga" class="form-label">Harga Satuan</label>
+                        <input type="number" class="form-control" id="harga" name="harga" min="0" required>
                     </div>
                     
                     <div class="mb-3">
@@ -468,8 +414,8 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="stok_awal" class="form-label">Stok Awal</label>
-                        <input type="number" class="form-control" id="stok_awal" name="stok_awal" min="0" required>
+                        <label for="stok" class="form-label">Stok Awal</label>
+                        <input type="number" class="form-control" id="stok" name="stok" min="0" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -481,6 +427,7 @@
     </div>
 </div>
 
+<!-- Update Medicine Modal -->
 <div class="modal fade" id="updateMedicineModal" tabindex="-1" aria-labelledby="updateMedicineModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -503,7 +450,7 @@
                     
                     <div class="mb-3">
                         <label for="updateHarga" class="form-label">Harga Satuan</label>
-                        <input type="number" class="form-control" id="updateHarga" name="harga_satuan" min="0" required>
+                        <input type="number" class="form-control" id="updateHarga" name="harga" min="0" required>
                     </div>
                     
                     <div class="mb-3">
@@ -519,7 +466,8 @@
         </div>
     </div>
 </div>
-       
+
+<!-- Update Stock Modal -->       
 <div class="modal fade" id="updateStockModal" tabindex="-1" aria-labelledby="updateStockModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -546,6 +494,7 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -595,7 +544,10 @@
         document.getElementById('updateNama').value = name;
         document.getElementById('updateHarga').value = price;
         document.getElementById('updateDosis').value = dosage;
-        document.getElementById('updateMedicineForm').action = "{% url 'medications:update' '0000' %}".replace('0000', code);
+        
+        // Build URL manually instead of using Django template tag
+        const baseUrl = window.location.origin + '/medications/update/';
+        document.getElementById('updateMedicineForm').action = baseUrl + code + '/';
         
         const modal = new bootstrap.Modal(document.getElementById('updateMedicineModal'));
         modal.show();
@@ -604,7 +556,10 @@
     function openUpdateStockModal(code, name, stock) {
         document.getElementById('updateStockMedicineName').textContent = " " + code + " - " + name;
         document.getElementById('stockValue').value = stock;
-        document.getElementById('updateStockForm').action = "{% url 'medications:update_stock' '0000' %}".replace('0000', code);
+        
+        // Build URL manually instead of using Django template tag
+        const baseUrl = window.location.origin + '/medications/update-stock/';
+        document.getElementById('updateStockForm').action = baseUrl + code + '/';
         
         const modal = new bootstrap.Modal(document.getElementById('updateStockModal'));
         modal.show();
@@ -614,7 +569,10 @@
         document.getElementById('deleteMedicineName').textContent = name;
         document.getElementById('deleteMedicineCode').textContent = code;
         const form = document.getElementById('deleteForm');
-        form.action = "{% url 'medications:delete' '0000' %}".replace('0000', code);
+        
+        // Build URL manually instead of using Django template tag
+        const baseUrl = window.location.origin + '/medications/delete/';
+        form.action = baseUrl + code + '/';
         
         const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
         modal.show();

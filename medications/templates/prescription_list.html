@@ -47,47 +47,12 @@
             width: 100%;
         }
         
-        .search-add-container {
+        .add-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             width: 100%;
             margin-top: 20px;
             padding: 0 20px;
-            gap: 20px;
-        }
-        
-        .search-container {
-            flex: 1;
-            position: relative;
-        }
-        
-        .add-container {
-            flex: 0 0 auto;
-        }
-        
-        #searchInput {
-            height: 45px;
-            padding-left: 15px;
-            border-radius: 4px;
-            width: 100%;
-            border: 1px solid #ced4da;
-        }
-        
-        .btn-search {
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 45px;
-            width: 45px;
-            background-color: var(--pet-clinic-green);
-            border-color: var(--pet-clinic-green);
-            color: white;
-            border-radius: 0 4px 4px 0;
-        }
-        
-        .btn-search:hover {
-            background-color: var(--pet-clinic-dark-green);
-            border-color: var(--pet-clinic-dark-green);
         }
         
         .btn-add {
@@ -113,51 +78,50 @@
             padding: 0 20px;
         }
         
-        .prescription-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        .table-container {
+            background: white;
             border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             overflow: hidden;
+            margin-bottom: 20px;
         }
         
-        .prescription-table th {
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
             background-color: var(--pet-clinic-green);
             color: white;
-            padding: 12px 15px;
-            text-align: left;
+            border: none;
+            padding: 15px;
             font-weight: 600;
+            text-align: center;
         }
         
-        .prescription-table td {
+        .table tbody td {
             padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
-            background-color: white;
+            text-align: center;
+            vertical-align: middle;
+            border-color: #e9ecef;
         }
         
-        .prescription-table tr:last-child td {
-            border-bottom: none;
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
         }
         
-        .action-icons {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
         }
         
-        .action-icons a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-        }
-        
-        .delete-icon {
-            color: #dc3545;
-            font-size: 16px;
+        .delete-btn:hover {
+            background-color: #c82333;
         }
         
         .empty-message {
@@ -180,7 +144,7 @@
             border-top: none;
         }
         
-        .btn-create, .btn-update {
+        .btn-create {
             background-color: var(--pet-clinic-green);
             color: white;
             border: none;
@@ -207,39 +171,6 @@
             padding: 0.375rem 0.75rem;
         }
         
-        .form-control[readonly] {
-            background-color: #e9ecef;
-        }
-        
-        @media (max-width: 992px) {
-            .search-add-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .search-container {
-                width: 100%;
-            }
-            
-            .add-container {
-                width: 100%;
-            }
-            
-            .btn-add {
-                width: 100%;
-            }
-            
-            .prescription-header {
-                font-size: 1.8rem;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .prescription-header {
-                font-size: 1.6rem;
-            }
-        }
-
         .main-card {
             margin: 0;
             border-radius: 0;
@@ -248,38 +179,14 @@
             background-color: white;
         }
         
-        .no-results-message {
-            text-align: center;
-            padding: 40px 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-        
-        .no-results-message h4 {
-            color: var(--pet-clinic-green);
-            margin-bottom: 15px;
-        }
-        
-        .no-results-message p {
-            color: #6c757d;
-            margin-bottom: 20px;
-        }
-        
-        .btn-clear-search {
-            background-color: var(--pet-clinic-green);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-        
-        .btn-clear-search:hover {
-            background-color: var(--pet-clinic-dark-green);
-            color: white;
+        @media (max-width: 768px) {
+            .prescription-header {
+                font-size: 1.6rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.875rem;
+            }
         }
     </style>
 </head>
@@ -294,21 +201,10 @@
                 <h2 class="text-center prescription-header">LIST PRESCRIPTIONS</h2>
             </div>
             
-            <div class="search-add-container">
-                <div class="search-container">
-                    <form method="GET" action="{% url 'medications:prescription_list' %}">
-                        <input type="text" id="searchInput" name="search" class="form-control" placeholder="Search by treatment or medicine..." value="{{ search_query }}">
-                        <button class="btn btn-search" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </form>
-                </div>
-                
-                <div class="add-container">
-                    <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addPrescriptionModal">
-                        <i class="fas fa-plus me-1"></i> Add New Prescription
-                    </button>
-                </div>
+            <div class="add-container">
+                <button type="button" class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addPrescriptionModal">
+                    <i class="fas fa-plus me-1"></i> Add New Prescription
+                </button>
             </div>
             
             <div id="alertMessages">
@@ -326,15 +222,16 @@
 
             <div class="prescription-container">
                 {% if prescriptions %}
+                <div class="table-container">
                     <div class="table-responsive">
-                        <table class="prescription-table">
+                        <table class="table">
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Treatment Type</th>
-                                    <th>Medicine</th>
-                                    <th>Quantity</th>
-                                    <th>Total Price</th>
+                                    <th>Jenis Perawatan</th>
+                                    <th>Obat</th>
+                                    <th>Kuantitas Obat</th>
+                                    <th>Total Harga</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -345,77 +242,75 @@
                                     <td>{{ prescription.kode_perawatan }} - {{ prescription.nama_perawatan }}</td>
                                     <td>{{ prescription.kode_obat }} - {{ prescription.nama_obat }}</td>
                                     <td>{{ prescription.kuantitas_obat }}</td>
-                                    <td>Rp {{ prescription.total_harga }}</td>
+                                    <td>{{ prescription.total_harga }}</td>
                                     <td>
-                                        <div class="action-icons">
-                                            <a href="#" class="delete-icon" onclick="openDeleteModal('{{ prescription.kode_perawatan }}', '{{ prescription.kode_obat }}'); return false;">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        </div>
+                                        <button class="delete-btn" onclick="openDeleteModal('{{ prescription.kode_perawatan }}', '{{ prescription.kode_obat }}', '{{ prescription.nama_perawatan }}', '{{ prescription.nama_obat }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                {% elif search_query %}
-                    <div class="no-results-message">
-                        <h4>No prescriptions found</h4>
-                        <p>No prescriptions match your search for "{{ search_query }}"</p>
-                        <a href="{% url 'medications:prescription_list' %}" class="btn-clear-search">Clear Search</a>
-                    </div>
+                </div>
                 {% else %}
-                    <div class="empty-message">No prescriptions found. Add a new prescription to get started.</div>
+                <div class="empty-message">
+                    <h4>No prescriptions found</h4>
+                    <p>You haven't created any prescriptions yet. Create your first prescription to get started.</p>
+                </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
 
+<!-- Add Prescription Modal -->
 <div class="modal fade" id="addPrescriptionModal" tabindex="-1" aria-labelledby="addPrescriptionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addPrescriptionModalLabel">Add New Prescription</h5>
+                <h5 class="modal-title" id="addPrescriptionModalLabel">Create New Prescription</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{% url 'medications:add_prescription' %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="jenis_perawatan" class="form-label">Treatment Type</label>
-                        <select class="form-control" id="jenis_perawatan" name="jenis_perawatan" required>
-                            <option value="">Select Treatment Type</option>
+                        <label for="jenis_perawatan" class="form-label">Jenis Perawatan</label>
+                        <select class="form-control" id="jenis_perawatan" name="kode_perawatan" required>
+                            <option value="">Jenis Perawatan</option>
                             {% for treatment in treatments %}
-                            <option value="{{ treatment.kode_perawatan }}">{{ treatment.kode_perawatan }} - {{ treatment.nama_perawatan }}</option>
+                            <option value="{{ treatment.kode }}">{{ treatment.display }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="obat" class="form-label">Medicine</label>
-                        <select class="form-control" id="obat" name="obat" required>
-                            <option value="">Select Medicine</option>
+                        <label for="obat" class="form-label">Obat</label>
+                        <select class="form-control" id="obat" name="kode_obat" required>
+                            <option value="">Obat</option>
                             {% for medicine in medicines %}
-                            <option value="{{ medicine.kode }}">{{ medicine.kode }} - {{ medicine.nama }}</option>
+                            <option value="{{ medicine.kode }}" data-stock="{{ medicine.stok }}">{{ medicine.display }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="kuantitas" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="kuantitas" name="kuantitas" min="1" required>
+                        <label for="kuantitas_obat" class="form-label">Kuantitas Obat</label>
+                        <input type="number" class="form-control" id="kuantitas_obat" name="kuantitas_obat" min="1" required>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-create">Add Prescription</button>
+                    <button type="submit" class="btn btn-create">Create</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -424,11 +319,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Apakah kamu yakin untuk menghapus Prescription untuk Jenis Perawatan <span id="deletePerawatanKode" style="color: #dc3545; font-weight: bold;"></span> dengan Obat <span id="deleteObatKode" style="color: #dc3545; font-weight: bold;"></span>?</p>
-                <form id="deleteForm" method="POST" action="{% url 'medications:delete_prescription' %}">
+                <p>Are you sure you want to delete the prescription for <strong><span id="deleteTreatmentName"></span></strong> with medicine <strong><span id="deleteMedicineName"></span></strong>?</p>
+                <p class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i>This action will restore medicine stock and cannot be undone.</p>
+                <form id="deleteForm" method="POST" action="">
                     {% csrf_token %}
-                    <input type="hidden" name="kode_perawatan" id="kode_perawatan_input">
-                    <input type="hidden" name="kode_obat" id="kode_obat_input">
                 </form>
             </div>
             <div class="modal-footer">
@@ -458,11 +352,13 @@
         }, 5000);
     }
     
-    function openDeleteModal(kodePerawatan, kodeObat) {
-        document.getElementById('deletePerawatanKode').textContent = kodePerawatan;
-        document.getElementById('deleteObatKode').textContent = kodeObat;
-        document.getElementById('kode_perawatan_input').value = kodePerawatan;
-        document.getElementById('kode_obat_input').value = kodeObat;
+    function openDeleteModal(kodePerawatan, kodeObat, namaPerawatan, namaObat) {
+        document.getElementById('deleteTreatmentName').textContent = namaPerawatan;
+        document.getElementById('deleteMedicineName').textContent = namaObat;
+        
+        // Set the form action with the correct URL pattern
+        const deleteForm = document.getElementById('deleteForm');
+        deleteForm.action = `/medications/prescription/delete/${kodePerawatan}/${kodeObat}/`;
         
         const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
         modal.show();
@@ -470,6 +366,32 @@
     
     document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
         document.getElementById('deleteForm').submit();
+    });
+    
+    // Validate stock when selecting medicine
+    document.getElementById('obat').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const stock = selectedOption.getAttribute('data-stock');
+        const quantityInput = document.getElementById('kuantitas_obat');
+        
+        if (stock) {
+            quantityInput.setAttribute('max', stock);
+            quantityInput.setAttribute('placeholder', `Max: ${stock}`);
+        }
+    });
+    
+    // Validate quantity input
+    document.getElementById('kuantitas_obat').addEventListener('input', function() {
+        const selectedMedicine = document.getElementById('obat');
+        const selectedOption = selectedMedicine.options[selectedMedicine.selectedIndex];
+        const stock = parseInt(selectedOption.getAttribute('data-stock'));
+        const quantity = parseInt(this.value);
+        
+        if (quantity > stock) {
+            this.setCustomValidity(`Quantity cannot exceed available stock (${stock})`);
+        } else {
+            this.setCustomValidity('');
+        }
     });
     
     document.addEventListener('DOMContentLoaded', function() {

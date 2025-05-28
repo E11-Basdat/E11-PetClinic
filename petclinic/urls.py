@@ -28,6 +28,6 @@ urlpatterns = [
     path('vaccinations/', include('vaccinations.urls')),
     path('visits/', include('visits.urls')),
     # path('treatments/', include('treatments.urls', namespace='treatments')),
-    path('treatment/', include('treatments.urls')),
+    path('treatments/', include('treatments.urls')),
 ]
 
