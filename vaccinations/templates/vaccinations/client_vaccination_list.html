@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}List Vaccine for Client's Pet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="w-full">
+        <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="bg-white/20 text-center">
+                <h1 class="text-stone-900 text-2xl font-bold pt-5 py-5">List Vaccine for Client's Pet</h1>
+            </div>
+            
+            {% if messages %}
+            <div class="messages p-4">
+                {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}bg-red-100 border-l-4 border-red-500 text-red-700{% elif message.tags == 'success' %}bg-stone-100 border-l-4 border-stone-500 text-stone-700{% else %}bg-stone-50 border-l-4 border-stone-400 text-stone-600{% endif %} p-4 mb-3 rounded">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- Filter Section -->
+            <div class="p-4 bg-white/30 border-b border-gray-200">
+                <form method="get" action="{% url 'client_vaccination_list' %}" class="flex flex-wrap items-center justify-end gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="w-40">
+                            <select name="pet_filter" id="petFilter" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-stone-500">
+                                <option value="">Filter by Pet</option>
+                                {% for pet in pets %}
+                                <option value="{{ pet.nama }}" {% if pet_filter == pet.nama %}selected{% endif %}>{{ pet.nama }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="w-40">
+                            <select name="vaccine_filter" id="vaccineFilter" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-stone-500">
+                                <option value="">Filter by Vaccine</option>
+                                {% for vaccine in vaccines %}
+                                <option value="{{ vaccine.kode }}" {% if vaccine_filter == vaccine.kode %}selected{% endif %}>[{{ vaccine.kode }}] {{ vaccine.nama }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="bg-stone-800 text-white px-4 py-2 rounded text-sm transition duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Filter
+                        </button>
+                        <a href="{% url 'client_vaccination_list' %}" class="bg-gray-300 text-gray-800 px-4 py-2 rounded text-sm transition duration-300">
+                            Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="p-5">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full border-collapse text-sm">
+                        <thead>
+                            <tr>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">No</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Pet</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Vaksin</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">ID Vaksin</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Harga</th>
+                                <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Time and Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vaccination in vaccinations %}
+                            <tr class="{% cycle '' 'bg-gray-50' %}">
+                                <td class="border border-stone-300 p-3 text-center">{{ forloop.counter }}</td>
+                                <td class="border border-stone-300 p-3 text-center">
+                                    <a class="text-blue-600 underline">
+                                        {{ vaccination.nama_hewan }}
+                                    </a>
+                                </td>
+                                <td class="border border-stone-300 p-3 text-center">{{ vaccination.nama_vaksin }}</td>
+                                <td class="border border-stone-300 p-3 text-center">{{ vaccination.id_vaksin }}</td>
+                                <td class="border border-stone-300 p-3 text-center">{{ vaccination.harga }}</td>
+                                <td class="border border-stone-300 p-3 text-center">{{ vaccination.tanggal_kunjungan|date:"d-m-Y H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center border border-stone-300 p-4">Tidak ada data vaksinasi yang tersedia</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

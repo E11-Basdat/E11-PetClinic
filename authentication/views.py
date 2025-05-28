@@ -4,6 +4,12 @@ from django.db import connection
 import uuid
 from datetime import date
 
+def clean_error_message(message):
+    """Remove the CONTEXT part from database error messages"""
+    if isinstance(message, str) and 'CONTEXT:' in message:
+        message = message.split('CONTEXT:')[0].strip()
+    return message
+
 def execute_query(query, params=None):
     """Execute a database query and return results"""
     with connection.cursor() as cursor:
@@ -16,8 +22,21 @@ def execute_query(query, params=None):
 def execute_update_query(query, params=None):
     """Execute a database query (INSERT, UPDATE, DELETE) that doesn't return results"""
     with connection.cursor() as cursor:
-        cursor.execute(query, params or [])
-        return True
+        try:
+            cursor.execute(query, params or [])
+            
+            notices = get_pg_notices(cursor)
+            return notices
+        except Exception as e:
+            raise e
+
+def get_pg_notices(cursor):
+    """Get PostgreSQL notice messages if available"""
+    notices = []
+    if hasattr(cursor.connection, 'notices') and cursor.connection.notices:
+        notices = [notice.replace('NOTICE:  ', '') for notice in cursor.connection.notices.copy()]
+        cursor.connection.notices.clear()
+    return notices
 
 def get_sertifikat_data(no_tenaga_medis):
     """Get certificate data for medical staff"""
@@ -113,7 +132,8 @@ def get_user_data(request):
     
     if user_type == 'front_desk':
         emp_data = execute_query("""
-            SELECT p.no_pegawai, p.tanggal_mulai_kerja FROM petclinic.PEGAWAI p 
+            SELECT p.no_pegawai, p.tanggal_mulai_kerja, p.tanggal_akhir_kerja 
+            FROM petclinic.PEGAWAI p 
             JOIN petclinic.FRONT_DESK fd ON p.no_pegawai = fd.no_front_desk
             WHERE p.email_user = %s
         """, [user_email])
@@ -121,12 +141,13 @@ def get_user_data(request):
         if emp_data:
             result.update({
                 'no_pegawai': emp_data[0][0],
-                'tanggal_mulai_kerja': emp_data[0][1]
+                'tanggal_mulai_kerja': emp_data[0][1],
+                'tanggal_akhir_kerja': emp_data[0][2]
             })
             
     elif user_type == 'dokter':
         emp_data = execute_query("""
-            SELECT p.no_pegawai, p.tanggal_mulai_kerja, tm.no_izin_praktik 
+            SELECT p.no_pegawai, p.tanggal_mulai_kerja, p.tanggal_akhir_kerja, tm.no_izin_praktik 
             FROM petclinic.PEGAWAI p 
             JOIN petclinic.TENAGA_MEDIS tm ON p.no_pegawai = tm.no_tenaga_medis
             JOIN petclinic.DOKTER_HEWAN dh ON tm.no_tenaga_medis = dh.no_dokter_hewan
@@ -137,15 +158,21 @@ def get_user_data(request):
             result.update({
                 'no_pegawai': emp_data[0][0],
                 'tanggal_mulai_kerja': emp_data[0][1],
-                'no_izin_praktik': emp_data[0][2]
+                'tanggal_akhir_kerja': emp_data[0][2],
+                'no_izin_praktik': emp_data[0][3]
             })
             
             result['sertifikat'] = get_sertifikat_data(emp_data[0][0])
-            result['jadwal'] = get_jadwal_data(emp_data[0][0])
+            
+            
+            if not emp_data[0][2] or emp_data[0][2] >= date.today():
+                result['jadwal'] = get_jadwal_data(emp_data[0][0])
+            else:
+                result['jadwal'] = []
             
     elif user_type == 'perawat':
         emp_data = execute_query("""
-            SELECT p.no_pegawai, p.tanggal_mulai_kerja, tm.no_izin_praktik 
+            SELECT p.no_pegawai, p.tanggal_mulai_kerja, p.tanggal_akhir_kerja, tm.no_izin_praktik 
             FROM petclinic.PEGAWAI p 
             JOIN petclinic.TENAGA_MEDIS tm ON p.no_pegawai = tm.no_tenaga_medis
             JOIN petclinic.PERAWAT_HEWAN ph ON tm.no_tenaga_medis = ph.no_perawat_hewan
@@ -156,7 +183,8 @@ def get_user_data(request):
             result.update({
                 'no_pegawai': emp_data[0][0],
                 'tanggal_mulai_kerja': emp_data[0][1],
-                'no_izin_praktik': emp_data[0][2]
+                'tanggal_akhir_kerja': emp_data[0][2],
+                'no_izin_praktik': emp_data[0][3]
             })
             
             result['sertifikat'] = get_sertifikat_data(emp_data[0][0])
@@ -458,7 +486,7 @@ def register_user(request):
             return redirect('authentication:login') 
             
         except Exception as e:
-            messages.error(request, f'Error during registration: {str(e)}')
+            messages.error(request, clean_error_message(str(e)))
     
     return render(request, 'register.html')
 
@@ -512,17 +540,25 @@ def update_profile(request):
     user_email = request.session.get('user_email')
     user_type = request.session.get('user_type')
     
+    
     user_data = get_user_data(request)
+    
+    if user_type in ['front_desk', 'dokter', 'perawat'] and 'tanggal_akhir_kerja' in user_data and user_data['tanggal_akhir_kerja']:
+        user_data['tanggal_akhir_kerja'] = user_data['tanggal_akhir_kerja'].isoformat()
     
     if request.method == 'POST':
         alamat = request.POST.get('alamat')
         nomor_telepon = request.POST.get('nomor_telepon')
         
         try:
-            execute_update_query("""
-                UPDATE petclinic."USER" SET alamat = %s, nomor_telepon = %s
-                WHERE email = %s
-            """, [alamat, nomor_telepon, user_email])
+            
+            fields_changed = False
+            if alamat != user_data['alamat'] or nomor_telepon != user_data['nomor_telepon']:
+                execute_update_query("""
+                    UPDATE petclinic."USER" SET alamat = %s, nomor_telepon = %s
+                    WHERE email = %s
+                """, [alamat, nomor_telepon, user_email])
+                fields_changed = True
             
             
             if user_type == 'individu':
@@ -530,50 +566,133 @@ def update_profile(request):
                 nama_tengah = request.POST.get('nama_tengah', '')
                 nama_belakang = request.POST.get('nama_belakang')
                 
-                execute_update_query("""
-                    UPDATE petclinic.INDIVIDU SET nama_depan = %s, nama_tengah = %s, nama_belakang = %s
-                    WHERE no_identitas_klien = %s
-                """, [nama_depan, nama_tengah, nama_belakang, user_data['no_identitas']])
+                if (nama_depan != user_data.get('nama_depan', '') or 
+                    nama_tengah != user_data.get('nama_tengah', '') or 
+                    nama_belakang != user_data.get('nama_belakang', '')):
+                    
+                    execute_update_query("""
+                        UPDATE petclinic.INDIVIDU SET nama_depan = %s, nama_tengah = %s, nama_belakang = %s
+                        WHERE no_identitas_klien = %s
+                    """, [nama_depan, nama_tengah, nama_belakang, user_data['no_identitas']])
+                    fields_changed = True
                 
             elif user_type == 'perusahaan':
                 nama_perusahaan = request.POST.get('nama_perusahaan')
                 
-                execute_update_query("""
-                    UPDATE petclinic.PERUSAHAAN SET nama_perusahaan = %s
-                    WHERE no_identitas_klien = %s
-                """, [nama_perusahaan, user_data['no_identitas']])
+                if nama_perusahaan != user_data.get('nama_perusahaan', ''):
+                    execute_update_query("""
+                        UPDATE petclinic.PERUSAHAAN SET nama_perusahaan = %s
+                        WHERE no_identitas_klien = %s
+                    """, [nama_perusahaan, user_data['no_identitas']])
+                    fields_changed = True
                 
             elif user_type in ['front_desk', 'dokter', 'perawat']:
                 tanggal_akhir_kerja = request.POST.get('tanggal_akhir_kerja')
                 
-                if tanggal_akhir_kerja:
-                    execute_update_query("""
-                        UPDATE petclinic.PEGAWAI SET tanggal_akhir_kerja = %s
-                        WHERE no_pegawai = %s
-                    """, [tanggal_akhir_kerja, user_data['no_pegawai']])
-                else:
-                    execute_update_query("""
-                        UPDATE petclinic.PEGAWAI SET tanggal_akhir_kerja = NULL
-                        WHERE no_pegawai = %s
-                    """, [user_data['no_pegawai']])
+                
+                current_end_date = user_data.get('tanggal_akhir_kerja')
+                if tanggal_akhir_kerja != current_end_date:
+                    if tanggal_akhir_kerja:
+                        notices = execute_update_query("""
+                            UPDATE petclinic.PEGAWAI SET tanggal_akhir_kerja = %s
+                            WHERE no_pegawai = %s
+                        """, [tanggal_akhir_kerja, user_data['no_pegawai']])
+                        print(f"DEBUG: Notices received: {notices}")
+                        
+                        for notice in notices:
+                            messages.success(request, notice)
+                    else:
+                        execute_update_query("""
+                            UPDATE petclinic.PEGAWAI SET tanggal_akhir_kerja = NULL
+                            WHERE no_pegawai = %s
+                        """, [user_data['no_pegawai']])
+                    
+                    fields_changed = True
+                    
+                    if user_type == 'dokter':
+                        user_data = get_user_data(request)
             
             
             if user_type in ['dokter', 'perawat']:
                 cert_numbers = request.POST.getlist('no_sertifikat_kompetensi[]')
                 cert_names = request.POST.getlist('nama_sertifikat[]')
-                handle_certificates(user_data['no_pegawai'], cert_numbers, cert_names)
+                
+                
+                current_certs = {cert['no_sertifikat_kompetensi']: cert['nama_sertifikat'] 
+                               for cert in user_data.get('sertifikat', [])}
+                
+                new_certs = {cert_numbers[i]: cert_names[i] for i in range(len(cert_numbers))}
+                
+                if current_certs != new_certs:
+                    handle_certificates(user_data['no_pegawai'], cert_numbers, cert_names)
+                    fields_changed = True
             
             
             if user_type == 'dokter':
-                days = request.POST.getlist('hari[]')
-                hours = request.POST.getlist('jam[]')
-                handle_schedules(user_data['no_pegawai'], days, hours)
-        
-            messages.success(request, 'Profile updated successfully!')
+                
+                end_date = user_data.get('tanggal_akhir_kerja')
+                today = date.today()
+                is_active = False
+                
+                if not end_date:
+                    is_active = True
+                elif isinstance(end_date, str):
+                    try:
+                        is_active = date.fromisoformat(end_date) >= today
+                    except ValueError:
+                        is_active = False
+                else:
+                    is_active = end_date >= today
+                
+                if is_active:
+                    days = request.POST.getlist('hari[]')
+                    hours = request.POST.getlist('jam[]')
+                    
+                    
+                    current_schedules = {schedule['hari']: schedule['jam'] 
+                                       for schedule in user_data.get('jadwal', [])}
+                    
+                    new_schedules = {days[i]: hours[i] for i in range(len(days))}
+                    
+                    if current_schedules != new_schedules:
+                        handle_schedules(user_data['no_pegawai'], days, hours)
+                        fields_changed = True
+            
+            if user_type == 'dokter' and tanggal_akhir_kerja and tanggal_akhir_kerja != current_end_date:
+                end_date = None
+                try:
+                    end_date = date.fromisoformat(tanggal_akhir_kerja) if isinstance(tanggal_akhir_kerja, str) else tanggal_akhir_kerja
+                except ValueError:
+                    pass
+                
+                if end_date and end_date <= date.today():
+                    
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            UPDATE petclinic.PEGAWAI SET tanggal_akhir_kerja = %s
+                            WHERE no_pegawai = %s
+                        """, [tanggal_akhir_kerja, user_data['no_pegawai']])
+                    
+                    
+                    notices = []
+                    with connection.cursor() as cursor:
+                        notices = get_pg_notices(cursor)
+                        
+                    for notice in notices:
+                        messages.success(request, notice)
+                    
+                    fields_changed = True
+                    return redirect('authentication:dashboard')
+            
+            if fields_changed:
+                messages.success(request, 'Profile updated successfully!')
+            else:
+                messages.info(request, 'No changes detected in your profile.')
+                
             return redirect('authentication:dashboard')
             
         except Exception as e:
-            messages.error(request, f'Error updating profile: {str(e)}')
+            messages.error(request, f'Error updating profile: {clean_error_message(str(e))}')
     
     return render(request, 'update_profile.html', {'user_data': user_data})
 

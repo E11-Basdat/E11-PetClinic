@@ -6,6 +6,7 @@ from functools import wraps
 from datetime import datetime
 import uuid
 import locale
+from django.views.decorators.http import require_POST
 
 
 def dokter_required(view_func):
@@ -217,18 +218,6 @@ def get_vaccine_by_id(kode):
         
         return None
 
-def is_vaccine_used(kode):
-    """Check if vaccine has been used in vaccinations"""
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT COUNT(*)
-            FROM PETCLINIC.KUNJUNGAN k
-            WHERE k.kode_vaksin = %s
-        """, [kode])
-        
-        count = cursor.fetchone()[0]
-        return count > 0
-
 def generate_vaccine_code():
     """Generate a new vaccine code"""
     with connection.cursor() as cursor:
@@ -247,6 +236,12 @@ def generate_vaccine_code():
         
         return next_code
 
+def clean_error_message(message):
+    """Remove the CONTEXT part from database error messages"""
+    if isinstance(message, str) and 'CONTEXT:' in message:
+        message = message.split('CONTEXT:')[0].strip()
+    return message
+
 @dokter_required
 def vaccination_list(request):
     vaccinations = get_list_vaccinations(request)
@@ -257,13 +252,10 @@ def vaccination_list(request):
 def add_vaccination(request):
     if request.method == 'POST':
         try:
-            
             id_kunjungan = request.POST.get('id_kunjungan')
             kode_vaksin = request.POST.get('kode_vaksin')
             
-            
             with connection.cursor() as cursor:
-                
                 cursor.execute("""
                     SELECT kode_vaksin
                     FROM PETCLINIC.KUNJUNGAN
@@ -275,30 +267,6 @@ def add_vaccination(request):
                     messages.error(request, "Kunjungan ini sudah memiliki vaksinasi")
                     return redirect('add_vaccination')
                 
-                cursor.execute("""
-                    SELECT stok FROM PETCLINIC.VAKSIN
-                    WHERE kode = %s
-                """, [kode_vaksin])
-                
-                result = cursor.fetchone()
-                if not result or result[0] <= 0:
-                    messages.error(request, "Stok Vaksin yang dipilih sudah habis")
-                    return redirect('add_vaccination')
-                
-                
-                cursor.execute("""
-                    SELECT nama_hewan, no_identitas_klien, no_front_desk, 
-                           no_perawat_hewan, no_dokter_hewan,
-                           timestamp_awal, timestamp_akhir, suhu, berat_badan
-                    FROM PETCLINIC.KUNJUNGAN
-                    WHERE id_kunjungan = %s
-                """, [id_kunjungan])
-                
-                visit_data = cursor.fetchone()
-                if not visit_data:
-                    messages.error(request, "Data kunjungan tidak ditemukan")
-                    return redirect('add_vaccination')
-                
                 
                 cursor.execute("""
                     UPDATE PETCLINIC.KUNJUNGAN 
@@ -306,18 +274,15 @@ def add_vaccination(request):
                     WHERE id_kunjungan = %s
                 """, [kode_vaksin, id_kunjungan])
                 
-                
-                cursor.execute("""
-                    UPDATE PETCLINIC.VAKSIN 
-                    SET stok = stok - 1
-                    WHERE kode = %s
-                """, [kode_vaksin])
-                
             messages.success(request, "Vaksinasi berhasil ditambahkan")
             return redirect('vaccination_list')
         
         except Exception as e:
-            messages.error(request, f"Gagal menambahkan vaksinasi: {str(e)}")
+            error_message = str(e)
+            if "ERROR:" in error_message:
+                messages.error(request, clean_error_message(error_message))
+            else:
+                messages.error(request, f"Gagal menambahkan vaksinasi: {clean_error_message(error_message)}")
             return redirect('add_vaccination')
     
     
@@ -338,7 +303,6 @@ def update_vaccination(request, id_kunjungan):
             kode_vaksin = request.POST.get('kode_vaksin')
             
             with connection.cursor() as cursor:
-                
                 cursor.execute("""
                     SELECT k.nama_hewan, k.no_identitas_klien, k.no_front_desk, 
                            k.no_perawat_hewan, k.no_dokter_hewan, k.tipe_kunjungan,
@@ -358,42 +322,21 @@ def update_vaccination(request, id_kunjungan):
                 
                 if old_vaccine != kode_vaksin:
                     cursor.execute("""
-                        SELECT stok FROM PETCLINIC.VAKSIN
-                        WHERE kode = %s
-                    """, [kode_vaksin])
-                    
-                    result = cursor.fetchone()
-                    if not result or result[0] <= 0:
-                        messages.error(request, "Stok Vaksin yang dipilih sudah habis")
-                        return redirect('update_vaccination', id_kunjungan=id_kunjungan)
-                    
-                    
-                    cursor.execute("""
                         UPDATE PETCLINIC.KUNJUNGAN
                         SET kode_vaksin = %s
                         WHERE id_kunjungan = %s
                     """, [kode_vaksin, id_kunjungan])
-                    
-                    
-                    cursor.execute("""
-                        UPDATE PETCLINIC.VAKSIN
-                        SET stok = stok + 1
-                        WHERE kode = %s
-                    """, [old_vaccine])
-                    
-                    
-                    cursor.execute("""
-                        UPDATE PETCLINIC.VAKSIN
-                        SET stok = stok - 1
-                        WHERE kode = %s
-                    """, [kode_vaksin])
             
             messages.success(request, "Data vaksinasi berhasil diperbarui")
             return redirect('vaccination_list')
             
         except Exception as e:
-            messages.error(request, f"Gagal memperbarui data vaksinasi: {str(e)}")
-            return redirect('vaccination_list')
+            error_message = str(e)
+            if "ERROR:" in error_message:
+                messages.error(request, clean_error_message(error_message))
+            else:
+                messages.error(request, f"Gagal memperbarui data vaksinasi: {clean_error_message(error_message)}")
+            return redirect('update_vaccination', id_kunjungan=id_kunjungan)
     
     
     with connection.cursor() as cursor:
@@ -431,7 +374,6 @@ def update_vaccination(request, id_kunjungan):
 def delete_vaccination(request, id_kunjungan):
     try:
         with connection.cursor() as cursor:
-            
             cursor.execute("""
                 SELECT k.kode_vaksin, v.nama
                 FROM PETCLINIC.KUNJUNGAN k
@@ -444,7 +386,6 @@ def delete_vaccination(request, id_kunjungan):
                 messages.error(request, "Data vaksinasi tidak ditemukan")
                 return redirect('vaccination_list')
                 
-            vaccine_code = result[0]
             vaccine_name = result[1]
             
             
@@ -453,17 +394,14 @@ def delete_vaccination(request, id_kunjungan):
                 SET kode_vaksin = NULL
                 WHERE id_kunjungan = %s
             """, [id_kunjungan])
-            
-            
-            cursor.execute("""
-                UPDATE PETCLINIC.VAKSIN
-                SET stok = stok + 1
-                WHERE kode = %s
-            """, [vaccine_code])
         
         messages.success(request, f"Vaksinasi {vaccine_name} untuk kunjungan {id_kunjungan} berhasil dihapus")
     except Exception as e:
-        messages.error(request, f"Gagal menghapus data vaksinasi: {str(e)}")
+        error_message = str(e)
+        if "ERROR:" in error_message:
+            messages.error(request, clean_error_message(error_message))
+        else:
+            messages.error(request, f"Gagal menghapus data vaksinasi: {clean_error_message(error_message)}")
     
     return redirect('vaccination_list')
 
@@ -506,7 +444,7 @@ def add_vaccine(request):
             return redirect('vaccine_list')
             
         except Exception as e:
-            messages.error(request, f"Gagal menambahkan vaksin: {str(e)}")
+            messages.error(request, f"Gagal menambahkan vaksin: {clean_error_message(str(e))}")
             return redirect('add_vaccine')
     
     return render(request, 'vaccinations/add_vaccine.html')
@@ -540,7 +478,7 @@ def update_vaccine(request, kode):
             return redirect('vaccine_list')
             
         except Exception as e:
-            messages.error(request, f"Gagal memperbarui data vaksin: {str(e)}")
+            messages.error(request, f"Gagal memperbarui data vaksin: {clean_error_message(str(e))}")
             return redirect('update_vaccine', kode=kode)
     
     context = {'vaccine': vaccine}
@@ -574,34 +512,219 @@ def update_stock(request, kode):
             return redirect('vaccine_list')
             
         except Exception as e:
-            messages.error(request, f"Gagal memperbarui stok vaksin: {str(e)}")
+            messages.error(request, f"Gagal memperbarui stok vaksin: {clean_error_message(str(e))}")
             return redirect('update_stock', kode=kode)
     
     context = {'vaccine': vaccine}
     return render(request, 'vaccinations/update_stock.html', context)
 
+@require_POST
 @perawat_required
 def delete_vaccine(request, kode):
     try:
         vaccine = get_vaccine_by_id(kode)
         
         if not vaccine:
-            messages.error(request, "Data vaksin tidak ditemukan")
-            return redirect('vaccine_list')
-        
-        if is_vaccine_used(kode):
-            messages.error(request, "Vaksin tidak dapat dihapus karena sudah digunakan dalam vaksinasi")
-            return redirect('vaccine_list')
-        
+            return JsonResponse({'success': False, 'message': 'Data vaksin tidak ditemukan'})
+
         with connection.cursor() as cursor:
             cursor.execute("""
                 DELETE FROM PETCLINIC.VAKSIN
                 WHERE kode = %s
             """, [kode])
         
-        messages.success(request, f"Vaksin {vaccine['nama']} berhasil dihapus")
+        return JsonResponse({'success': True, 'message': f'Vaksin {vaccine["nama"]} berhasil dihapus'})
         
     except Exception as e:
-        messages.error(request, f"Gagal menghapus data vaksin: {str(e)}")
+        error_message = str(e)
+        if "ERROR:" in error_message:
+            return JsonResponse({'success': False, 'message': clean_error_message(error_message)})
+        return JsonResponse({'success': False, 'message': f"Gagal menghapus vaksin: {clean_error_message(error_message)}"})
+
+def klien_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        
+        if not request.session.get('user_email'):
+            messages.error(request, "Silakan login terlebih dahulu.")
+            return redirect('login')
+        
+        user_type = request.session.get('user_type')
+        if user_type != 'individu' and user_type != 'perusahaan':
+            messages.error(request, "Anda tidak memiliki akses ke halaman ini.")
+            print(f"User type: {user_type}")
+            return redirect('authentication:dashboard')
+        
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+@require_POST
+@perawat_required
+def check_vaccine_delete(request, kode):
+    """Check if vaccine can be deleted"""
+    try:
+        vaccine = get_vaccine_by_id(kode)
+        
+        if not vaccine:
+            return JsonResponse({'success': False, 'can_delete': False, 'message': 'Data vaksin tidak ditemukan'})
+
+        with connection.cursor() as cursor:
+            
+            cursor.execute("BEGIN;")
+            
+            try:
+                
+                cursor.execute("""
+                    DELETE FROM PETCLINIC.VAKSIN
+                    WHERE kode = %s
+                """, [kode])
+                
+                
+                
+                cursor.execute("ROLLBACK;")
+                
+                return JsonResponse({
+                    'success': True, 
+                    'can_delete': True, 
+                    'vaccine_name': vaccine['nama']
+                })
+                
+            except Exception as delete_error:
+                
+                cursor.execute("ROLLBACK;")
+                
+                error_message = str(delete_error)
+                if "CONTEXT:" in error_message:
+                    error_message = clean_error_message(error_message)
+                
+                return JsonResponse({
+                    'success': True, 
+                    'can_delete': False, 
+                    'message': error_message
+                })
+        
+    except Exception as e:
+        error_message = str(e)
+        if "ERROR:" in error_message:
+            return JsonResponse({'success': False, 'can_delete': False, 'message': clean_error_message(error_message)})
+        return JsonResponse({'success': False, 'can_delete': False, 'message': clean_error_message(error_message)})
     
-    return redirect('vaccine_list')
+
+def get_client_id(request):
+    """Get client ID from session"""
+    user_email = request.session.get('user_email')
+    
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT no_identitas
+            FROM PETCLINIC.KLIEN
+            WHERE email = %s
+        """, [user_email])
+        result = cursor.fetchone()
+    
+    return result[0] if result else None
+
+def get_client_pets(client_id):
+    """Get list of pets owned by the client"""
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT nama
+            FROM PETCLINIC.HEWAN
+            WHERE no_identitas_klien = %s
+            ORDER BY nama
+        """, [client_id])
+        
+        pets = cursor.fetchall()
+        pet_list = []
+        
+        for row in pets:
+            pet_list.append({
+                'nama': row[0]
+            })
+    
+    return pet_list
+
+def get_all_vaccines():
+    """Get list of all vaccines"""
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT kode, nama
+            FROM PETCLINIC.VAKSIN
+            ORDER BY nama
+        """)
+        
+        vaccines = cursor.fetchall()
+        vaccine_list = []
+        
+        for row in vaccines:
+            vaccine_list.append({
+                'kode': row[0],
+                'nama': row[1]
+            })
+    
+    return vaccine_list
+
+def get_client_vaccinations(request):
+    """Get vaccinations for a client's pets with optional filters"""
+    client_id = get_client_id(request)
+    pet_filter = request.GET.get('pet_filter')
+    vaccine_filter = request.GET.get('vaccine_filter')
+    
+    query = """
+    """
+    
+    params = [client_id]
+    
+    if pet_filter:
+        query += " AND k.nama_hewan = %s"
+        params.append(pet_filter)
+    
+    if vaccine_filter:
+        query += " AND v.kode = %s"
+        params.append(vaccine_filter)
+    
+    query += " ORDER BY k.timestamp_awal DESC"
+    
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        vaccinations = cursor.fetchall()
+        
+        vaccination_list = []
+        for row in vaccinations:
+            try:
+                harga = row[4]
+                formatted_harga = f"Rp{locale.format_string('%d', float(harga), grouping=True)}"
+            except (ValueError, TypeError):
+                formatted_harga = f"Rp{row[4]}"
+                
+            vaccination_list.append({
+                'id_kunjungan': row[0],
+                'nama_hewan': row[1],
+                'nama_vaksin': row[2],
+                'id_vaksin': row[3],
+                'harga': formatted_harga,
+                'tanggal_kunjungan': row[5]
+            })
+    
+    return vaccination_list
+
+@klien_required
+def client_vaccination_list(request):
+    client_id = get_client_id(request)
+    
+    if not client_id:
+        messages.error(request, "Data klien tidak ditemukan")
+        return redirect('authentication:dashboard')
+    
+    vaccinations = get_client_vaccinations(request)
+    pets = get_client_pets(client_id)
+    vaccines = get_all_vaccines()
+    
+    context = {
+        'vaccinations': vaccinations,
+        'pets': pets,
+        'vaccines': vaccines,
+        'pet_filter': request.GET.get('pet_filter', ''),
+        'vaccine_filter': request.GET.get('vaccine_filter', '')
+    }
+    return render(request, 'vaccinations/client_vaccination_list.html', context)

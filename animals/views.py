@@ -4,7 +4,9 @@ from django.db import connection
 import uuid
 from authentication.views import get_user_data
 from django.http import JsonResponse
-from django.db import IntegrityError
+from django.db import IntegrityError as DBIntegrityError
+import psycopg2            #  ← tambahkan
+from psycopg2 import errors
 
 
 # ===== JENIS HEWAN =====
@@ -58,8 +60,13 @@ def jenis_hewan_create(request):
                 )
             messages.success(request, 'Jenis hewan berhasil ditambahkan!')
             return redirect('animals:jenis_hewan_list')
-        except Exception as e:
-            messages.error(request, f'Error: {str(e)}')
+        
+        except (DBIntegrityError, psycopg2.IntegrityError, errors.RaiseException) as e:
+            connection.rollback()                           # ← WAJIB
+            # ambil pesan singkat (buang “ERROR:” & “CONTEXT:”)
+            clean_msg = str(e).split('CONTEXT')[0]
+            messages.error(request, clean_msg.replace('ERROR:', '').strip())
+            return redirect('animals:jenis_hewan_create')
     
     return render(request, 'jenis_hewan_form.html', {
         'user_data': user_data,
@@ -288,11 +295,21 @@ def hewan_create(request):
             messages.success(request, 'Hewan peliharaan berhasil ditambahkan!')
             return redirect('animals:hewan_list')
 
-        except IntegrityError as e:
-            messages.error(request, f'Data duplikat atau tidak valid: {e}')
-            return redirect('animals:hewan_create')
+        except (DBIntegrityError, psycopg2.IntegrityError, errors.RaiseException) as e:
+            # Kembalikan status transaksi agar query selanjutnya aman
+            connection.rollback()
+
+            # Ambil pesan paling ringkas
+            msg = getattr(getattr(e, "diag", None), "message_primary", None)
+            if not msg:
+                # fallback; aman walau str(e) == ''
+                msg = str(e).partition("CONTEXT")[0]
+            messages.error(request, msg.replace("ERROR:", "").strip())
+
+            return redirect("animals:hewan_create")
 
         except Exception as e:
+            connection.rollback()
             messages.error(request, f'Error: {e}')
             return redirect('animals:hewan_create')
 
@@ -481,8 +498,12 @@ def hewan_delete(request, nama, no_identitas_klien):
                 [nama, no_identitas_klien]
             )
         messages.success(request, 'Hewan peliharaan berhasil dihapus!')
+    
+    except errors.RaiseException as e:
+        messages.error(request, str(e).replace('ERROR:','').strip())
+
     except Exception as e:
-        messages.error(request, f'Error: {str(e)}')
+        messages.error(request, f'Error: {e}')
     
     return redirect('animals:hewan_list')
 
