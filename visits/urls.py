@@ -1,16 +1,21 @@
+# urls.py
 from django.urls import path
 from . import views
 
-app_name = 'visits'  # Pastikan namespace ini sesuai
+app_name = 'visits'
 
 urlpatterns = [
-    # path('', views.list_visits, name='list_visits'),
-    path('doctor/', views.visit_list_doctor, name='visit_list_doctor'),
-    path('fd/', views.visit_list_fd, name='visit_list_fd'),
-    path('update/', views.update_visit, name='update_visit'),
+    path('', views.visit_list_fd, name='list'),
     path('create/', views.create_visit, name='create_visit'),
-    # path('update/<str:visit_id>/', views.update_visit, name='update_visit'),
-    # path('delete/<str:visit_id>/', views.delete_visit, name='delete_visit'),
-    # path('medical-records/create/<str:id_kunjungan>/', views.create_medical_record, name='create_medical_record'),
-    # path('check-medical-record/<str:id_kunjungan>/', views.check_medical_record, name='check_medical_record'),
+    path('update/<str:visit_id>/', views.update_visit, name='update_visit'),
+    path('delete/', views.delete_visit, name='delete_visit'),
+    path('record/create/', views.create_record, name='create_record'),
+    path('record/update/', views.update_record, name='update_record'),
+    path('record/get/', views.get_medical_record, name='get_medical_record'),
+    path('doctor/', views.doctor_view, name='doctor_view'),
+    path('front-desk/', views.visit_list_fd, name='front_desk_view'),
+    
+    # API endpoints
+    path('api/perawatan/', views.get_perawatan_options, name='get_perawatan_options'),
+    path('get-animals/', views.get_animals_by_client, name='get_animals'),
 ]

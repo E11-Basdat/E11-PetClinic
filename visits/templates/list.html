@@ -51,7 +51,7 @@
         <!-- No Record View -->
         <div id="no-record-view" class="hidden">
             <h4 class="text-xl font-bold mb-2 text-red-500">Rekam Medis tidak Tersedia</h4>
-            <p class="mb-4 text-gray-700">Maaf, sepertinya belum ada rekam medis yang dibuat untuk kunjungan ini.</p>
+            <p class="mb-4 text-gray-700" id="no-record-message">Maaf, sepertinya belum ada rekam medis yang dibuat untuk kunjungan ini.</p>
             <div class="flex justify-end">
                 <button id="create-medical-record-btn" class="bg-gray-800 hover:bg-gray-900 text-white py-2 px-4 rounded mr-2">Create</button>
                 <button class="close-modal-btn bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded">OK</button>
@@ -67,16 +67,13 @@
             <div class="mb-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="text-gray-600">Suhu Tubuh</div>
-                    <div id="suhu-value">36.8°C</div>
+                    <div id="suhu-value">-</div>
                     
                     <div class="text-gray-600">Berat Badan</div>
-                    <div id="berat-value">12.3 kg</div>
-                    
-                    <div class="text-gray-600">Perawatan</div>
-                    <div id="perawatan-value">Vaksinasi</div>
+                    <div id="berat-value">-</div>
                     
                     <div class="text-gray-600">Catatan Medis</div>
-                    <div id="catatan-value" class="col-span-2 mt-2">Hewan dalam kondisi sehat, diberikan vaksin rabies dosis standar, tidak ada reaksi alergi setelah penyuntikan.</div>
+                    <div id="catatan-value" class="col-span-2 mt-2">-</div>
                 </div>
             </div>
             <div class="flex justify-end">
@@ -89,37 +86,23 @@
             <h4 class="text-xl font-bold mb-4">Create Rekam Medis</h4>
             <form id="create-record-form">
                 <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Suhu Tubuh</label>
-                    <input type="text" placeholder="Suhu Tubuh Pasien (°C)" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    <label class="block text-gray-700 mb-2">Suhu Tubuh (°C)</label>
+                    <input type="number" 
+                        step="0.1" 
+                        name="suhu" 
+                        placeholder="Masukkan suhu tubuh" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                        required>
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Berat Badan</label>
-                    <input type="text" placeholder="Berat Badan Pasien (kg)" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Jenis Perawatan</label>
-                    <div class="relative">
-                        <select class="block appearance-none w-full bg-white border border-gray-300 px-3 py-2 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option selected disabled>Pilih jenis perawatan</option>
-                            <option>Perawatan Gigi</option>
-                            <option>Grooming</option>
-                            <option>Pembersihan Telinga</option>
-                            <option>Perawatan Kulit dan Bulu</option>
-                            <option>Perawatan Luka Ringan</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                            </svg>
-                        </div>
-                    </div>
+                    <label class="block text-gray-700 mb-2">Berat Badan (kg)</label>
+                    <input type="number" step="0.1" name="berat" placeholder="Masukkan berat badan" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                 </div>
                 
                 <div class="mb-4">
                     <label class="block text-gray-700 mb-2">Catatan</label>
-                    <textarea placeholder="Catatan Medis" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                    <textarea name="catatan" placeholder="Catatan medis" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                 </div>
                 
                 <div class="flex justify-end mt-6">
@@ -128,41 +111,30 @@
                 </div>
             </form>
         </div>
-        
+
         <!-- Update Record View -->
         <div id="update-record-view" class="hidden">
             <h4 class="text-xl font-bold mb-4">Update Rekam Medis</h4>
             <form id="update-record-form">
                 <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Suhu Tubuh</label>
-                    <input type="text" id="update-suhu" placeholder="Suhu Tubuh Pasien (°C)" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    <label class="block text-gray-700 mb-2">Suhu Tubuh (°C)</label>
+                    <input type="number" 
+                        step="0.1" 
+                        id="update-suhu" 
+                        name="suhu" 
+                        placeholder="Masukkan suhu tubuh" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                        required>
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Berat Badan</label>
-                    <input type="text" id="update-berat" placeholder="Berat Badan Pasien (kg)" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Jenis Perawatan</label>
-                    <div class="relative">
-                        <select id="update-perawatan" class="block appearance-none w-full bg-white border border-gray-300 px-3 py-2 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option disabled>Pilih jenis perawatan</option>
-                            <option>Vaksinasi</option>
-                            <option>Medical Check-Up</option>
-                            <option>Perawatan Cacingan</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                            </svg>
-                        </div>
-                    </div>
+                    <label class="block text-gray-700 mb-2">Berat Badan (kg)</label>
+                    <input type="number" step="0.1" id="update-berat" name="berat" placeholder="Masukkan berat badan" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                 </div>
                 
                 <div class="mb-4">
                     <label class="block text-gray-700 mb-2">Catatan</label>
-                    <textarea id="update-catatan" placeholder="Catatan Medis" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                    <textarea id="update-catatan" name="catatan" placeholder="Catatan medis" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
                 </div>
                 
                 <div class="flex justify-end mt-6">
@@ -187,447 +159,276 @@
 </div>
 
 <script>
-    // JSON data for visits
-    const visitsData = {
-        "visits": [
-        {
-          "id": "47ac10b-58cc-4372-a567-0e02b2c34479",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c8",
-          "animal_name": "Blacky",
-          "visit_method": "Janji Temu",
-          "start_time": "01-05-2024 09:30:00",
-          "end_time": "01-05-2024 10:00:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "38°C",
-              "berat": "25.5 kg",
-              "perawatan": "Perawatan Gigi",
-              "catatan": "Pastikan hewan mendapatkan vaksinasi yang diperlukan ya!"
-            }
-          }
-        },
-        {
-          "id": "56c4d6e0-e2bb-11d4-a71e-00c04fd430c0",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c8",
-          "animal_name": "Snowy",
-          "visit_method": "Janji Temu",
-          "start_time": "18-02-2024 14:15:00",
-          "end_time": "18-02-2024 15:00:00",
-          "medical_record": {
-            "exists": false,
-          }
-        },
-        {
-          "id": "d3573b2a-f4ca-47d8-a35e-1912aef4c445",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c8",
-          "animal_name": "Coco",
-          "visit_method": "Janji Temu",
-          "start_time": "23-03-2024 10:05:00",
-          "end_time": "23-03-2024 10:50:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "37°C",
-              "berat": "0.8 kg",
-              "perawatan": "Pembersihan Telinga",
-              "catatan": "Perhatikan tanda-tanda perubahan perilaku hewan! Hewan perlu mendapatkan cukup waktu untuk bermain!"
-            }
-          }
-        },
-        {
-          "id": "8a33b2c7-cc4-4ea0-8c6c-cce21e3d47ca",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c8",
-          "animal_name": "Luna",
-          "visit_method": "Janji Temu",
-          "start_time": "01-04-2024 11:20:00",
-          "end_time": "01-04-2024 11:45:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "38°C",
-              "berat": "4.4 kg",
-              "perawatan": "Perawatan Kulit dan Bulu",
-              "catatan": "Pastikan hewan mendapatkan cukup air dan makanan! Cek kesehatan gigi hewan secara rutin, ya!"
-            }
-          }
-        },
-        {
-          "id": "6765c8d2-a67a-4f3c-d15-3c920137a9e5",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c10",
-          "animal_name": "Pebbles",
-          "visit_method": "Walk-in",
-          "start_time": "04-05-2024 14:35:00",
-          "end_time": "04-05-2024 15:00:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "37°C",
-              "berat": "0.15 kg",
-              "perawatan": "Perawatan Gigi",
-              "catatan": "Jaga kebersihan tempat tidur hewan ya! Catatan: juga beri obat sesuai jadwal!"
-            }
-          }
-        },
-        {
-          "id": "67559f7c-5e3a-40a8-8d84-a0f6382a2a99",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c10",
-          "animal_name": "Spike",
-          "visit_method": "Darurat",
-          "start_time": "11-06-2024 15:40:00",
-          "end_time": "11-06-2024 16:30:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "39°C",
-              "berat": "29 kg",
-              "perawatan": "Grooming",
-              "catatan": "Jangan biarkan hewan bermain dengan benda berbahaya! Periksa telinga hewan secara rutin!"
-            }
-          }
-        },
-        {
-          "id": "a6762ad2-09bb-6cbf-d-a5a2-706fedccafdf",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c11",
-          "animal_name": "Bella",
-          "visit_method": "Janji Temu",
-          "start_time": "01-07-2024 13:15:00",
-          "end_time": "01-07-2024 14:00:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "39°C",
-              "berat": "18 kg",
-              "perawatan": "Pembersihan Telinga",
-              "catatan": "Hindari makanan yang dapat menyebabkan alergi pada hewan! Berikan makanan sesuai dengan usia hewan!"
-            }
-          }
-        },
-        {
-          "id": "0870543c-10fe-dcba-967e-54f2210fedcaa",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c11",
-          "animal_name": "Sky",
-          "visit_method": "Janji Temu",
-          "start_time": "02-08-2024 08:25:00",
-          "end_time": "02-08-2024 09:00:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "41°C",
-              "berat": "5.2 kg",
-              "perawatan": "Perawatan Kulit dan Bulu",
-              "catatan": "Hewan perlu disikat yang cukup setelah perawatan. Hewan perlu pemeriksaan rutin setiap 3 bulan sekali."
-            }
-          }
-        },
-        {
-          "id": "87c645a6-6fe9-d78a-38d-1f2e3a45dc68",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c12",
-          "animal_name": "Rocky",
-          "visit_method": "Darurat",
-          "start_time": "10-09-2024 00:10:00",
-          "end_time": "10-09-2024 00:50:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "39°C",
-              "berat": "58.75 kg",
-              "perawatan": "Perawatan Luka Ringan",
-              "catatan": "Jangan biarkan hewan terlalu lama di luar rumah! Pastikan kandang hewan selalu bersih dan kering!"
-            }
-          }
-        },
-        {
-          "id": "8766437-f4efc-bad0-754c321045aca8",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c12",
-          "animal_name": "Kiwi",
-          "visit_method": "Janji Temu",
-          "start_time": "03-10-2024 09:05:00",
-          "end_time": "03-10-2024 09:25:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "40°C",
-              "berat": "3.8 kg",
-              "perawatan": "Perawatan Gigi",
-              "catatan": "Jangan biarkan hewan menggaruk tubuhnya terlalu keras ya! Jaga kebersihan kulit dan bulu hewan!"
-            }
-          }
-        },
-        {
-          "id": "6ba7b810-80ad-11d1-80b4-00c04fd430c8",
-          "client_id": "6ba7b82c-9dad-11d1-80b4-00c04fd430c13",
-          "animal_name": "Nemo",
-          "visit_method": "Walk-in",
-          "start_time": "05-11-2024 11:00:00",
-          "end_time": "05-11-2024 11:20:00",
-          "medical_record": {
-            "exists": true,
-            "data": {
-              "suhu": "28°C",
-              "berat": "0.05 kg",
-              "perawatan": "Grooming",
-              "catatan": "Perhatikan tanda-tanda stres pada hewan! Jangan lupa memberikan perawatan gigi hewan secara teratur!"
-            }
-          }
-        },
-        ],
-        "treatment_options": [
-            "Perawatan Gigi",
-            "Grooming",
-            "Pembersihan Telinga",
-            "Perawatan Kulit dan Bulu",
-            "Perawatan Luka Ringan"
-        ]
-    };
+// Get visits data from Django template
+const visitsData = {
+    "visits": {{ visits|safe }}  // Data will be passed from view
+};
 
-    // Hardcode user role for testing (in production, this would come from the server)
-    const userRole = '{{ user_role }}'; // This will be replaced by the actual user role in Django templates
+const userRole = '{{ user_role }}'; 
+let currentKunjunganId = null;
+let currentAnimalName = null;
+let currentClientId = null;
+
+function showMedicalRecordModal(idKunjungan, animalName, clientId) {
+    currentKunjunganId = idKunjungan;
+    currentAnimalName = animalName;
+    currentClientId = clientId;
     
-    // Populate visits table
-    document.addEventListener('DOMContentLoaded', function() {
-        const tableBody = document.getElementById('visits-table-body');
-        
-        visitsData.visits.forEach(visit => {
-            const row = document.createElement('tr');
-            
-            row.innerHTML = `
-                <td class="py-3 px-4 border-b border-gray-200">${visit.id}</td>
-                <td class="py-3 px-4 border-b border-gray-200">${visit.client_id}</td>
-                <td class="py-3 px-4 border-b border-gray-200">${visit.animal_name}</td>
-                <td class="py-3 px-4 border-b border-gray-200">${visit.visit_method}</td>
-                <td class="py-3 px-4 border-b border-gray-200">${visit.start_time}</td>
-                <td class="py-3 px-4 border-b border-gray-200">${visit.end_time}</td>
-                <td class="py-3 px-4 border-b border-gray-200">
-                    <button class="bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded check-medical-record" data-id="${visit.id}">Lihat Rekam Medis</button>
-                </td>
-                ${userRole === 'front-desk' ? `
-                <td class="py-3 px-4 border-b border-gray-200">
-                    <button class="bg-indigo-900 hover:bg-indigo-800 text-white py-1 px-3 rounded mr-2" onclick="location.href='/visits/update/?id=${visit.id}'">Update</button>
-                    <button class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded delete-btn" data-id="${visit.id}">Delete</button>
-                </td>
-                ` : ''}
-            `;
-            
-            tableBody.appendChild(row);
+    const modal = document.getElementById('medical-record-modal');
+    const noRecordView = document.getElementById('no-record-view');
+    const recordView = document.getElementById('record-view');
+    const createRecordView = document.getElementById('create-record-view');
+    const updateRecordView = document.getElementById('update-record-view');
+    const noRecordMessage = document.getElementById('no-record-message');
+    
+    // Hide all views first
+    noRecordView.classList.add('hidden');
+    recordView.classList.add('hidden');
+    createRecordView.classList.add('hidden');
+    updateRecordView.classList.add('hidden');
+    modal.classList.remove('hidden');
+    
+    // Set appropriate message based on role
+    if (userRole !== 'doctor') {
+        noRecordMessage.textContent = 'Rekam medis belum tersedia. Hanya dokter yang dapat membuat rekam medis.';
+    } else {
+        noRecordMessage.textContent = 'Belum ada rekam medis untuk kunjungan ini.';
+    }
+    
+    // Fetch medical record from server
+    // Dalam fungsi showMedicalRecordModal, ganti bagian .then setelah fetch:
+
+    fetch(`/visits/record/get/?visit_id=${idKunjungan}&animal_name=${encodeURIComponent(animalName)}&client_id=${clientId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Perbaikan logika pengecekan
+            if (data.exists && 
+                data.data.suhu !== null && 
+                data.data.berat !== null && 
+                data.data.catatan !== null) {
+                // Show existing record view
+                recordView.classList.remove('hidden');
+                
+                // Update view with record data
+                document.getElementById('suhu-value').textContent = data.data.suhu ? `${data.data.suhu}°C` : '-';
+                document.getElementById('berat-value').textContent = data.data.berat ? `${data.data.berat} kg` : '-';
+                document.getElementById('catatan-value').textContent = data.data.catatan || '-';
+                
+                // Show or hide Update button based on role
+                const updateBtn = document.getElementById('update-record-btn');
+                updateBtn.style.display = userRole === 'doctor' ? 'block' : 'none';
+            } else {
+                // Show no record view
+                noRecordView.classList.remove('hidden');
+                
+                // Show or hide Create button based on role
+                const createBtn = document.getElementById('create-medical-record-btn');
+                createBtn.style.display = userRole === 'doctor' ? 'block' : 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching medical record:', error);
+            noRecordView.classList.remove('hidden');
         });
-        
-        // Initialize event listeners after table is populated
-        initEventListeners();
+}
+
+function initEventListeners() {
+    // Toggle medical record modal when clicking on "Lihat Rekam Medis" button
+    document.querySelectorAll('.check-medical-record').forEach(button => {
+        button.addEventListener('click', function() {
+            const idKunjungan = this.getAttribute('data-id');
+            const animalName = this.getAttribute('data-animal');
+            const clientId = this.getAttribute('data-client');
+            showMedicalRecordModal(idKunjungan, animalName, clientId);
+        });
     });
     
-    let currentKunjunganId = null;
-    
-    function initEventListeners() {
-        // Toggle medical record modal when clicking on "Lihat Rekam Medis" button
-        document.querySelectorAll('.check-medical-record').forEach(button => {
-            button.addEventListener('click', function() {
-                const idKunjungan = this.getAttribute('data-id');
-                currentKunjunganId = idKunjungan;
-                showMedicalRecordModal(idKunjungan);
-            });
-        });
-        
-        // Close modal buttons
-        document.querySelectorAll('.close-modal-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                document.getElementById('medical-record-modal').classList.add('hidden');
-            });
-        });
-        
-        // Create medical record button
-        document.getElementById('create-medical-record-btn').addEventListener('click', function() {
-            const noRecordView = document.getElementById('no-record-view');
-            const createRecordView = document.getElementById('create-record-view');
-            
-            noRecordView.classList.add('hidden');
-            createRecordView.classList.remove('hidden');
-        });
-        
-        // Cancel create button
-        document.getElementById('cancel-create-btn').addEventListener('click', function() {
-            const noRecordView = document.getElementById('no-record-view');
-            const createRecordView = document.getElementById('create-record-view');
-            
-            createRecordView.classList.add('hidden');
-            noRecordView.classList.remove('hidden');
-        });
-        
-        // Handle form submission for creating record
-        document.getElementById('create-record-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Find the visit in our data
-            const visit = visitsData.visits.find(v => v.id === currentKunjunganId);
-            
-            if (visit) {
-                // Update the visit's medical record
-                visit.medical_record = {
-                    exists: true,
-                    data: {
-                        suhu: '37.2°C', // Hardcoded for prototype
-                        berat: '10.5 kg', // Hardcoded for prototype
-                        perawatan: 'Perawatan Gigi', // Hardcoded for prototype
-                        catatan: 'Hewan dalam kondisi sehat, diberikan vaksin rabies.' // Hardcoded for prototype
-                    }
-                };
-            }
-            
-            // Hide modal
+    // Close modal buttons
+    document.querySelectorAll('.close-modal-btn').forEach(button => {
+        button.addEventListener('click', function() {
             document.getElementById('medical-record-modal').classList.add('hidden');
         });
-        
-        // Update record button
-        document.getElementById('update-record-btn').addEventListener('click', function() {
-            const recordView = document.getElementById('record-view');
-            const updateRecordView = document.getElementById('update-record-view');
-            
-            // Get current record data
-            const suhu = document.getElementById('suhu-value').textContent;
-            const berat = document.getElementById('berat-value').textContent;
-            const perawatan = document.getElementById('perawatan-value').textContent;
-            const catatan = document.getElementById('catatan-value').textContent;
-            
-            // Prefill the update form with current data
-            document.getElementById('update-suhu').value = suhu;
-            document.getElementById('update-berat').value = berat;
-            
-            // Set the select option to match current value
-            const perawatanSelect = document.getElementById('update-perawatan');
-            for (let i = 0; i < perawatanSelect.options.length; i++) {
-                if (perawatanSelect.options[i].text === perawatan) {
-                    perawatanSelect.selectedIndex = i;
-                    break;
-                }
-            }
-            
-            document.getElementById('update-catatan').value = catatan;
-            
-            // Show update view
-            recordView.classList.add('hidden');
-            updateRecordView.classList.remove('hidden');
-        });
-        
-        // Cancel update button
-        document.getElementById('cancel-update-btn').addEventListener('click', function() {
-            const recordView = document.getElementById('record-view');
-            const updateRecordView = document.getElementById('update-record-view');
-            
-            updateRecordView.classList.add('hidden');
-            recordView.classList.remove('hidden');
-        });
-        
-        // Handle form submission for updating record
-        document.getElementById('update-record-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get updated values
-            const updatedSuhu = document.getElementById('update-suhu').value;
-            const updatedBerat = document.getElementById('update-berat').value;
-            const updatedPerawatan = document.getElementById('update-perawatan').value;
-            const updatedCatatan = document.getElementById('update-catatan').value;
-            
-            // Find the visit in our data
-            const visit = visitsData.visits.find(v => v.id === currentKunjunganId);
-            
-            if (visit && visit.medical_record.exists) {
-                // Update the medical record data
-                visit.medical_record.data = {
-                    suhu: updatedSuhu,
-                    berat: updatedBerat,
-                    perawatan: updatedPerawatan,
-                    catatan: updatedCatatan
-                };
-                
-                // Update the record view with new values
-                document.getElementById('suhu-value').textContent = updatedSuhu;
-                document.getElementById('berat-value').textContent = updatedBerat;
-                document.getElementById('perawatan-value').textContent = updatedPerawatan;
-                document.getElementById('catatan-value').textContent = updatedCatatan;
-            }
-            
-            // Go back to record view
-            document.getElementById('update-record-view').classList.add('hidden');
-            document.getElementById('record-view').classList.remove('hidden');
-        });
-        
-        // Delete functionality
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const idKunjungan = this.getAttribute('data-id');
-                const deleteModal = document.getElementById('delete-modal');
-                const deleteIdSpan = document.getElementById('delete-id');
-                
-                deleteIdSpan.textContent = idKunjungan;
-                deleteModal.classList.remove('hidden');
-            });
-        });
-        
-        document.getElementById('cancel-delete').addEventListener('click', function() {
-            document.getElementById('delete-modal').classList.add('hidden');
-        });
-        
-        document.getElementById('confirm-delete').addEventListener('click', function() {
-            const idKunjungan = document.getElementById('delete-id').textContent;
-            
-            // Simulasi penghapusan (tidak benar-benar menghapus)
-            console.log(`Deleting kunjungan with ID: ${idKunjungan} (this is just a simulation)`);
-           
-            // Tutup modal
-            document.getElementById('delete-modal').classList.add('hidden');
-        });
-    }
+    });
     
-    // Function to show the appropriate medical record modal view
-    function showMedicalRecordModal(idKunjungan) {
-        const modal = document.getElementById('medical-record-modal');
+    // Create medical record button
+    document.getElementById('create-medical-record-btn').addEventListener('click', function() {
         const noRecordView = document.getElementById('no-record-view');
-        const recordView = document.getElementById('record-view');
         const createRecordView = document.getElementById('create-record-view');
-        const updateRecordView = document.getElementById('update-record-view');
-        const createRecordBtn = document.getElementById('create-medical-record-btn');
         
-        // Hide all views first
         noRecordView.classList.add('hidden');
-        recordView.classList.add('hidden');
+        createRecordView.classList.remove('hidden');
+    });
+    
+    // Cancel create button
+    document.getElementById('cancel-create-btn').addEventListener('click', function() {
+        const noRecordView = document.getElementById('no-record-view');
+        const createRecordView = document.getElementById('create-record-view');
+        
         createRecordView.classList.add('hidden');
-        updateRecordView.classList.add('hidden');
+        noRecordView.classList.remove('hidden');
+    });
+    
+    // Handle form submission for creating record
+    document.getElementById('create-record-form').addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        // Show modal
-        modal.classList.remove('hidden');
+        const formData = new FormData();
+        formData.append('visit_id', currentKunjunganId);
+        formData.append('animal_name', currentAnimalName);
+        formData.append('client_id', currentClientId);
+        formData.append('suhu', this.querySelector('input[name="suhu"]').value);
+        formData.append('berat', this.querySelector('input[name="berat"]').value);
+        formData.append('catatan', this.querySelector('textarea').value);
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
         
-        // Find the visit in our data
-        const visit = visitsData.visits.find(v => v.id === idKunjungan);
-        
-        if (visit && visit.medical_record.exists) {
-            // Show existing record view
-            recordView.classList.remove('hidden');
-            
-            // Update view with record data
-            document.getElementById('suhu-value').textContent = visit.medical_record.data.suhu;
-            document.getElementById('berat-value').textContent = visit.medical_record.data.berat;
-            document.getElementById('perawatan-value').textContent = visit.medical_record.data.perawatan;
-            document.getElementById('catatan-value').textContent = visit.medical_record.data.catatan;
-            
-            // Show or hide Update button based on role
-            const updateBtn = document.getElementById('update-record-btn');
-            if (userRole === 'doctor') {
-                updateBtn.classList.remove('hidden');
+        fetch('/visits/record/create/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Rekam medis berhasil dibuat!', 'success');
+                setTimeout(() => location.reload(), 1500);
             } else {
-                updateBtn.classList.add('hidden');
+                throw new Error(data.error || 'Failed to create medical record');
             }
-        } else {
-            // Show no record view
-            noRecordView.classList.remove('hidden');
-            
-            // Show or hide Create button based on role
-            if (userRole === 'doctor') {
-                createRecordBtn.classList.remove('hidden');
-            } else {
-                createRecordBtn.classList.add('hidden');
-            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification(`Error: ${error.message}`, 'error');
+        });
+    });
+    
+    // Update record button
+        // Update record button - BAGIAN YANG DIPERBAIKI
+    document.getElementById('update-record-btn').addEventListener('click', function() {
+        const recordView = document.getElementById('record-view');
+        const updateRecordView = document.getElementById('update-record-view');
+        
+        // Get current record data - DIPERBAIKI: ambil data yang bersih
+        const suhuText = document.getElementById('suhu-value').textContent.trim();
+        const beratText = document.getElementById('berat-value').textContent.trim();
+        const catatanText = document.getElementById('catatan-value').textContent.trim();
+        
+        // Clean and extract actual values - BAGIAN BARU
+        let suhuValue = '';
+        let beratValue = '';
+        let catatanValue = '';
+        
+        // Extract suhu value (remove °C and handle dash)
+        if (suhuText && suhuText !== '-') {
+            suhuValue = suhuText.replace('°C', '').replace('°C', '').trim();
         }
-    }
+        
+        // Extract berat value (remove kg and handle dash)
+        if (beratText && beratText !== '-') {
+            beratValue = beratText.replace(' kg', '').replace('kg', '').trim();
+        }
+        
+        // Extract catatan value (handle dash)
+        if (catatanText && catatanText !== '-') {
+            catatanValue = catatanText;
+        }
+        
+        // Prefill the update form with cleaned data - DIPERBAIKI
+        document.getElementById('update-suhu').value = suhuValue;
+        document.getElementById('update-berat').value = beratValue;
+        document.getElementById('update-catatan').value = catatanValue;
+        
+        // Show update view
+        recordView.classList.add('hidden');
+        updateRecordView.classList.remove('hidden');
+    });
+        
+    // Cancel update button
+    document.getElementById('cancel-update-btn').addEventListener('click', function() {
+        const recordView = document.getElementById('record-view');
+        const updateRecordView = document.getElementById('update-record-view');
+        
+        updateRecordView.classList.add('hidden');
+        recordView.classList.remove('hidden');
+    });
+    
+    // Handle form submission for updating record
+    document.getElementById('update-record-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('visit_id', currentKunjunganId);
+        formData.append('animal_name', currentAnimalName);
+        formData.append('client_id', currentClientId);
+        formData.append('suhu', document.getElementById('update-suhu').value);
+        formData.append('berat', document.getElementById('update-berat').value);
+        formData.append('catatan', document.getElementById('update-catatan').value);
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+        
+        fetch('/visits/record/update/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Rekam medis berhasil diupdate!', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                throw new Error(data.error || 'Failed to update medical record');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification(`Error: ${error.message}`, 'error');
+        });
+    });
+    
+    // Delete functionality
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const idKunjungan = this.getAttribute('data-id');
+            const deleteModal = document.getElementById('delete-modal');
+            const deleteIdSpan = document.getElementById('delete-id');
+            
+            deleteIdSpan.textContent = idKunjungan;
+            deleteModal.classList.remove('hidden');
+        });
+    });
+    
+    document.getElementById('cancel-delete').addEventListener('click', function() {
+        document.getElementById('delete-modal').classList.add('hidden');
+    });
+    
+    document.getElementById('confirm-delete').addEventListener('click', function() {
+        const idKunjungan = document.getElementById('delete-id').textContent;
+        
+        fetch('{% url "visits:delete_visit" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                visit_id: idKunjungan
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const rowToDelete = document.querySelector(`tr[data-id="${idKunjungan}"]`);
+                if (rowToDelete) {
+                    rowToDelete.remove();
+                }
+                document.getElementById('delete-modal').classList.add('hidden');
+                showNotification('Kunjungan berhasil dihapus', 'success');
+            } else {
+                throw new Error(data.error || 'Failed to delete visit');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification(`Error: ${error.message}`, 'error');
+        });
+    });
     
     // Close modals if clicking outside
     window.addEventListener('click', function(event) {
@@ -642,5 +443,80 @@
             deleteModal.classList.add('hidden');
         }
     });
+}
+
+// Helper function for CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Helper function to show notifications
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded shadow-lg ${type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.remove(), 3000);
+}
+
+// Initialize event listeners when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const tableBody = document.getElementById('visits-table-body');
+    
+        // Ganti bagian ini di dalam forEach untuk visitsData.visits
+    visitsData.visits.forEach(visit => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-id', visit.id_kunjungan);
+            
+        // Perbarui logika pengecekan rekam medis
+        const hasRecord = visit.suhu !== null && 
+                        visit.berat_badan !== null && 
+                        visit.catatan !== null;
+        
+        row.innerHTML = `
+            <td class="py-3 px-4 border-b border-gray-200">${visit.id_kunjungan}</td>
+            <td class="py-3 px-4 border-b border-gray-200">${visit.no_identitas_klien}</td>
+            <td class="py-3 px-4 border-b border-gray-200">${visit.nama_hewan}</td>
+            <td class="py-3 px-4 border-b border-gray-200">${visit.tipe_kunjungan}</td>
+            <td class="py-3 px-4 border-b border-gray-200">${visit.timestamp_awal}</td>
+            <td class="py-3 px-4 border-b border-gray-200">${visit.timestamp_akhir || '-'}</td>
+            <td class="py-3 px-4 border-b border-gray-200">
+                <button class="bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded check-medical-record" 
+                        data-id="${visit.id_kunjungan}"
+                        data-animal="${visit.nama_hewan}"
+                        data-client="${visit.no_identitas_klien}">
+                    Lihat Rekam Medis
+                </button>
+                ${hasRecord ? 
+                '<span class="ml-2 text-green-500" title="Rekam medis lengkap">✓</span>' : 
+                '<span class="ml-2 text-gray-500" title="Belum ada rekam medis">✗</span>'}
+            </td>
+            ${userRole === 'front-desk' ? `
+            <td class="py-3 px-4 border-b border-gray-200">
+                <button class="bg-indigo-900 hover:bg-indigo-800 text-white py-1 px-3 rounded mr-2" 
+                        onclick="location.href='/visits/update/${visit.id_kunjungan}/'">Update</button>
+                <button class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded delete-btn" 
+                        data-id="${visit.id_kunjungan}">Delete</button>
+            </td>
+            ` : ''}
+        `;
+        
+        tableBody.appendChild(row);
+    });
+        
+    initEventListeners();
+});
 </script>
 {% endblock %}
