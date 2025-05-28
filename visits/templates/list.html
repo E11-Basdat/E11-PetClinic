@@ -5,10 +5,16 @@
 {% block title %}List Kunjungan - Pet Clinic{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-6 max-w-6xl">
+<div class="container mx-auto px-4 py-6 max-w-6xl text-sm">
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">List Kunjungan</h1>
+            <h1 class="text-2xl font-bold text-gray-800">
+                {% if user_role == 'client' %}
+                    Riwayat Kunjungan Saya
+                {% else %}
+                    List Kunjungan
+                {% endif %}
+            </h1>
             
             <!-- Create Kunjungan button - only visible for front-desk role -->
             {% if user_role == 'front-desk' %}
@@ -21,27 +27,50 @@
             {% endif %}
         </div>
 
+        <!-- No visits message for clients -->
+        {% if user_role == 'client' and not visits %}
+        <div class="text-center py-8">
+            <div class="text-gray-500 text-lg mb-2">Belum ada riwayat kunjungan</div>
+            <p class="text-gray-400">Anda belum memiliki riwayat kunjungan ke klinik.</p>
+        </div>
+        {% elif not visits %}
+        <div class="text-center py-8">
+            <div class="text-gray-500 text-lg mb-2">Tidak ada data kunjungan</div>
+            <p class="text-gray-400">Belum ada kunjungan yang tercatat dalam sistem.</p>
+        </div>
+        {% else %}
+        
         <div class="overflow-x-auto">
             <table class="min-w-full bg-white">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="py-3 px-4 text-left font-medium text-gray-700 border-b-2 border-gray-200">ID Kunjungan</th>
-                        <th class="py-3 px-4 text-left font-medium text-gray-700 border-b-2 border-gray-200">ID Klien</th>
-                        <th class="py-3 px-4 text-left font-medium text-gray-700 border-b-2 border-gray-200">Nama Hewan</th>
-                        <th class="py-3 px-4 text-left font-medium text-gray-700 border-b-2 border-gray-200">Metode Kunjungan</th>
-                        <th class="py-3 px-4 text-left font-medium text-gray-700 border-b-2 border-gray-200">Waktu Mulai Penanganan</th>
-                        <th class="py-3 px-4 text-left font-medium text-gray-700 border-b-2 border-gray-200">Waktu Akhir Penanganan</th>
-                        <th class="py-3 px-4 text-left font-medium text-gray-700 border-b-2 border-gray-200">Rekam Medis</th>
-                        {% if user_role == 'front-desk' %}
-                            <th class="py-3 px-4 text-left font-medium text-gray-700 border-b-2 border-gray-200">Action</th>
-                        {% endif %}
-                    </tr>
-                </thead>
+                <!-- Update the table header alignment -->
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="py-2 px-3 text-center font-medium text-gray-700 border-b-2 border-gray-200">No</th>
+                            <th class="py-2 px-3 text-center font-medium text-gray-700 border-b-2 border-gray-200">ID Kunjungan</th>
+                            
+                            <!-- ID Klien column - hidden for clients since it's always their own -->
+                            {% if user_role != 'client' %}
+                            <th class="py-2 px-3 text-center font-medium text-gray-700 border-b-2 border-gray-200">ID Klien</th>
+                            {% endif %}
+                            
+                            <th class="py-2 px-3 text-center font-medium text-gray-700 border-b-2 border-gray-200">Nama Hewan</th>
+                            <th class="py-2 px-3 text-center font-medium text-gray-700 border-b-2 border-gray-200">Metode Kunjungan</th>
+                            <th class="py-2 px-3 text-center font-medium text-gray-700 border-b-2 border-gray-200">Waktu Mulai Penanganan</th>
+                            <th class="py-2 px-3 text-center font-medium text-gray-700 border-b-2 border-gray-200">Waktu Akhir Penanganan</th>
+                            <th class="py-2 px-3 text-center font-medium text-gray-700 border-b-2 border-gray-200">Rekam Medis</th>
+                            
+                            <!-- Action column - only for front-desk -->
+                            {% if user_role == 'front-desk' %}
+                            <th class="py-2 px-3 text-center font-medium text-gray-700 border-b-2 border-gray-200">Action</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
                 <tbody id="visits-table-body">
                     <!-- Data will be populated by JavaScript -->
                 </tbody>
             </table>
         </div>
+        {% endif %}
     </div>
 </div>
 
@@ -53,7 +82,10 @@
             <h4 class="text-xl font-bold mb-2 text-red-500">Rekam Medis tidak Tersedia</h4>
             <p class="mb-4 text-gray-700" id="no-record-message">Maaf, sepertinya belum ada rekam medis yang dibuat untuk kunjungan ini.</p>
             <div class="flex justify-end">
+                <!-- Create button only visible for doctors -->
+                {% if user_role == 'doctor' %}
                 <button id="create-medical-record-btn" class="bg-gray-800 hover:bg-gray-900 text-white py-2 px-4 rounded mr-2">Create</button>
+                {% endif %}
                 <button class="close-modal-btn bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded">OK</button>
             </div>
         </div>
@@ -62,7 +94,10 @@
         <div id="record-view" class="hidden">
             <div class="flex justify-between items-center mb-4">
                 <h4 class="text-xl font-bold">Rekam Medis</h4>
+                <!-- Update button only visible for doctors -->
+                {% if user_role == 'doctor' %}
                 <button id="update-record-btn" class="bg-gray-800 hover:bg-gray-900 text-white py-1 px-4 rounded">Update</button>
+                {% endif %}
             </div>
             <div class="mb-4">
                 <div class="grid grid-cols-2 gap-4">
@@ -81,7 +116,8 @@
             </div>
         </div>
         
-        <!-- Create Record View -->
+        <!-- Create Record View - Only for doctors -->
+        {% if user_role == 'doctor' %}
         <div id="create-record-view" class="hidden">
             <h4 class="text-xl font-bold mb-4">Create Rekam Medis</h4>
             <form id="create-record-form">
@@ -112,7 +148,7 @@
             </form>
         </div>
 
-        <!-- Update Record View -->
+        <!-- Update Record View - Only for doctors -->
         <div id="update-record-view" class="hidden">
             <h4 class="text-xl font-bold mb-4">Update Rekam Medis</h4>
             <form id="update-record-form">
@@ -143,10 +179,12 @@
                 </div>
             </form>
         </div>
+        {% endif %}
     </div>
 </div>
 
-<!-- Modal untuk konfirmasi delete -->
+<!-- Modal untuk konfirmasi delete - Only for front-desk -->
+{% if user_role == 'front-desk' %}
 <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
         <h4 class="text-xl font-bold text-red-500 mb-4">Delete Kunjungan</h4>
@@ -157,6 +195,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <script>
 // Get visits data from Django template
@@ -184,24 +223,24 @@ function showMedicalRecordModal(idKunjungan, animalName, clientId) {
     // Hide all views first
     noRecordView.classList.add('hidden');
     recordView.classList.add('hidden');
-    createRecordView.classList.add('hidden');
-    updateRecordView.classList.add('hidden');
+    if (createRecordView) createRecordView.classList.add('hidden');
+    if (updateRecordView) updateRecordView.classList.add('hidden');
     modal.classList.remove('hidden');
     
     // Set appropriate message based on role
-    if (userRole !== 'doctor') {
+    if (userRole === 'client') {
+        noRecordMessage.textContent = 'Rekam medis belum tersedia. Silakan hubungi dokter untuk informasi lebih lanjut.';
+    } else if (userRole !== 'doctor') {
         noRecordMessage.textContent = 'Rekam medis belum tersedia. Hanya dokter yang dapat membuat rekam medis.';
     } else {
         noRecordMessage.textContent = 'Belum ada rekam medis untuk kunjungan ini.';
     }
     
     // Fetch medical record from server
-    // Dalam fungsi showMedicalRecordModal, ganti bagian .then setelah fetch:
-
     fetch(`/visits/record/get/?visit_id=${idKunjungan}&animal_name=${encodeURIComponent(animalName)}&client_id=${clientId}`)
         .then(response => response.json())
         .then(data => {
-            // Perbaikan logika pengecekan
+            // Check if record exists and has complete data
             if (data.exists && 
                 data.data.suhu !== null && 
                 data.data.berat !== null && 
@@ -210,20 +249,12 @@ function showMedicalRecordModal(idKunjungan, animalName, clientId) {
                 recordView.classList.remove('hidden');
                 
                 // Update view with record data
-                document.getElementById('suhu-value').textContent = data.data.suhu ? `${data.data.suhu}°C` : '-';
-                document.getElementById('berat-value').textContent = data.data.berat ? `${data.data.berat} kg` : '-';
+                document.getElementById('suhu-value').textContent = data.data.suhu ? `${data.data.suhu}` : '-';
+                document.getElementById('berat-value').textContent = data.data.berat ? `${data.data.berat}` : '-';
                 document.getElementById('catatan-value').textContent = data.data.catatan || '-';
-                
-                // Show or hide Update button based on role
-                const updateBtn = document.getElementById('update-record-btn');
-                updateBtn.style.display = userRole === 'doctor' ? 'block' : 'none';
             } else {
                 // Show no record view
                 noRecordView.classList.remove('hidden');
-                
-                // Show or hide Create button based on role
-                const createBtn = document.getElementById('create-medical-record-btn');
-                createBtn.style.display = userRole === 'doctor' ? 'block' : 'none';
             }
         })
         .catch(error => {
@@ -250,185 +281,214 @@ function initEventListeners() {
         });
     });
     
-    // Create medical record button
-    document.getElementById('create-medical-record-btn').addEventListener('click', function() {
-        const noRecordView = document.getElementById('no-record-view');
-        const createRecordView = document.getElementById('create-record-view');
-        
-        noRecordView.classList.add('hidden');
-        createRecordView.classList.remove('hidden');
-    });
-    
-    // Cancel create button
-    document.getElementById('cancel-create-btn').addEventListener('click', function() {
-        const noRecordView = document.getElementById('no-record-view');
-        const createRecordView = document.getElementById('create-record-view');
-        
-        createRecordView.classList.add('hidden');
-        noRecordView.classList.remove('hidden');
-    });
-    
-    // Handle form submission for creating record
-    document.getElementById('create-record-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData();
-        formData.append('visit_id', currentKunjunganId);
-        formData.append('animal_name', currentAnimalName);
-        formData.append('client_id', currentClientId);
-        formData.append('suhu', this.querySelector('input[name="suhu"]').value);
-        formData.append('berat', this.querySelector('input[name="berat"]').value);
-        formData.append('catatan', this.querySelector('textarea').value);
-        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-        
-        fetch('/visits/record/create/', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification('Rekam medis berhasil dibuat!', 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                throw new Error(data.error || 'Failed to create medical record');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification(`Error: ${error.message}`, 'error');
-        });
-    });
-    
-    // Update record button
-        // Update record button - BAGIAN YANG DIPERBAIKI
-    document.getElementById('update-record-btn').addEventListener('click', function() {
-        const recordView = document.getElementById('record-view');
-        const updateRecordView = document.getElementById('update-record-view');
-        
-        // Get current record data - DIPERBAIKI: ambil data yang bersih
-        const suhuText = document.getElementById('suhu-value').textContent.trim();
-        const beratText = document.getElementById('berat-value').textContent.trim();
-        const catatanText = document.getElementById('catatan-value').textContent.trim();
-        
-        // Clean and extract actual values - BAGIAN BARU
-        let suhuValue = '';
-        let beratValue = '';
-        let catatanValue = '';
-        
-        // Extract suhu value (remove °C and handle dash)
-        if (suhuText && suhuText !== '-') {
-            suhuValue = suhuText.replace('°C', '').replace('°C', '').trim();
+    // Doctor-specific event listeners
+    if (userRole === 'doctor') {
+        // Create medical record button
+        const createBtn = document.getElementById('create-medical-record-btn');
+        if (createBtn) {
+            createBtn.addEventListener('click', function() {
+                const noRecordView = document.getElementById('no-record-view');
+                const createRecordView = document.getElementById('create-record-view');
+                
+                noRecordView.classList.add('hidden');
+                createRecordView.classList.remove('hidden');
+            });
         }
         
-        // Extract berat value (remove kg and handle dash)
-        if (beratText && beratText !== '-') {
-            beratValue = beratText.replace(' kg', '').replace('kg', '').trim();
+        // Cancel create button
+        const cancelCreateBtn = document.getElementById('cancel-create-btn');
+        if (cancelCreateBtn) {
+            cancelCreateBtn.addEventListener('click', function() {
+                const noRecordView = document.getElementById('no-record-view');
+                const createRecordView = document.getElementById('create-record-view');
+                
+                createRecordView.classList.add('hidden');
+                noRecordView.classList.remove('hidden');
+            });
         }
         
-        // Extract catatan value (handle dash)
-        if (catatanText && catatanText !== '-') {
-            catatanValue = catatanText;
+        // Handle form submission for creating record
+        const createForm = document.getElementById('create-record-form');
+        if (createForm) {
+            createForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData();
+                formData.append('visit_id', currentKunjunganId);
+                formData.append('animal_name', currentAnimalName);
+                formData.append('client_id', currentClientId);
+                formData.append('suhu', this.querySelector('input[name="suhu"]').value);
+                formData.append('berat', this.querySelector('input[name="berat"]').value);
+                formData.append('catatan', this.querySelector('textarea').value);
+                formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+                
+                fetch('/visits/record/create/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Rekam medis berhasil dibuat!', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        throw new Error(data.error || 'Failed to create medical record');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification(`Error: ${error.message}`, 'error');
+                });
+            });
         }
         
-        // Prefill the update form with cleaned data - DIPERBAIKI
-        document.getElementById('update-suhu').value = suhuValue;
-        document.getElementById('update-berat').value = beratValue;
-        document.getElementById('update-catatan').value = catatanValue;
-        
-        // Show update view
-        recordView.classList.add('hidden');
-        updateRecordView.classList.remove('hidden');
-    });
-        
-    // Cancel update button
-    document.getElementById('cancel-update-btn').addEventListener('click', function() {
-        const recordView = document.getElementById('record-view');
-        const updateRecordView = document.getElementById('update-record-view');
-        
-        updateRecordView.classList.add('hidden');
-        recordView.classList.remove('hidden');
-    });
-    
-    // Handle form submission for updating record
-    document.getElementById('update-record-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData();
-        formData.append('visit_id', currentKunjunganId);
-        formData.append('animal_name', currentAnimalName);
-        formData.append('client_id', currentClientId);
-        formData.append('suhu', document.getElementById('update-suhu').value);
-        formData.append('berat', document.getElementById('update-berat').value);
-        formData.append('catatan', document.getElementById('update-catatan').value);
-        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
-        
-        fetch('/visits/record/update/', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification('Rekam medis berhasil diupdate!', 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                throw new Error(data.error || 'Failed to update medical record');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification(`Error: ${error.message}`, 'error');
-        });
-    });
-    
-    // Delete functionality
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const idKunjungan = this.getAttribute('data-id');
-            const deleteModal = document.getElementById('delete-modal');
-            const deleteIdSpan = document.getElementById('delete-id');
-            
-            deleteIdSpan.textContent = idKunjungan;
-            deleteModal.classList.remove('hidden');
-        });
-    });
-    
-    document.getElementById('cancel-delete').addEventListener('click', function() {
-        document.getElementById('delete-modal').classList.add('hidden');
-    });
-    
-    document.getElementById('confirm-delete').addEventListener('click', function() {
-        const idKunjungan = document.getElementById('delete-id').textContent;
-        
-        fetch('{% url "visits:delete_visit" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({
-                visit_id: idKunjungan
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const rowToDelete = document.querySelector(`tr[data-id="${idKunjungan}"]`);
-                if (rowToDelete) {
-                    rowToDelete.remove();
+        // Update record button
+        const updateBtn = document.getElementById('update-record-btn');
+        if (updateBtn) {
+            updateBtn.addEventListener('click', function() {
+                const recordView = document.getElementById('record-view');
+                const updateRecordView = document.getElementById('update-record-view');
+                
+                // Get current record data
+                const suhuText = document.getElementById('suhu-value').textContent.trim();
+                const beratText = document.getElementById('berat-value').textContent.trim();
+                const catatanText = document.getElementById('catatan-value').textContent.trim();
+                
+                // Clean and extract actual values
+                let suhuValue = '';
+                let beratValue = '';
+                let catatanValue = '';
+                
+                // Extract suhu value (remove °C and handle dash)
+                if (suhuText && suhuText !== '-') {
+                    suhuValue = suhuText.replace('°C', '').trim();
                 }
-                document.getElementById('delete-modal').classList.add('hidden');
-                showNotification('Kunjungan berhasil dihapus', 'success');
-            } else {
-                throw new Error(data.error || 'Failed to delete visit');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification(`Error: ${error.message}`, 'error');
+                
+                // Extract berat value (remove kg and handle dash)
+                if (beratText && beratText !== '-') {
+                    beratValue = beratText.replace(' kg', '').trim();
+                }
+                
+                // Extract catatan value (handle dash)
+                if (catatanText && catatanText !== '-') {
+                    catatanValue = catatanText;
+                }
+                
+                // Prefill the update form with cleaned data
+                document.getElementById('update-suhu').value = suhuValue;
+                document.getElementById('update-berat').value = beratValue;
+                document.getElementById('update-catatan').value = catatanValue;
+                
+                // Show update view
+                recordView.classList.add('hidden');
+                updateRecordView.classList.remove('hidden');
+            });
+        }
+        
+        // Cancel update button
+        const cancelUpdateBtn = document.getElementById('cancel-update-btn');
+        if (cancelUpdateBtn) {
+            cancelUpdateBtn.addEventListener('click', function() {
+                const recordView = document.getElementById('record-view');
+                const updateRecordView = document.getElementById('update-record-view');
+                
+                updateRecordView.classList.add('hidden');
+                recordView.classList.remove('hidden');
+            });
+        }
+        
+        // Handle form submission for updating record
+        const updateForm = document.getElementById('update-record-form');
+        if (updateForm) {
+            updateForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData();
+                formData.append('visit_id', currentKunjunganId);
+                formData.append('animal_name', currentAnimalName);
+                formData.append('client_id', currentClientId);
+                formData.append('suhu', document.getElementById('update-suhu').value);
+                formData.append('berat', document.getElementById('update-berat').value);
+                formData.append('catatan', document.getElementById('update-catatan').value);
+                formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+                
+                fetch('/visits/record/update/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Rekam medis berhasil diupdate!', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        throw new Error(data.error || 'Failed to update medical record');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification(`Error: ${error.message}`, 'error');
+                });
+            });
+        }
+    }
+    
+    // Front-desk specific event listeners
+    if (userRole === 'front-desk') {
+        // Delete functionality
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const idKunjungan = this.getAttribute('data-id');
+                const deleteModal = document.getElementById('delete-modal');
+                const deleteIdSpan = document.getElementById('delete-id');
+                
+                deleteIdSpan.textContent = idKunjungan;
+                deleteModal.classList.remove('hidden');
+            });
         });
-    });
+        
+        const cancelDeleteBtn = document.getElementById('cancel-delete');
+        if (cancelDeleteBtn) {
+            cancelDeleteBtn.addEventListener('click', function() {
+                document.getElementById('delete-modal').classList.add('hidden');
+            });
+        }
+        
+        const confirmDeleteBtn = document.getElementById('confirm-delete');
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function() {
+                const idKunjungan = document.getElementById('delete-id').textContent;
+                
+                fetch('{% url "visits:delete_visit" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        visit_id: idKunjungan
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const rowToDelete = document.querySelector(`tr[data-id="${idKunjungan}"]`);
+                        if (rowToDelete) {
+                            rowToDelete.remove();
+                        }
+                        document.getElementById('delete-modal').classList.add('hidden');
+                        showNotification('Kunjungan berhasil dihapus', 'success');
+                    } else {
+                        throw new Error(data.error || 'Failed to delete visit');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification(`Error: ${error.message}`, 'error');
+                });
+            });
+        }
+    }
     
     // Close modals if clicking outside
     window.addEventListener('click', function(event) {
@@ -439,7 +499,7 @@ function initEventListeners() {
             medicalModal.classList.add('hidden');
         }
         
-        if (event.target === deleteModal) {
+        if (deleteModal && event.target === deleteModal) {
             deleteModal.classList.add('hidden');
         }
     });
@@ -464,59 +524,81 @@ function getCookie(name) {
 // Helper function to show notifications
 function showNotification(message, type) {
     const notification = document.createElement('div');
-    notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded shadow-lg ${type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white`;
+    notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded shadow-lg ${type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white z-50`;
     notification.textContent = message;
     document.body.appendChild(notification);
     
     setTimeout(() => notification.remove(), 3000);
 }
-
-// Initialize event listeners when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     const tableBody = document.getElementById('visits-table-body');
     
-        // Ganti bagian ini di dalam forEach untuk visitsData.visits
-    visitsData.visits.forEach(visit => {
-        const row = document.createElement('tr');
-        row.setAttribute('data-id', visit.id_kunjungan);
+    if (visitsData.visits && visitsData.visits.length > 0) {
+        visitsData.visits.forEach((visit, index) => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-id', visit.id_kunjungan);
             
-        // Perbarui logika pengecekan rekam medis
-        const hasRecord = visit.suhu !== null && 
-                        visit.berat_badan !== null && 
-                        visit.catatan !== null;
-        
-        row.innerHTML = `
-            <td class="py-3 px-4 border-b border-gray-200">${visit.id_kunjungan}</td>
-            <td class="py-3 px-4 border-b border-gray-200">${visit.no_identitas_klien}</td>
-            <td class="py-3 px-4 border-b border-gray-200">${visit.nama_hewan}</td>
-            <td class="py-3 px-4 border-b border-gray-200">${visit.tipe_kunjungan}</td>
-            <td class="py-3 px-4 border-b border-gray-200">${visit.timestamp_awal}</td>
-            <td class="py-3 px-4 border-b border-gray-200">${visit.timestamp_akhir || '-'}</td>
-            <td class="py-3 px-4 border-b border-gray-200">
-                <button class="bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded check-medical-record" 
-                        data-id="${visit.id_kunjungan}"
-                        data-animal="${visit.nama_hewan}"
-                        data-client="${visit.no_identitas_klien}">
-                    Lihat Rekam Medis
-                </button>
-                ${hasRecord ? 
-                '<span class="ml-2 text-green-500" title="Rekam medis lengkap">✓</span>' : 
-                '<span class="ml-2 text-gray-500" title="Belum ada rekam medis">✗</span>'}
-            </td>
-            ${userRole === 'front-desk' ? `
-            <td class="py-3 px-4 border-b border-gray-200">
-                <button class="bg-indigo-900 hover:bg-indigo-800 text-white py-1 px-3 rounded mr-2" 
-                        onclick="location.href='/visits/update/${visit.id_kunjungan}/'">Update</button>
-                <button class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded delete-btn" 
-                        data-id="${visit.id_kunjungan}">Delete</button>
-            </td>
-            ` : ''}
-        `;
-        
-        tableBody.appendChild(row);
-    });
-        
+            // Format timestamps
+            const startTime = visit.timestamp_awal ? new Date(visit.timestamp_awal).toLocaleString('id-ID') : '-';
+            const endTime = visit.timestamp_akhir ? new Date(visit.timestamp_akhir).toLocaleString('id-ID') : '-';
+            
+            // Check if medical record exists
+            const hasRecord = visit.suhu !== null && visit.berat_badan !== null && visit.catatan !== null;
+            
+            let rowContent = `
+                <td class="py-2 px-3 border-b">${index + 1}</td>
+                <td class="py-2 px-3 border-b">${visit.id_kunjungan}</td>`;
+            
+            // Add Client ID column only if not client
+            if (userRole !== 'client') {
+                rowContent += `
+                    <td class="py-2 px-3 border-b">${visit.no_identitas_klien}</td>`;
+            }
+            
+            // Update the row content generation in the DOMContentLoaded event listener
+            rowContent += `
+                <td class="py-2 px-3 border-b">${visit.nama_hewan}</td>
+                <td class="py-2 px-3 border-b">${visit.tipe_kunjungan}</td>
+                <td class="py-2 px-3 border-b">${startTime}</td>
+                <td class="py-2 px-3 border-b">${endTime}</td>
+                <td class="py-2 px-3 border-b">
+                    <div class="flex items-center">
+                        <button class="check-medical-record bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded text-xs w-24"
+                                data-id="${visit.id_kunjungan}"
+                                data-animal="${visit.nama_hewan}"
+                                data-client="${visit.no_identitas_klien}">
+                            Lihat Rekam Medis
+                        </button>
+                        ${hasRecord ? 
+                            '<span class="ml-2 text-green-500">✓</span>' : 
+                            '<span class="ml-2 text-gray-400">-</span>'}
+                    </div>
+                </td>`;
+
+            // Add Action column only for front-desk
+            if (userRole === 'front-desk') {
+                rowContent += `
+                    <td class="py-2 px-3 border-b">
+                        <div class="flex items-center space-x-2">
+                            <button onclick="location.href='/visits/update/${visit.id_kunjungan}/'" 
+                                    class="bg-indigo-900 hover:bg-indigo-800 text-white py-1 px-3 rounded text-xs w-16">
+                                Update
+                            </button>
+                            <button class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded delete-btn text-xs w-16" 
+                                    data-id="${visit.id_kunjungan}">
+                                Delete
+                            </button>
+                        </div>
+                    </td>`;
+            }
+            
+            row.innerHTML = rowContent;
+            tableBody.appendChild(row);
+        });
+    }
+    
     initEventListeners();
 });
 </script>
+
 {% endblock %}

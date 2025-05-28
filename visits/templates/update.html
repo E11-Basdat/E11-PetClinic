@@ -1,103 +1,374 @@
-<!-- update.html -->
-{% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Update Kunjungan - Pet Clinic{% endblock %}
-
-{% block content %}
-<div class="container mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">Update Kunjungan</h1>
-
-    <form method="post" action="{% url 'visits:update_visit' visit.id_kunjungan %}" class="bg-white p-6 rounded-lg shadow-md">
-        {% csrf_token %}
-        <input type="hidden" name="id_kunjungan" value="{{ visit.id_kunjungan }}">
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="flex flex-col">
-                <label for="id-klien" class="mb-2 text-gray-700 font-semibold">ID Klien</label>
-                <select id="id-klien" name="id_klien" class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
-                    <option value="" disabled>Pilih ID Klien</option>
-                    {% for client in clients %}
-                        <option value="{{ client.no_identitas }}" {% if client.no_identitas == visit.no_identitas_klien %}selected{% endif %}>
-                            {{ client.no_identitas }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="flex flex-col">
-                <label for="nama-hewan" class="mb-2 text-gray-700 font-semibold">Nama Hewan</label>
-                <select id="nama-hewan" name="nama_hewan" class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
-                    <option value="" disabled>Pilih Nama Hewan</option>
-                    {% for animal in animals %}
-                        <option value="{{ animal.nama }}" {% if animal.nama == visit.nama_hewan %}selected{% endif %}>
-                            {{ animal.nama }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div class="flex flex-col">
-                <label for="metode-kunjungan" class="mb-2 text-gray-700 font-semibold">Metode Kunjungan</label>
-                <select id="metode-kunjungan" name="metode_kunjungan" class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
-                    <option value="" disabled>Pilih Metode Kunjungan</option>
-                    <option value="Janji Temu" {% if visit.tipe_kunjungan == 'Janji Temu' %}selected{% endif %}>Janji Temu</option>
-                    <option value="Walk-In" {% if visit.tipe_kunjungan == 'Walk-In' %}selected{% endif %}>Walk-In</option>
-                    <option value="Darurat" {% if visit.tipe_kunjungan == 'Darurat' %}selected{% endif %}>Darurat</option>
-                </select>
-            </div>
-
-            <div class="flex flex-col">
-                <label for="waktu-mulai" class="mb-2 text-gray-700 font-semibold">Waktu Mulai Penanganan</label>
-                <input type="datetime-local" id="waktu-mulai" name="waktu_mulai" 
-                       value="{{ visit.timestamp_awal|date:'Y-m-d\TH:i' }}" 
-                       class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
-            </div>
-
-            <div class="flex flex-col">
-                <label for="waktu-selesai" class="mb-2 text-gray-700 font-semibold">Waktu Selesai Penanganan</label>
-                <input type="datetime-local" id="waktu-selesai" name="waktu_selesai" 
-                       value="{{ visit.timestamp_akhir|date:'Y-m-d\TH:i' }}" 
-                       class="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" required>
-            </div>
-        </div>
-
-        <div class="flex gap-4 mt-6">
-            <button type="button" onclick="history.back()" class="bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-6 rounded-lg">
-                Cancel
-            </button>
-            <button type="submit" class="bg-blue-900 hover:bg-blue-950 text-white font-semibold py-2 px-6 rounded-lg">
-                Update
-            </button>
-        </div>
-    </form>
-</div>
-
-<script>
-    // Update animals when client is changed
-    document.getElementById('id-klien').addEventListener('change', function() {
-        const clientId = this.value;
-        const animalSelect = document.getElementById('nama-hewan');
-        
-        if (clientId) {
-            fetch(`/get-animals/?client_id=${clientId}`)
-                .then(response => response.json())
-                .then(data => {
-                    animalSelect.innerHTML = '<option value="" disabled>Pilih Nama Hewan</option>';
-                    data.animals.forEach(animal => {
-                        const option = document.createElement('option');
-                        option.value = animal.nama;
-                        option.textContent = animal.nama;
-                        animalSelect.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching animals:', error);
-                    animalSelect.innerHTML = '<option value="" disabled>Error loading animals</option>';
-                });
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Kunjungan - Pet Clinic</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa;
         }
-    });
-</script>
-{% endblock %}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+        }
+        .required {
+            color: #dc3545;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        select:focus, input:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        select:disabled {
+            background-color: #e9ecef;
+            opacity: 0.65;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+        .form-col {
+            flex: 1;
+            padding: 0 15px;
+            min-width: 300px;
+        }
+        .form-col-full {
+            flex: 100%;
+            padding: 0 15px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+        .btn {
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-cancel:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        .btn-update {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-update:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        .alert {
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+        }
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        @media (max-width: 768px) {
+            .form-col {
+                flex: 100%;
+                margin-bottom: 15px;
+                min-width: unset;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐾 Update Kunjungan Pet Clinic</h1>
+        
+        <div class="alert alert-info">
+            <strong>Informasi:</strong> Pastikan semua data yang dibutuhkan telah diisi dengan benar. Nama hewan akan muncul setelah ID Klien dipilih.
+        </div>
+
+        <form method="post" action="{% url 'visits:update_visit' visit.id_kunjungan %}">
+            {% csrf_token %}
+            
+            <!-- Client & Animal Selection -->
+            <div class="form-section">
+                <div class="section-title">👤 Informasi Klien & Hewan</div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="id-klien">ID Klien <span class="required">*</span></label>
+                            <select id="id-klien" name="id_klien" required>
+                                <option value="" disabled>Pilih ID Klien</option>
+                                {% for client in clients %}
+                                    <option value="{{ client.no_identitas }}" 
+                                        {% if client.no_identitas == visit.no_identitas_klien %}selected{% endif %}>
+                                        {{ client.no_identitas }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="nama-hewan">Nama Hewan <span class="required">*</span></label>
+                            <select id="nama-hewan" name="nama_hewan" required>
+                                <option value="" disabled>Pilih Nama Hewan</option>
+                                {% for animal in animals %}
+                                    <option value="{{ animal.nama }}" 
+                                        {% if animal.nama == visit.nama_hewan %}selected{% endif %}>
+                                        🐾 {{ animal.nama }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Staff Selection -->
+            <div class="form-section">
+                <div class="section-title">👨‍⚕️ Tim Medis</div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="email-dokter">Email Dokter Hewan <span class="required">*</span></label>
+                            <select id="email-dokter" name="email_dokter" required>
+                                <option value="" disabled>Pilih Dokter Hewan</option>
+                                {% for doctor in doctors %}
+                                    <option value="{{ doctor.email }}" 
+                                        {% if doctor.email == visit.email_dokter %}selected{% endif %}>
+                                        {{ doctor.email }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="email-perawat">Email Perawat <span class="required">*</span></label>
+                            <select id="email-perawat" name="email_perawat" required>
+                                <option value="" disabled>Pilih Perawat</option>
+                                {% for nurse in nurses %}
+                                    <option value="{{ nurse.email }}" 
+                                        {% if nurse.email == visit.email_perawat %}selected{% endif %}>
+                                        {{ nurse.email }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visit Details -->
+            <div class="form-section">
+                <div class="section-title">📋 Detail Kunjungan</div>
+                <div class="form-row">
+                    <div class="form-col-full">
+                        <div class="form-group">
+                            <label for="metode-kunjungan">Metode Kunjungan <span class="required">*</span></label>
+                            <select id="metode-kunjungan" name="metode_kunjungan" required>
+                                <option value="" disabled>Pilih metode kunjungan</option>
+                                <option value="Janji Temu" {% if visit.tipe_kunjungan == 'Janji Temu' %}selected{% endif %}>📅 Janji Temu</option>
+                                <option value="Walk-In" {% if visit.tipe_kunjungan == 'Walk-In' %}selected{% endif %}>🚶 Walk-In</option>
+                                <option value="Darurat" {% if visit.tipe_kunjungan == 'Darurat' %}selected{% endif %}>🚨 Darurat</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="waktu-mulai">Waktu Mulai Penanganan <span class="required">*</span></label>
+                            <input type="datetime-local" id="waktu-mulai" name="waktu_mulai" required 
+                                value="{{ visit.timestamp_awal|date:'Y-m-d\TH:i' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="waktu-selesai">Waktu Selesai Penanganan <span class="required">*</span></label>
+                            <input type="datetime-local" id="waktu-selesai" name="waktu_selesai" required 
+                                value="{{ visit.timestamp_akhir|date:'Y-m-d\TH:i' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col-full">
+                        <div class="form-group">
+                            <label for="catatan">Catatan Kunjungan</label>
+                            <textarea id="catatan" name="catatan" rows="4" 
+                                placeholder="Catatan tambahan untuk kunjungan ini (opsional)..." 
+                                style="width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 16px; resize: vertical;">{{ visit.catatan|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn btn-cancel">❌ Cancel</button>
+                <button type="submit" class="btn btn-update">✅ Update Kunjungan</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Handle cancel button - redirect to visit list
+        document.querySelector('.btn-cancel').addEventListener('click', function() {
+            if(confirm('Apakah Anda yakin ingin membatalkan update kunjungan?')) {
+                window.location.href = "{% url 'visits:list' %}";
+            }
+        });
+        
+        // Fetch animals when client is selected
+        document.getElementById('id-klien').addEventListener('change', function() {
+            const clientId = this.value;
+            const animalSelect = document.getElementById('nama-hewan');
+            
+            if (clientId) {
+                // Show loading state
+                animalSelect.innerHTML = '<option value="" disabled selected>Loading hewan...</option>';
+                animalSelect.disabled = false;
+                
+                fetch(`/get-animals/?client_id=${clientId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        animalSelect.innerHTML = '<option value="" disabled>Pilih Nama Hewan</option>';
+                        
+                        if (data.animals && data.animals.length > 0) {
+                            data.animals.forEach(animal => {
+                                const option = document.createElement('option');
+                                option.value = animal.nama;
+                                option.textContent = `🐾 ${animal.nama}`;
+                                
+                                // Check if this was the originally selected animal
+                                if (animal.nama === '{{ visit.nama_hewan }}') {
+                                    option.selected = true;
+                                }
+                                
+                                animalSelect.appendChild(option);
+                            });
+                        } else {
+                            animalSelect.innerHTML = '<option value="" disabled selected>Tidak ada hewan terdaftar</option>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching animals:', error);
+                        animalSelect.innerHTML = '<option value="" disabled selected>Error loading animals</option>';
+                    });
+            } else {
+                animalSelect.innerHTML = '<option value="" disabled selected>Pilih ID Klien terlebih dahulu</option>';
+                animalSelect.disabled = true;
+            }
+        });
+
+        // Validate end time is after start time
+        document.getElementById('waktu-selesai').addEventListener('change', function() {
+            const startTime = document.getElementById('waktu-mulai').value;
+            const endTime = this.value;
+            
+            if (startTime && endTime && new Date(endTime) <= new Date(startTime)) {
+                alert('Waktu selesai harus setelah waktu mulai penanganan!');
+                this.value = '';
+            }
+        });
+
+        // Also check when start time changes
+        document.getElementById('waktu-mulai').addEventListener('change', function() {
+            const startTime = this.value;
+            const endTime = document.getElementById('waktu-selesai').value;
+            
+            if (startTime && endTime && new Date(endTime) <= new Date(startTime)) {
+                alert('Waktu selesai harus setelah waktu mulai penanganan!');
+                document.getElementById('waktu-selesai').value = '';
+            }
+        });
+
+        // Initialize page with current client's animals
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentClientId = '{{ visit.no_identitas_klien }}';
+            if (currentClientId) {
+                // Trigger the change event to load animals for the current client
+                const clientSelect = document.getElementById('id-klien');
+                if (clientSelect.value === currentClientId) {
+                    // Fire change event to load animals
+                    const event = new Event('change');
+                    clientSelect.dispatchEvent(event);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
