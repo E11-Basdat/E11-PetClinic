@@ -70,7 +70,8 @@ def n_create_treatment(request):
                       no_perawat_hewan, no_dokter_hewan, kode_perawatan])
             
             messages.success(request, "Treatment berhasil ditambahkan")
-            return redirect('treatments:n_treatment_list_doctor')
+            # Add highlight parameter to URL
+            return redirect(f"{reverse('treatments:n_treatment_list_doctor')}?highlight={kunjungan_id}")
             
         except Exception as e:
             messages.error(request, f"Gagal menambahkan treatment: {str(e)}")
@@ -160,9 +161,11 @@ def n_update_treatment(request, kunjungan_id):
                 
                 if cursor.rowcount > 0:
                     messages.success(request, "Treatment berhasil diupdate")
+                    # Add highlight parameter to URL
+                    return redirect(f"{reverse('treatments:n_treatment_list_doctor')}?highlight={kunjungan_id}")
                 else:
                     messages.error(request, "Gagal mengupdate treatment")
-                return redirect('treatments:n_treatment_list_doctor')
+                    return redirect('treatments:n_treatment_list_doctor')
                 
         except Exception as e:
             messages.error(request, f"Gagal mengupdate treatment: {str(e)}")
