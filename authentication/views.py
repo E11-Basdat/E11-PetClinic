@@ -708,24 +708,47 @@ def list_client(request):
     user_data = get_user_data(request)
     
     
-    individual_clients = execute_query("""
-        SELECT k.no_identitas, k.email, u.alamat, 
-               i.nama_depan, i.nama_tengah, i.nama_belakang, 
-               'Individu' as jenis
-        FROM petclinic.KLIEN k
-        JOIN petclinic."USER" u ON k.email = u.email
-        JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
-    """)
+    search_query = request.GET.get('search', '').strip()
     
     
-    company_clients = execute_query("""
-        SELECT k.no_identitas, k.email, u.alamat, 
-               p.nama_perusahaan, 
-               'Perusahaan' as jenis
-        FROM petclinic.KLIEN k
-        JOIN petclinic."USER" u ON k.email = u.email
-        JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
-    """)
+    if search_query:
+        individual_clients = execute_query("""
+            SELECT k.no_identitas, k.email, u.alamat, 
+                   i.nama_depan, i.nama_tengah, i.nama_belakang, 
+                   'Individu' as jenis
+            FROM petclinic.KLIEN k
+            JOIN petclinic."USER" u ON k.email = u.email
+            JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
+            WHERE LOWER(CONCAT(i.nama_depan, ' ', COALESCE(i.nama_tengah, ''), ' ', i.nama_belakang)) LIKE LOWER(%s)
+        """, [f'%{search_query}%'])
+        
+        company_clients = execute_query("""
+            SELECT k.no_identitas, k.email, u.alamat, 
+                   p.nama_perusahaan, 
+                   'Perusahaan' as jenis
+            FROM petclinic.KLIEN k
+            JOIN petclinic."USER" u ON k.email = u.email
+            JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
+            WHERE LOWER(p.nama_perusahaan) LIKE LOWER(%s)
+        """, [f'%{search_query}%'])
+    else:
+        individual_clients = execute_query("""
+            SELECT k.no_identitas, k.email, u.alamat, 
+                   i.nama_depan, i.nama_tengah, i.nama_belakang, 
+                   'Individu' as jenis
+            FROM petclinic.KLIEN k
+            JOIN petclinic."USER" u ON k.email = u.email
+            JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
+        """)
+        
+        company_clients = execute_query("""
+            SELECT k.no_identitas, k.email, u.alamat, 
+                   p.nama_perusahaan, 
+                   'Perusahaan' as jenis
+            FROM petclinic.KLIEN k
+            JOIN petclinic."USER" u ON k.email = u.email
+            JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
+        """)
     
     clients_list = []
     
@@ -760,7 +783,8 @@ def list_client(request):
     
     context = {
         'user_data': user_data,
-        'clients': clients_list
+        'clients': clients_list,
+        'search_query': search_query
     }
     
     return render(request, 'list_client.html', context)
