@@ -318,7 +318,6 @@
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to delete the prescription for <strong><span id="deleteTreatmentName"></span></strong> with medicine <strong><span id="deleteMedicineName"></span></strong>?</p>
-                <p class="text-warning"><i class="fas fa-exclamation-triangle me-2"></i>This action will restore medicine stock and cannot be undone.</p>
                 <form id="deleteForm" method="POST" action="">
                     {% csrf_token %}
                 </form>
@@ -331,6 +330,7 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
     function openDeleteModal(kodePerawatan, kodeObat, namaPerawatan, namaObat) {
         document.getElementById('deleteTreatmentName').textContent = namaPerawatan;
