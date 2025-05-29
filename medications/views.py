@@ -6,9 +6,10 @@ from functools import wraps
 from datetime import datetime
 import uuid
 import locale
+import re
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-
+from django.db import connection, transaction
 
 def dokter_required(view_func):
     @wraps(view_func)
@@ -270,8 +271,8 @@ def add_medicine(request):
     return render(request, 'add_medicine.html')
 
 @tenaga_medis_required
-def update_medicine(request, medicine_id):  # Ubah dari 'kode' ke 'medicine_id'
-    medicine = get_medicine_by_id(medicine_id)  # Ubah parameter
+def update_medicine(request, medicine_id):  
+    medicine = get_medicine_by_id(medicine_id)  
     
     if not medicine:
         messages.error(request, "Data obat tidak ditemukan")
@@ -292,20 +293,20 @@ def update_medicine(request, medicine_id):  # Ubah dari 'kode' ke 'medicine_id'
                     UPDATE petclinic.obat 
                     SET nama = %s, harga = %s, dosis = %s
                     WHERE kode = %s
-                """, [nama, harga, dosis, medicine_id])  # Ubah parameter
+                """, [nama, harga, dosis, medicine_id])  
             
             messages.success(request, f"Data obat {nama} berhasil diperbarui")
             return redirect('medications:medicine_list')
             
         except Exception as e:
             messages.error(request, f"Gagal memperbarui data obat: {clean_error_message(str(e))}")
-            return redirect('medications:update_medicine', medicine_id=medicine_id)  # Ubah parameter
+            return redirect('medications:update_medicine', medicine_id=medicine_id)  
     
     context = {'medicine': medicine}
     return render(request, 'update_medicine.html', context)
 
-def update_medicine_stock(request, medicine_id):  # Ubah dari 'kode' ke 'medicine_id'
-    medicine = get_medicine_by_id(medicine_id)  # Ubah parameter
+def update_medicine_stock(request, medicine_id):  
+    medicine = get_medicine_by_id(medicine_id)  
     
     if not medicine:
         messages.error(request, "Data obat tidak ditemukan")
@@ -317,30 +318,30 @@ def update_medicine_stock(request, medicine_id):  # Ubah dari 'kode' ke 'medicin
             
             if stok < 0:
                 messages.error(request, "Stok tidak boleh bernilai negatif")
-                return redirect('medications:update_medicine_stock', medicine_id=medicine_id)  # Ubah parameter
+                return redirect('medications:update_medicine_stock', medicine_id=medicine_id)  
             
             with connection.cursor() as cursor:
                 cursor.execute("""
                     UPDATE petclinic.obat 
                     SET stok = %s
                     WHERE kode = %s
-                """, [stok, medicine_id])  # Ubah parameter
+                """, [stok, medicine_id])  
             
             messages.success(request, f"Stok obat {medicine['nama']} berhasil diperbarui")
             return redirect('medications:medicine_list')
             
         except Exception as e:
             messages.error(request, f"Gagal memperbarui stok obat: {clean_error_message(str(e))}")
-            return redirect('medications:update_medicine_stock', medicine_id=medicine_id)  # Ubah parameter
+            return redirect('medications:update_medicine_stock', medicine_id=medicine_id)  
     
     context = {'medicine': medicine}
     return render(request, 'update_medicine_stock.html', context)
 
 @require_POST
 @tenaga_medis_required
-def delete_medicine(request, medicine_id):  # Changed from 'kode' to 'medicine_id'
+def delete_medicine(request, medicine_id):  
     try:
-        medicine = get_medicine_by_id(medicine_id)  # Changed from 'kode' to 'medicine_id'
+        medicine = get_medicine_by_id(medicine_id)  
         
         if not medicine:
             messages.error(request, "Data obat tidak ditemukan")
@@ -350,7 +351,7 @@ def delete_medicine(request, medicine_id):  # Changed from 'kode' to 'medicine_i
             cursor.execute("""
                 DELETE FROM petclinic.obat
                 WHERE kode = %s
-            """, [medicine_id])  # Changed from 'kode' to 'medicine_id'
+            """, [medicine_id])  
         
         messages.success(request, f"Obat {medicine['nama']} berhasil dihapus")
         return redirect('medications:medicine_list')
@@ -365,37 +366,51 @@ def delete_medicine(request, medicine_id):  # Changed from 'kode' to 'medicine_i
 
 
 # =========================
-# PRESCRIPTION MANAGEMENT - SUPABASE SCHEMA FIXED
+# PRESCRIPTION MANAGEMENT 
 # =========================
 
+
 def clean_error_message(error_msg):
-    """Clean up error messages for better user experience"""
-    if "duplicate key" in error_msg.lower():
-        return "Data sudah ada"
-    elif "foreign key" in error_msg.lower():
-        return "Data terkait tidak ditemukan"
-    elif "not null" in error_msg.lower():
-        return "Data wajib diisi"
-    elif "does not exist" in error_msg.lower():
-        return "Tabel tidak ditemukan di database"
-    else:
-        return error_msg
+    """Clean up error messages for better user experience - ENHANCED"""
+    if not error_msg:
+        return "Terjadi kesalahan yang tidak diketahui"
+    
+    error_str = str(error_msg).strip()
+    
+    if "ERROR:" in error_str:
+        error_match = re.search(r'ERROR:\s*(.+?)(?:\n|$)', error_str, re.IGNORECASE)
+        if error_match:
+            return error_match.group(1).strip()
+    
+    # Handle RAISE EXCEPTION messages directly
+    if "RAISE EXCEPTION" in error_str.upper():
+        # Extract message from RAISE EXCEPTION format
+        raise_match = re.search(r'RAISE EXCEPTION\s*[\'"](.+?)[\'"]', error_str, re.IGNORECASE)
+        if raise_match:
+            return raise_match.group(1).strip()
+    
+    
+    cleaned = re.sub(r'CONTEXT:.*$', '', error_str, flags=re.MULTILINE | re.IGNORECASE)
+    cleaned = re.sub(r'LINE \d+:.*$', '', cleaned, flags=re.MULTILINE | re.IGNORECASE)
+    cleaned = re.sub(r'DETAIL:.*$', '', cleaned, flags=re.MULTILINE | re.IGNORECASE)
+    cleaned = re.sub(r'HINT:.*$', '', cleaned, flags=re.MULTILINE | re.IGNORECASE)
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    
+    return cleaned if cleaned else "Terjadi kesalahan database"
 
 def get_treatment_types():
     """Get list of all treatment types (Jenis Perawatan) - SUPABASE FIXED"""
     with connection.cursor() as cursor:
         try:
-            # Try with schema prefix first
             cursor.execute("""
-                SELECT kode_perawatan, nama_perawatan
+                SELECT kode_perawatan, nama_perawatan, biaya_perawatan
                 FROM petclinic.perawatan
                 ORDER BY nama_perawatan
             """)
         except Exception as e:
             try:
-                # Try without schema prefix
                 cursor.execute("""
-                    SELECT kode_perawatan, nama_perawatan
+                    SELECT kode_perawatan, nama_perawatan, biaya_perawatan
                     FROM perawatan
                     ORDER BY nama_perawatan
                 """)
@@ -407,9 +422,11 @@ def get_treatment_types():
         treatment_list = []
         
         for row in treatments:
+            # Include biaya_perawatan for frontend validation
             treatment_list.append({
                 'kode': row[0],
                 'nama': row[1],
+                'biaya': row[2] if len(row) > 2 else 0,
                 'display': f"{row[0]} - {row[1]}"
             })
     
@@ -419,7 +436,6 @@ def get_medicines_with_stock():
     """Get list of medicines with their stock information - SUPABASE FIXED"""
     with connection.cursor() as cursor:
         try:
-            # Try with schema prefix first
             cursor.execute("""
                 SELECT kode, nama, harga, stok, dosis
                 FROM petclinic.obat
@@ -428,7 +444,6 @@ def get_medicines_with_stock():
             """)
         except Exception as e:
             try:
-                # Try without schema prefix
                 cursor.execute("""
                     SELECT kode, nama, harga, stok, dosis
                     FROM obat
@@ -458,7 +473,6 @@ def get_list_prescriptions(request):
     """Get list of prescriptions - SUPABASE SCHEMA FIXED"""
     with connection.cursor() as cursor:
         try:
-            # Try with schema prefix first
             cursor.execute("""
                 SELECT 
                     po.kode_perawatan, 
@@ -479,7 +493,6 @@ def get_list_prescriptions(request):
         except Exception as e:
             print(f"Schema query failed: {str(e)}")
             try:
-                # Try without schema prefix
                 cursor.execute("""
                     SELECT 
                         po.kode_perawatan, 
@@ -500,7 +513,6 @@ def get_list_prescriptions(request):
             except Exception as e2:
                 print(f"No schema query also failed: {str(e2)}")
                 try:
-                    # Try basic query to check if perawatan_obat exists
                     cursor.execute("""
                         SELECT 
                             kode_perawatan, 
@@ -512,7 +524,6 @@ def get_list_prescriptions(request):
                     
                     prescriptions = cursor.fetchall()
                     
-                    # Convert to expected format without joins
                     prescription_list = []
                     for row in prescriptions:
                         prescription_list.append({
@@ -531,12 +542,10 @@ def get_list_prescriptions(request):
                     print(f"All queries failed: {str(e)}, {str(e2)}, {str(e3)}")
                     return []
         
-        # Process successful query results
         prescription_list = []
         
         for row in prescriptions:
             try:
-                # Format currency properly
                 harga = float(row[5]) if row[5] else 0
                 total_harga = float(row[6]) if row[6] else 0
                 formatted_harga = f"Rp{harga:,.0f}"
@@ -565,7 +574,6 @@ def prescription_list(request):
         treatments = get_treatment_types()
         medicines = get_medicines_with_stock()
         
-        # Debug information
         print(f"Found {len(prescriptions)} prescriptions")
         print(f"Found {len(treatments)} treatments")
         print(f"Found {len(medicines)} medicines")
@@ -578,7 +586,8 @@ def prescription_list(request):
         return render(request, 'prescription_list.html', context)
     except Exception as e:
         print(f"Error in prescription_list view: {str(e)}")
-        messages.error(request, f"Error loading data: {clean_error_message(str(e))}")
+        error_message = clean_error_message(str(e))
+        messages.error(request, f"Error loading data: {error_message}")
         return render(request, 'prescription_list.html', {
             'prescriptions': [],
             'treatments': [],
@@ -587,95 +596,83 @@ def prescription_list(request):
 
 @csrf_exempt
 def add_prescription(request):
-    """Add new prescription - SUPABASE FIXED"""
+    """Add new prescription - FULLY DYNAMIC ERROR HANDLING"""
     if request.method == 'POST':
         try:
-            kode_perawatan = request.POST.get('kode_perawatan')
-            kode_obat = request.POST.get('kode_obat')
-            kuantitas_obat = int(request.POST.get('kuantitas_obat', 0))
+            # Get form data
+            kode_perawatan = request.POST.get('kode_perawatan', '').strip()
+            kode_obat = request.POST.get('kode_obat', '').strip()
+            kuantitas_obat_str = request.POST.get('kuantitas_obat', '').strip()
             
-            # Validate inputs
-            if not all([kode_perawatan, kode_obat, kuantitas_obat]):
+            if not all([kode_perawatan, kode_obat, kuantitas_obat_str]):
                 messages.error(request, "Semua field harus diisi")
                 return redirect('medications:prescription_list')
             
-            if kuantitas_obat <= 0:
-                messages.error(request, "Kuantitas obat harus lebih dari 0")
+            try:
+                kuantitas_obat = int(kuantitas_obat_str)
+                if kuantitas_obat <= 0:
+                    messages.error(request, "Kuantitas obat harus lebih dari 0")
+                    return redirect('medications:prescription_list')
+            except ValueError:
+                messages.error(request, "Kuantitas obat harus berupa angka yang valid")
                 return redirect('medications:prescription_list')
             
-            with connection.cursor() as cursor:
-                # Check if prescription already exists - try with schema first
-                try:
-                    cursor.execute("""
-                        SELECT COUNT(*)
-                        FROM petclinic.perawatan_obat
-                        WHERE kode_perawatan = %s AND kode_obat = %s
-                    """, [kode_perawatan, kode_obat])
-                except:
-                    cursor.execute("""
-                        SELECT COUNT(*)
-                        FROM perawatan_obat
-                        WHERE kode_perawatan = %s AND kode_obat = %s
-                    """, [kode_perawatan, kode_obat])
-                
-                if cursor.fetchone()[0] > 0:
-                    messages.error(request, "Resep untuk jenis perawatan dan obat ini sudah ada")
-                    return redirect('medications:prescription_list')
-                
-                # Check medicine stock - try with schema first
-                try:
-                    cursor.execute("""
-                        SELECT stok FROM petclinic.obat WHERE kode = %s
-                    """, [kode_obat])
-                except:
-                    cursor.execute("""
-                        SELECT stok FROM obat WHERE kode = %s
-                    """, [kode_obat])
-                
-                stock_result = cursor.fetchone()
-                if not stock_result:
-                    messages.error(request, "Obat tidak ditemukan")
-                    return redirect('medications:prescription_list')
-                
-                if stock_result[0] < kuantitas_obat:
-                    messages.error(request, f"Stok obat tidak mencukupi. Stok tersedia: {stock_result[0]}")
-                    return redirect('medications:prescription_list')
-                
-                # Add prescription - try with schema first
-                try:
-                    cursor.execute("""
-                        INSERT INTO petclinic.perawatan_obat (kode_perawatan, kode_obat, kuantitas_obat)
-                        VALUES (%s, %s, %s)
-                    """, [kode_perawatan, kode_obat, kuantitas_obat])
-                except:
-                    cursor.execute("""
-                        INSERT INTO perawatan_obat (kode_perawatan, kode_obat, kuantitas_obat)
-                        VALUES (%s, %s, %s)
-                    """, [kode_perawatan, kode_obat, kuantitas_obat])
-                
-                # Update stock - try with schema first
-                try:
-                    cursor.execute("""
-                        UPDATE petclinic.obat 
-                        SET stok = stok - %s 
-                        WHERE kode = %s
-                    """, [kuantitas_obat, kode_obat])
-                except:
-                    cursor.execute("""
-                        UPDATE obat 
-                        SET stok = stok - %s 
-                        WHERE kode = %s
-                    """, [kuantitas_obat, kode_obat])
-                
+            # Use transaction to ensure data integrity
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    # Check if prescription already exists - try with schema first
+                    try:
+                        cursor.execute("""
+                            SELECT COUNT(*)
+                            FROM petclinic.perawatan_obat
+                            WHERE kode_perawatan = %s AND kode_obat = %s
+                        """, [kode_perawatan, kode_obat])
+                    except Exception:
+                        cursor.execute("""
+                            SELECT COUNT(*)
+                            FROM perawatan_obat
+                            WHERE kode_perawatan = %s AND kode_obat = %s
+                        """, [kode_perawatan, kode_obat])
+                    
+                    if cursor.fetchone()[0] > 0:
+                        messages.error(request, "Resep untuk kombinasi perawatan dan obat ini sudah ada")
+                        return redirect('medications:prescription_list')
+                    
+                    # Insert prescription - triggers will handle ALL validation
+                    try:
+                        cursor.execute("""
+                            INSERT INTO petclinic.perawatan_obat (kode_perawatan, kode_obat, kuantitas_obat)
+                            VALUES (%s, %s, %s)
+                        """, [kode_perawatan, kode_obat, kuantitas_obat])
+                        
+                    except Exception as db_error:
+                        if any(keyword in str(db_error).lower() for keyword in ['does not exist', 'relation', 'schema']):
+                            try:
+                                cursor.execute("""
+                                    INSERT INTO perawatan_obat (kode_perawatan, kode_obat, kuantitas_obat)
+                                    VALUES (%s, %s, %s)
+                                """, [kode_perawatan, kode_obat, kuantitas_obat])
+                                
+                            except Exception as db_error2:
+                                # This is where trigger errors will be caught
+                                error_message = clean_error_message(str(db_error2))
+                                print(f"Database trigger error (no schema): {str(db_error2)}")
+                                messages.error(request, error_message)
+                                return redirect('medications:prescription_list')
+                        else:
+                            # This is where trigger errors will be caught for schema version
+                            error_message = clean_error_message(str(db_error))
+                            print(f"Database trigger error (with schema): {str(db_error)}")
+                            messages.error(request, error_message)
+                            return redirect('medications:prescription_list')
+            
             messages.success(request, "Resep obat berhasil ditambahkan")
             return redirect('medications:prescription_list')
         
-        except ValueError as e:
-            messages.error(request, "Kuantitas obat harus berupa angka")
-            return redirect('medications:prescription_list')
         except Exception as e:
-            print(f"Error adding prescription: {str(e)}")
-            messages.error(request, f"Gagal menambahkan resep obat: {clean_error_message(str(e))}")
+            error_message = clean_error_message(str(e))
+            print(f"Unexpected error in add_prescription: {str(e)}")
+            messages.error(request, f"Gagal menambahkan resep obat: {error_message}")
             return redirect('medications:prescription_list')
     
     return redirect('medications:prescription_list')
@@ -683,92 +680,93 @@ def add_prescription(request):
 @require_POST
 @csrf_exempt
 def delete_prescription(request, kode_perawatan, kode_obat):
-    """Delete prescription - FIXED VERSION"""
+    """Delete prescription - FULLY DYNAMIC ERROR HANDLING"""
     try:
-        with connection.cursor() as cursor:
-            # Get prescription details first - try with schema first
-            try:
-                cursor.execute("""
-                    SELECT po.kuantitas_obat, p.nama_perawatan, o.nama
-                    FROM petclinic.perawatan_obat po
-                    LEFT JOIN petclinic.perawatan p ON po.kode_perawatan = p.kode_perawatan
-                    LEFT JOIN petclinic.obat o ON po.kode_obat = o.kode
-                    WHERE po.kode_perawatan = %s AND po.kode_obat = %s
-                """, [kode_perawatan, kode_obat])
-            except Exception as e:
-                print(f"Schema query failed: {str(e)}")
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                prescription_info = None
                 try:
                     cursor.execute("""
                         SELECT po.kuantitas_obat, p.nama_perawatan, o.nama
-                        FROM perawatan_obat po
-                        LEFT JOIN perawatan p ON po.kode_perawatan = p.kode_perawatan
-                        LEFT JOIN obat o ON po.kode_obat = o.kode
+                        FROM petclinic.perawatan_obat po
+                        LEFT JOIN petclinic.perawatan p ON po.kode_perawatan = p.kode_perawatan
+                        LEFT JOIN petclinic.obat o ON po.kode_obat = o.kode
                         WHERE po.kode_perawatan = %s AND po.kode_obat = %s
                     """, [kode_perawatan, kode_obat])
-                except Exception as e2:
-                    print(f"No schema query also failed: {str(e2)}")
-                    # Fallback: just get from perawatan_obat table
+                    prescription_info = cursor.fetchone()
+                except Exception:
+                    try:
+                        cursor.execute("""
+                            SELECT po.kuantitas_obat, p.nama_perawatan, o.nama
+                            FROM perawatan_obat po
+                            LEFT JOIN perawatan p ON po.kode_perawatan = p.kode_perawatan
+                            LEFT JOIN obat o ON po.kode_obat = o.kode
+                            WHERE po.kode_perawatan = %s AND po.kode_obat = %s
+                        """, [kode_perawatan, kode_obat])
+                        prescription_info = cursor.fetchone()
+                    except Exception:
+                        cursor.execute("""
+                            SELECT kuantitas_obat
+                            FROM perawatan_obat
+                            WHERE kode_perawatan = %s AND kode_obat = %s
+                        """, [kode_perawatan, kode_obat])
+                        result = cursor.fetchone()
+                        if result:
+                            prescription_info = (result[0], f'Treatment {kode_perawatan}', f'Medicine {kode_obat}')
+                
+                if not prescription_info:
+                    messages.error(request, 'Resep yang akan dihapus tidak ditemukan')
+                    return redirect('medications:prescription_list')
+                
+                # Prepare names for success message
+                treatment_name = prescription_info[1] if len(prescription_info) >= 2 and prescription_info[1] else f'Treatment {kode_perawatan}'
+                medicine_name = prescription_info[2] if len(prescription_info) >= 3 and prescription_info[2] else f'Medicine {kode_obat}'
+                
+                # Delete prescription - any triggers for deletion will be handled here
+                try:
                     cursor.execute("""
-                        SELECT kuantitas_obat
-                        FROM perawatan_obat
+                        DELETE FROM petclinic.perawatan_obat
                         WHERE kode_perawatan = %s AND kode_obat = %s
                     """, [kode_perawatan, kode_obat])
-            
-            result = cursor.fetchone()
-            if not result:
-                messages.error(request, 'Data resep tidak ditemukan')
-                return redirect('medications:prescription_list')
+                    
+                except Exception as db_error:
+                    # If schema table doesn't exist, try without schema
+                    if any(keyword in str(db_error).lower() for keyword in ['does not exist', 'relation', 'schema']):
+                        try:
+                            cursor.execute("""
+                                DELETE FROM perawatan_obat
+                                WHERE kode_perawatan = %s AND kode_obat = %s
+                            """, [kode_perawatan, kode_obat])
+                            
+                        except Exception as db_error2:
+                            # Handle any delete trigger errors dynamically
+                            error_message = clean_error_message(str(db_error2))
+                            print(f"Delete trigger error (no schema): {str(db_error2)}")
+                            messages.error(request, f"Gagal menghapus resep: {error_message}")
+                            return redirect('medications:prescription_list')
+                    else:
+                        # Handle any delete trigger errors dynamically for schema version
+                        error_message = clean_error_message(str(db_error))
+                        print(f"Delete trigger error (with schema): {str(db_error)}")
+                        messages.error(request, f"Gagal menghapus resep: {error_message}")
+                        return redirect('medications:prescription_list')
                 
-            kuantitas_obat = result[0]
-            
-            # If we have treatment and medicine names from JOIN
-            if len(result) >= 3:
-                treatment_name = result[1] or f'Treatment {kode_perawatan}'
-                medicine_name = result[2] or f'Medicine {kode_obat}'
-            else:
-                treatment_name = f'Treatment {kode_perawatan}'
-                medicine_name = f'Medicine {kode_obat}'
-            
-            # Delete prescription - try with schema first
-            try:
-                cursor.execute("""
-                    DELETE FROM petclinic.perawatan_obat
-                    WHERE kode_perawatan = %s AND kode_obat = %s
-                """, [kode_perawatan, kode_obat])
-            except Exception as e:
-                print(f"Schema delete failed: {str(e)}")
-                cursor.execute("""
-                    DELETE FROM perawatan_obat
-                    WHERE kode_perawatan = %s AND kode_obat = %s
-                """, [kode_perawatan, kode_obat])
-            
-            if cursor.rowcount == 0:
-                messages.error(request, 'Resep tidak ditemukan untuk dihapus')
-                return redirect('medications:prescription_list')
-            
-            # Restore stock - try with schema first
-            try:
-                cursor.execute("""
-                    UPDATE petclinic.obat 
-                    SET stok = stok + %s 
-                    WHERE kode = %s
-                """, [kuantitas_obat, kode_obat])
-            except Exception as e:
-                print(f"Schema stock update failed: {str(e)}")
-                cursor.execute("""
-                    UPDATE obat 
-                    SET stok = stok + %s 
-                    WHERE kode = %s
-                """, [kuantitas_obat, kode_obat])
+                # Check if deletion was successful
+                if cursor.rowcount == 0:
+                    messages.error(request, 'Resep tidak ditemukan atau sudah dihapus')
+                    return redirect('medications:prescription_list')
         
+        # Success message
         messages.success(request, f"Resep {treatment_name} - {medicine_name} berhasil dihapus")
         return redirect('medications:prescription_list')
         
     except Exception as e:
-        print(f"Error deleting prescription: {str(e)}")
-        messages.error(request, f"Gagal menghapus resep: {clean_error_message(str(e))}")
+        # Handle any other unexpected errors
+        error_message = clean_error_message(str(e))
+        print(f"Unexpected error in delete_prescription: {str(e)}")
+        messages.error(request, f"Gagal menghapus resep: {error_message}")
         return redirect('medications:prescription_list')
-
+    
 def delete_prescription_ajax(request, kode_perawatan, kode_obat):
     """AJAX version for better UX"""
     if request.method != 'POST':
@@ -834,4 +832,3 @@ def delete_prescription_ajax(request, kode_perawatan, kode_obat):
             'success': False, 
             'message': f'Gagal menghapus resep: {str(e)}'
         })
-
