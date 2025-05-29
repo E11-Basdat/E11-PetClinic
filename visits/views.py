@@ -191,6 +191,62 @@ def visit_list_doctor(request):
             'user_role': user_role
         })
         
+def visit_list_nurse(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    k.id_kunjungan, 
+                    k.no_identitas_klien, 
+                    k.nama_hewan,
+                    k.tipe_kunjungan, 
+                    k.timestamp_awal, 
+                    k.timestamp_akhir,
+                    k.suhu, 
+                    k.berat_badan,
+                    k.catatan,
+                    kk.kode_perawatan,
+                    p.nama_perawatan,
+                    -- Get doctor's name
+                    CONCAT('dr. ', INITCAP(p_dh.email_user)) as dokter_email,
+                    -- Get nurse's name  
+                    INITCAP(p_ph.email_user) as perawat_email
+                FROM PETCLINIC.KUNJUNGAN k
+                LEFT JOIN PETCLINIC.KUNJUNGAN_KEPERAWATAN kk 
+                    ON k.id_kunjungan = kk.id_kunjungan
+                    AND k.nama_hewan = kk.nama_hewan
+                    AND k.no_identitas_klien = kk.no_identitas_klien
+                LEFT JOIN PETCLINIC.PERAWATAN p
+                    ON kk.kode_perawatan = p.kode_perawatan
+                -- Join for doctor info
+                LEFT JOIN PETCLINIC.DOKTER_HEWAN dh ON k.no_dokter_hewan = dh.no_dokter_hewan
+                LEFT JOIN PETCLINIC.TENAGA_MEDIS tm_dh ON dh.no_dokter_hewan = tm_dh.no_tenaga_medis
+                LEFT JOIN PETCLINIC.PEGAWAI p_dh ON tm_dh.no_tenaga_medis = p_dh.no_pegawai
+                -- Join for nurse info
+                LEFT JOIN PETCLINIC.PERAWAT_HEWAN ph ON k.no_perawat_hewan = ph.no_perawat_hewan
+                LEFT JOIN PETCLINIC.TENAGA_MEDIS tm_ph ON ph.no_perawat_hewan = tm_ph.no_tenaga_medis
+                LEFT JOIN PETCLINIC.PEGAWAI p_ph ON tm_ph.no_tenaga_medis = p_ph.no_pegawai
+                ORDER BY k.timestamp_awal DESC
+            """)
+            visits = dictfetchall(cursor)
+
+        from django.core.serializers.json import DjangoJSONEncoder
+        import json
+        
+        visits_json = json.dumps(visits, cls=DjangoJSONEncoder)
+
+        return render(request, 'list.html', {
+            'visits': visits_json,
+            'user_role': 'nurse'  # Set role as nurse
+        })
+
+    except Exception as e:
+        messages.error(request, f'Error: {str(e)}')
+        return render(request, 'list.html', {
+            'visits': '[]',
+            'user_role': 'nurse'
+        })
+        
 def update_visit(request, visit_id):
     if request.method == 'POST':
         try:
@@ -205,19 +261,18 @@ def update_visit(request, visit_id):
             
             # Validate required fields
             if not all([nama_hewan, no_identitas_klien, email_dokter, email_perawat, 
-                       tipe_kunjungan, timestamp_awal, timestamp_akhir]):
+                       tipe_kunjungan, timestamp_awal]):
                 messages.error(request, 'Semua field wajib harus diisi!')
                 return redirect('visits:update_visit', visit_id=visit_id)
             
             # Validate time range
             try:
                 start_time = datetime.fromisoformat(timestamp_awal.replace('T', ' '))
-                end_time = datetime.fromisoformat(timestamp_akhir.replace('T', ' '))
-                
-                if end_time <= start_time:
-                    messages.error(request, 'Waktu selesai harus setelah waktu mulai!')
-                    return redirect('visits:update_visit', visit_id=visit_id)
-                    
+                if timestamp_akhir:  # Only validate if end time exists
+                    end_time = datetime.fromisoformat(timestamp_akhir.replace('T', ' '))
+                    if end_time <= start_time:
+                        messages.error(request, 'Waktu selesai harus setelah waktu mulai!')
+                        return redirect('visits:update_visit', visit_id=visit_id)
             except ValueError:
                 messages.error(request, 'Format waktu tidak valid!')
                 return redirect('visits:update_visit', visit_id=visit_id)
@@ -313,8 +368,9 @@ def update_visit(request, visit_id):
                         catatan = %s
                     WHERE id_kunjungan = %s
                 """, [nama_hewan, no_identitas_klien, nurse, doctor,
-                    tipe_kunjungan, timestamp_awal, timestamp_akhir, 
-                    catatan, visit_id])               
+                      tipe_kunjungan, timestamp_awal, 
+                      timestamp_akhir if timestamp_akhir else None,  # Make end time optional
+                      catatan, visit_id])             
                 
             messages.success(request, 'Kunjungan berhasil diupdate!')
             return redirect(f"{reverse('visits:list')}?highlight={visit_id}#visit-{visit_id}")
@@ -452,19 +508,18 @@ def create_visit(request):
             
             # Validate required fields
             if not all([nama_hewan, no_identitas_klien, email_dokter, email_perawat, 
-                       tipe_kunjungan, timestamp_awal, timestamp_akhir]):
+                       tipe_kunjungan, timestamp_awal]):
                 messages.error(request, 'Semua field wajib harus diisi!')
                 return redirect('visits:create_visit')
             
             # Validate time range
             try:
                 start_time = datetime.fromisoformat(timestamp_awal.replace('T', ' '))
-                end_time = datetime.fromisoformat(timestamp_akhir.replace('T', ' '))
-                
-                if end_time <= start_time:
-                    messages.error(request, 'Waktu selesai harus setelah waktu mulai!')
-                    return redirect('visits:create_visit')
-                    
+                if timestamp_akhir:  # Only validate if end time exists
+                    end_time = datetime.fromisoformat(timestamp_akhir.replace('T', ' '))
+                    if end_time <= start_time:
+                        messages.error(request, 'Waktu selesai harus setelah waktu mulai!')
+                        return redirect('visits:create_visit')
             except ValueError:
                 messages.error(request, 'Format waktu tidak valid!')
                 return redirect('visits:create_visit')
@@ -533,19 +588,7 @@ def create_visit(request):
                 if cursor.fetchone()[0] == 0:
                     messages.error(request, 'Hewan tersebut tidak terdaftar untuk klien yang dipilih!')
                     return redirect('visits:create_visit')
-                
-                # Check for scheduling conflicts for doctor
-                cursor.execute("""
-                    SELECT COUNT(*) 
-                    FROM PETCLINIC.KUNJUNGAN 
-                    WHERE no_dokter_hewan = %s 
-                    AND (
-                        (timestamp_awal <= %s AND timestamp_akhir > %s) OR
-                        (timestamp_awal < %s AND timestamp_akhir >= %s) OR
-                        (timestamp_awal >= %s AND timestamp_akhir <= %s)
-                    )
-                """, [doctor, timestamp_awal, timestamp_awal, timestamp_akhir, timestamp_akhir, 
-                     timestamp_awal, timestamp_akhir])
+    
                 
                 # Insert the new visit with catatan
                 cursor.execute("""
@@ -556,7 +599,9 @@ def create_visit(request):
                     ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, [
                     visit_id, nama_hewan, no_identitas_klien, front_desk,
-                    nurse, doctor, tipe_kunjungan, timestamp_awal, timestamp_akhir, catatan
+                    nurse, doctor, tipe_kunjungan, timestamp_awal, 
+                    timestamp_akhir if timestamp_akhir else None,
+                    catatan
                 ])
                 
                 messages.success(request, f'Kunjungan berhasil dibuat dengan ID: {visit_id}')
