@@ -6,6 +6,7 @@ app_name = 'visits'
 
 urlpatterns = [
     path('', views.visit_list_fd, name='list'),
+    path('list/', views.visit_list_fd, name='list'),
     path('create/', views.create_visit, name='create_visit'),
     path('update/<str:visit_id>/', views.update_visit, name='update_visit'),
     path('delete/', views.delete_visit, name='delete_visit'),

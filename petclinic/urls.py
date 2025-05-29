@@ -30,5 +30,6 @@ urlpatterns = [
     path('visits/', include('visits.urls')),
     # path('treatments/', include('treatments.urls', namespace='treatments')),
     path('treatments/', include('treatments.urls')),
+    path('client-prescription/', include('client_prescription.urls')),
     path('get-animals/', visit_views.get_animals, name='get_animals'),
 ]

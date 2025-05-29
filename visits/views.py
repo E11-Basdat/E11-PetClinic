@@ -6,6 +6,8 @@ from django.http import JsonResponse
 import uuid
 from datetime import datetime
 
+from django.urls import reverse
+
 # Add this to views.py
 
 def get_perawatan_options(request):
@@ -188,6 +190,7 @@ def visit_list_doctor(request):
             'visits': '[]',
             'user_role': user_role
         })
+        
 def update_visit(request, visit_id):
     if request.method == 'POST':
         try:
@@ -270,32 +273,52 @@ def update_visit(request, visit_id):
                     messages.error(request, 'Hewan tersebut tidak terdaftar untuk klien yang dipilih!')
                     return redirect('visits:update_visit', visit_id=visit_id)
                 
-                # Update the visit
                 cursor.execute("""
-                    UPDATE PETCLINIC.KUNJUNGAN
-                    SET nama_hewan = %s, no_identitas_klien = %s, 
-                        no_perawat_hewan = %s, no_dokter_hewan = %s,
-                        tipe_kunjungan = %s, timestamp_awal = %s, 
-                        timestamp_akhir = %s, catatan = %s
+                    SELECT no_front_desk
+                    FROM PETCLINIC.KUNJUNGAN
                     WHERE id_kunjungan = %s
-                """, [nama_hewan, no_identitas_klien, nurse, doctor,
-                      tipe_kunjungan, timestamp_awal, timestamp_akhir, 
-                      catatan, visit_id])
+                """, [visit_id])
+                original_visit = cursor.fetchone()
+                front_desk = original_visit[0]
                 
+                # First check if there are any related treatments
+                cursor.execute("""
+                    SELECT COUNT(*) FROM PETCLINIC.KUNJUNGAN_KEPERAWATAN
+                    WHERE id_kunjungan = %s
+                """, [visit_id])
+                has_treatments = cursor.fetchone()[0] > 0
+
+                if has_treatments:
+                    # Update related treatments first
+                    cursor.execute("""
+                        UPDATE PETCLINIC.KUNJUNGAN_KEPERAWATAN
+                        SET nama_hewan = %s,
+                            no_identitas_klien = %s,
+                            no_front_desk = %s,
+                            no_perawat_hewan = %s,
+                            no_dokter_hewan = %s
+                        WHERE id_kunjungan = %s
+                    """, [nama_hewan, no_identitas_klien, front_desk, nurse, doctor, visit_id])
+
+                # Then update the main visit
                 cursor.execute("""
                     UPDATE PETCLINIC.KUNJUNGAN
-                    SET nama_hewan = %s, no_identitas_klien = %s, 
-                        no_perawat_hewan = %s, no_dokter_hewan = %s,
-                        tipe_kunjungan = %s, timestamp_awal = %s, 
-                        timestamp_akhir = %s, catatan = %s
+                    SET nama_hewan = %s, 
+                        no_identitas_klien = %s, 
+                        no_perawat_hewan = %s, 
+                        no_dokter_hewan = %s,
+                        tipe_kunjungan = %s, 
+                        timestamp_awal = %s, 
+                        timestamp_akhir = %s, 
+                        catatan = %s
                     WHERE id_kunjungan = %s
                 """, [nama_hewan, no_identitas_klien, nurse, doctor,
-                      tipe_kunjungan, timestamp_awal, timestamp_akhir, 
-                      catatan, visit_id])
+                    tipe_kunjungan, timestamp_awal, timestamp_akhir, 
+                    catatan, visit_id])               
                 
             messages.success(request, 'Kunjungan berhasil diupdate!')
-            return redirect('visits:list')
-        
+            return redirect(f"{reverse('visits:list')}?highlight={visit_id}#visit-{visit_id}")
+            
         except Exception as e:
             error_message = str(e)
             if "Timestamp akhir kunjungan" in error_message:
@@ -304,8 +327,9 @@ def update_visit(request, visit_id):
                 messages.error(request, error_message)
             else:
                 messages.error(request, f'Error updating visit: {error_message}')
-            return redirect('visits:update_visit', visit_id=visit_id)
-    
+            # Return to same page with error message
+            return redirect(f"{reverse('visits:update_visit', args=[visit_id])}#error")
+        
     else:
         # GET request - show form with current data
         with connection.cursor() as cursor:
@@ -390,7 +414,9 @@ def update_visit(request, visit_id):
                 ORDER BY nama
             """)
             nurses = dictfetchall(cursor)
-    
+
+        messages.info(request, 'Pastikan semua data yang dibutuhkan telah diisi dengan benar. Nama hewan akan muncul setelah ID Klien dipilih.')
+        
         return render(request, 'update.html', {
             'visit': visit,
             'clients': clients,
@@ -521,10 +547,6 @@ def create_visit(request):
                 """, [doctor, timestamp_awal, timestamp_awal, timestamp_akhir, timestamp_akhir, 
                      timestamp_awal, timestamp_akhir])
                 
-                if cursor.fetchone()[0] > 0:
-                    messages.warning(request, 'Dokter hewan sudah memiliki jadwal pada waktu tersebut!')
-                    # You can choose to continue or return based on business rules
-                
                 # Insert the new visit with catatan
                 cursor.execute("""
                     INSERT INTO PETCLINIC.KUNJUNGAN (
@@ -536,10 +558,11 @@ def create_visit(request):
                     visit_id, nama_hewan, no_identitas_klien, front_desk,
                     nurse, doctor, tipe_kunjungan, timestamp_awal, timestamp_akhir, catatan
                 ])
+                
+                messages.success(request, f'Kunjungan berhasil dibuat dengan ID: {visit_id}')
+                # Use reverse with query parameters
+                return redirect(f"{reverse('visits:list')}?highlight={visit_id}#visit-{visit_id}")
             
-            messages.success(request, f'Kunjungan berhasil dibuat dengan ID: {visit_id}')
-            return redirect('visits:list')
-        
         except Exception as e:
             error_message = str(e)
             if "Timestamp akhir kunjungan" in error_message:

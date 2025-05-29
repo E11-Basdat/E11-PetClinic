@@ -16,6 +16,8 @@
             --pet-clinic-dark-green: #4c6349;
             --pet-clinic-light-green: #8EB897;
             --price-label-green: #5a7557;
+            --card-border: #d1d5db;
+            --card-border-hover: #9ca3af;
         }
         
         body {
@@ -98,14 +100,15 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             overflow: hidden;
             height: 100%;
-            transition: transform 0.2s;
-            border: none;
+            transition: all 0.2s ease;
+            border: 2px solid var(--card-border);
             background-color: white;
         }
         
         .card:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: var(--card-border-hover);
         }
         
         .medicine-body {
@@ -118,12 +121,12 @@
         
         .price-tag {
             position: absolute;
-            top: 0;
-            right: 0;
+            top: -2px;
+            right: -2px;
             background-color: var(--price-label-green);
             color: white;
             padding: 4px 12px;
-            border-radius: 0 10px 0 10px;
+            border-radius: 0 8px 0 10px;
             font-weight: 600;
             z-index: 1;
         }
@@ -173,6 +176,7 @@
             align-items: center;
             padding: 12px 15px;
             background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
         }
         
         .stock-label {
@@ -192,6 +196,13 @@
             align-items: center;
             justify-content: center;
             text-decoration: none;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .action-icons a:hover {
+            background-color: rgba(0,0,0,0.05);
         }
         
         .update-icon {

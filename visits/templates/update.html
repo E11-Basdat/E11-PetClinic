@@ -140,15 +140,76 @@
                 width: 100%;
             }
         }
+
+        .notification-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .notification-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .notification-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .notification-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .notification-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-weight: 500;
+        }
+
+        .btn-no {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-yes {
+            background-color: #dc3545;
+            color: white;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🐾 Update Kunjungan Pet Clinic</h1>
         
-        <div class="alert alert-info">
-            <strong>Informasi:</strong> Pastikan semua data yang dibutuhkan telah diisi dengan benar. Nama hewan akan muncul setelah ID Klien dipilih.
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'info' %}alert-info{% else %}alert-{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
         </div>
+        {% endif %}
 
         <form method="post" action="{% url 'visits:update_visit' visit.id_kunjungan %}">
             {% csrf_token %}
@@ -282,9 +343,36 @@
     <script>
         // Handle cancel button - redirect to visit list
         document.querySelector('.btn-cancel').addEventListener('click', function() {
-            if(confirm('Apakah Anda yakin ingin membatalkan update kunjungan?')) {
+            const overlay = document.createElement('div');
+            overlay.className = 'notification-overlay';
+            overlay.style.display = 'flex';
+            
+            overlay.innerHTML = `
+                <div class="notification-card">
+                    <div class="notification-title">Konfirmasi Pembatalan</div>
+                    <div>Apakah Anda yakin ingin membatalkan pembuatan kunjungan?</div>
+                    <div class="notification-buttons">
+                        <button class="notification-btn btn-no">Tidak</button>
+                        <button class="notification-btn btn-yes">Ya</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            overlay.querySelector('.btn-no').addEventListener('click', function() {
+                overlay.remove();
+            });
+            
+            overlay.querySelector('.btn-yes').addEventListener('click', function() {
                 window.location.href = "{% url 'visits:list' %}";
-            }
+            });
+            
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
         });
         
         // Fetch animals when client is selected

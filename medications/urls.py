@@ -14,8 +14,7 @@ urlpatterns = [
     # # Prescription management
     path('prescriptions/', views.prescription_list, name='prescription_list'),
     path('prescriptions/add/', views.add_prescription, name='add_prescription'),
-    # Fixed URL pattern - parameter names must match function parameter names
     path('prescription/delete/<str:kode_perawatan>/<str:kode_obat>/', views.delete_prescription, name='delete_prescription'),
-    # Optional: Add AJAX version
+    # Optional: AJAX version
     path('prescription/delete-ajax/<str:kode_perawatan>/<str:kode_obat>/', views.delete_prescription_ajax, name='delete_prescription_ajax'),
 ]

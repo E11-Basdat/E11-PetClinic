@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'vaccinations',
     'visits',
     'treatments',
+    'client_prescription',
 ]
 
 # LOGGING = {

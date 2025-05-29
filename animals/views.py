@@ -6,7 +6,7 @@ from authentication.views import get_user_data
 from django.http import JsonResponse
 from django.db import DatabaseError
 from django.db import IntegrityError as DBIntegrityError
-import psycopg2            #  ← tambahkan
+import psycopg2            
 from psycopg2 import errors
 from psycopg2 import errors as pgerr
 
@@ -490,9 +490,7 @@ def hewan_delete(request, nama, no_identitas_klien):
             )
         messages.success(request, 'Hewan peliharaan berhasil dihapus!', extra_tags='hewan')
 
-    except (pgerr.ModifyingSqlDataNotPermitted,
-            pgerr.RaiseException,           # jaga-jaga kalau errcode diubah
-            DatabaseError) as e:            # termasuk InternalError
+    except (pgerr.ModifyingSqlDataNotPermitted, pgerr.RaiseException, DatabaseError) as e:            
         connection.rollback()
 
         # ambil pesan utama & singkirkan “CONTEXT: …”
