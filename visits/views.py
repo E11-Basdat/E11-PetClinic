@@ -536,17 +536,6 @@ def create_visit(request):
                     visit_id, nama_hewan, no_identitas_klien, front_desk,
                     nurse, doctor, tipe_kunjungan, timestamp_awal, timestamp_akhir, catatan
                 ])
-                
-                cursor.execute("""
-                    INSERT INTO PETCLINIC.KUNJUNGAN (
-                        id_kunjungan, nama_hewan, no_identitas_klien, no_front_desk,
-                        no_perawat_hewan, no_dokter_hewan, tipe_kunjungan, 
-                        timestamp_awal, timestamp_akhir, catatan
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, [
-                    visit_id, nama_hewan, no_identitas_klien, front_desk,
-                    nurse, doctor, tipe_kunjungan, timestamp_awal, timestamp_akhir, catatan
-                ])
             
             messages.success(request, f'Kunjungan berhasil dibuat dengan ID: {visit_id}')
             return redirect('visits:list')
