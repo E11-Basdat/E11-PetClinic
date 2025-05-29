@@ -617,10 +617,8 @@ def add_prescription(request):
                 messages.error(request, "Kuantitas obat harus berupa angka yang valid")
                 return redirect('medications:prescription_list')
             
-            # Use transaction to ensure data integrity
             with transaction.atomic():
                 with connection.cursor() as cursor:
-                    # Check if prescription already exists - try with schema first
                     try:
                         cursor.execute("""
                             SELECT COUNT(*)
