@@ -227,8 +227,8 @@ def get_user_data(request):
 def show_pengguna(request):
     if request.session.get('user_email'):
         return redirect('authentication:dashboard')
-    
     return render(request, 'pengguna.html')
+
 def dashboard(request):
     """Unified dashboard for all user types"""
     
