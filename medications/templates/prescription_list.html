@@ -265,7 +265,6 @@
     </div>
 </div>
 
-<!-- Add Prescription Modal -->
 <div class="modal fade" id="addPrescriptionModal" tabindex="-1" aria-labelledby="addPrescriptionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -291,7 +290,7 @@
                         <select class="form-control" id="obat" name="kode_obat" required>
                             <option value="">Obat</option>
                             {% for medicine in medicines %}
-                            <option value="{{ medicine.kode }}" data-stock="{{ medicine.stok }}">{{ medicine.display }}</option>
+                            <option value="{{ medicine.kode }}">{{ medicine.display }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -310,7 +309,6 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -335,28 +333,10 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-    function showMessage(message, type = 'success') {
-        const messageContainer = document.getElementById('messageContainer');
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.role = 'alert';
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        messageContainer.appendChild(alertDiv);
-        
-        setTimeout(() => {
-            alertDiv.classList.remove('show');
-            setTimeout(() => alertDiv.remove(), 150);
-        }, 5000);
-    }
-    
     function openDeleteModal(kodePerawatan, kodeObat, namaPerawatan, namaObat) {
         document.getElementById('deleteTreatmentName').textContent = namaPerawatan;
         document.getElementById('deleteMedicineName').textContent = namaObat;
         
-        // Set the form action with the correct URL pattern
         const deleteForm = document.getElementById('deleteForm');
         deleteForm.action = `/medications/prescription/delete/${kodePerawatan}/${kodeObat}/`;
         
@@ -366,32 +346,6 @@
     
     document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
         document.getElementById('deleteForm').submit();
-    });
-    
-    // Validate stock when selecting medicine
-    document.getElementById('obat').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const stock = selectedOption.getAttribute('data-stock');
-        const quantityInput = document.getElementById('kuantitas_obat');
-        
-        if (stock) {
-            quantityInput.setAttribute('max', stock);
-            quantityInput.setAttribute('placeholder', `Max: ${stock}`);
-        }
-    });
-    
-    // Validate quantity input
-    document.getElementById('kuantitas_obat').addEventListener('input', function() {
-        const selectedMedicine = document.getElementById('obat');
-        const selectedOption = selectedMedicine.options[selectedMedicine.selectedIndex];
-        const stock = parseInt(selectedOption.getAttribute('data-stock'));
-        const quantity = parseInt(this.value);
-        
-        if (quantity > stock) {
-            this.setCustomValidity(`Quantity cannot exceed available stock (${stock})`);
-        } else {
-            this.setCustomValidity('');
-        }
     });
     
     document.addEventListener('DOMContentLoaded', function() {
