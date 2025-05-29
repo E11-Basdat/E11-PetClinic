@@ -576,27 +576,75 @@ def delete_treatment_type(request, kode_perawatan):
                 'message': 'Data jenis perawatan tidak ditemukan'
             })
 
-        # Check if treatment is used
-        if is_treatment_type_used(kode_perawatan):
-            return JsonResponse({
-                'success': False,
-                'message': 'Tidak dapat menghapus jenis perawatan yang sedang digunakan'
-            })
-
         with connection.cursor() as cursor:
+            # Check if treatment is referenced in perawatan_obat table
+            cursor.execute("""
+                SELECT COUNT(*) 
+                FROM PETCLINIC.PERAWATAN_OBAT 
+                WHERE kode_perawatan = %s
+            """, [kode_perawatan])
+            
+            obat_count = cursor.fetchone()[0]
+            
+            if obat_count > 0:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Tidak dapat menghapus jenis perawatan "{treatment["nama_perawatan"]}" karena masih terdapat {obat_count} obat yang terkait dengan perawatan ini'
+                })
+            
+            # Check if treatment is used in other tables (if any)
+            # You might need to add more checks here based on your complete schema
+            
+            # If no dependencies found, proceed with deletion
             cursor.execute("""
                 DELETE FROM PETCLINIC.PERAWATAN
                 WHERE kode_perawatan = %s
             """, [kode_perawatan])
-        
-        return JsonResponse({
-            'success': True,
-            'message': f"Jenis perawatan {treatment['nama_perawatan']} berhasil dihapus"
-        })
-        
+            
+            if cursor.rowcount == 0:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Data jenis perawatan tidak ditemukan atau sudah terhapus'
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Jenis perawatan "{treatment["nama_perawatan"]}" berhasil dihapus'
+            })
+                
     except Exception as e:
         error_message = clean_error_message(str(e))
+        
+        # Handle specific foreign key constraint errors
+        if 'foreign key constraint' in error_message.lower():
+            return JsonResponse({
+                'success': False,
+                'message': f'Tidak dapat menghapus jenis perawatan "{treatment["nama_perawatan"] if treatment else ""}" karena masih digunakan oleh data lain dalam sistem'
+            })
+        
         return JsonResponse({
             'success': False,
             'message': f"Gagal menghapus jenis perawatan: {error_message}"
         })
+
+
+# Alternative: If you want to update your existing is_treatment_type_used function
+def is_treatment_type_used(kode_perawatan):
+    """
+    Check if a treatment type is being used in any related table
+    """
+    with connection.cursor() as cursor:
+        # Check perawatan_obat table
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM PETCLINIC.PERAWATAN_OBAT 
+            WHERE kode_perawatan = %s
+        """, [kode_perawatan])
+        
+        if cursor.fetchone()[0] > 0:
+            return True
+        
+        # Add more checks for other tables that might reference perawatan
+        # For example, if there's a table for treatment records, appointments, etc.
+        
+        return False
