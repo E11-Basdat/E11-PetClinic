@@ -153,25 +153,19 @@ def get_nurse_id(request):
     return result[0] if result else None
 
 def get_vaccines_list(search=None):
-    """Get list of all vaccines with usage information"""
+    """Get list of all vaccines"""
     with connection.cursor() as cursor:
         if search:
             cursor.execute("""
-                SELECT v.kode, v.nama, v.harga, v.stok,
-                       CASE WHEN COUNT(k.id_kunjungan) > 0 THEN false ELSE true END as can_delete
+                SELECT v.kode, v.nama, v.harga, v.stok
                 FROM PETCLINIC.VAKSIN v
-                LEFT JOIN PETCLINIC.KUNJUNGAN k ON v.kode = k.kode_vaksin
                 WHERE LOWER(v.nama) LIKE LOWER(%s)
-                GROUP BY v.kode, v.nama, v.harga, v.stok
                 ORDER BY v.kode DESC
             """, [f'%{search}%'])
         else:
             cursor.execute("""
-                SELECT v.kode, v.nama, v.harga, v.stok,
-                       CASE WHEN COUNT(k.id_kunjungan) > 0 THEN false ELSE true END as can_delete
+                SELECT v.kode, v.nama, v.harga, v.stok
                 FROM PETCLINIC.VAKSIN v
-                LEFT JOIN PETCLINIC.KUNJUNGAN k ON v.kode = k.kode_vaksin
-                GROUP BY v.kode, v.nama, v.harga, v.stok
                 ORDER BY v.kode DESC
             """)
         
@@ -190,8 +184,7 @@ def get_vaccines_list(search=None):
                 'nama': row[1],
                 'harga': formatted_harga,
                 'harga_raw': original_harga,  
-                'stok': row[3],
-                'can_delete': row[4]
+                'stok': row[3]
             })
     
     return vaccine_list

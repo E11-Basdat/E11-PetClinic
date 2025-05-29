@@ -870,3 +870,110 @@ def client_detail(request, no_identitas):
     }
     
     return render(request, 'client_detail.html', context)
+
+def my_client_data(request):
+    """View function for clients to view their own data and pets."""
+    
+    if not request.session.get('user_email') or request.session.get('user_type') not in ['individu', 'perusahaan']:
+        messages.error(request, 'Only clients can access this page.')
+        return redirect('authentication:dashboard')
+    
+    user_data = get_user_data(request)
+    no_identitas = user_data['no_identitas']
+    
+    
+    client_type = execute_query("""
+        SELECT 
+            CASE 
+                WHEN EXISTS (SELECT 1 FROM petclinic.INDIVIDU WHERE no_identitas_klien = %s) THEN 'Individu'
+                WHEN EXISTS (SELECT 1 FROM petclinic.PERUSAHAAN WHERE no_identitas_klien = %s) THEN 'Perusahaan'
+                ELSE 'Unknown'
+            END
+    """, [no_identitas, no_identitas])
+    
+    if not client_type:
+        messages.error(request, 'Client data not found.')
+        return redirect('authentication:dashboard')
+    
+    client_jenis = client_type[0][0]
+    client = {}
+    
+    
+    if client_jenis == 'Individu':
+        individual_data = execute_query("""
+            SELECT k.no_identitas, k.email, u.alamat, u.nomor_telepon, k.tanggal_registrasi,
+                   i.nama_depan, i.nama_tengah, i.nama_belakang
+            FROM petclinic.KLIEN k
+            JOIN petclinic."USER" u ON k.email = u.email
+            JOIN petclinic.INDIVIDU i ON k.no_identitas = i.no_identitas_klien
+            WHERE k.no_identitas = %s
+        """, [no_identitas])
+        
+        if individual_data:
+            
+            nama_lengkap = individual_data[0][5]  
+            if individual_data[0][6]:  
+                nama_lengkap += " " + individual_data[0][6]
+            if individual_data[0][7]:  
+                nama_lengkap += " " + individual_data[0][7]
+            
+            client = {
+                'no_identitas': individual_data[0][0],
+                'email': individual_data[0][1],
+                'alamat': individual_data[0][2],
+                'nomor_telepon': individual_data[0][3],
+                'tanggal_registrasi': individual_data[0][4],
+                'nama': nama_lengkap.strip(),
+                'jenis': client_jenis
+            }
+    else:  
+        company_data = execute_query("""
+            SELECT k.no_identitas, k.email, u.alamat, u.nomor_telepon, k.tanggal_registrasi,
+                   p.nama_perusahaan
+            FROM petclinic.KLIEN k
+            JOIN petclinic."USER" u ON k.email = u.email
+            JOIN petclinic.PERUSAHAAN p ON k.no_identitas = p.no_identitas_klien
+            WHERE k.no_identitas = %s
+        """, [no_identitas])
+        
+        if company_data:
+            client = {
+                'no_identitas': company_data[0][0],
+                'email': company_data[0][1],
+                'alamat': company_data[0][2],
+                'nomor_telepon': company_data[0][3],
+                'tanggal_registrasi': company_data[0][4],
+                'nama': company_data[0][5],
+                'jenis': client_jenis
+            }
+    
+    if not client:
+        messages.error(request, 'Client details could not be retrieved.')
+        return redirect('authentication:dashboard')
+    
+    
+    pets_query = """
+        SELECT h.nama, h.tanggal_lahir, jh.nama_jenis
+        FROM petclinic.HEWAN h
+        JOIN petclinic.JENIS_HEWAN jh ON h.id_jenis = jh.id
+        WHERE h.no_identitas_klien = %s
+    """
+    
+    pets_data = execute_query(pets_query, [no_identitas])
+    
+    pets = []
+    if pets_data:
+        for pet in pets_data:
+            pets.append({
+                'nama': pet[0],
+                'tanggal_lahir': pet[1],
+                'jenis': pet[2]
+            })
+    
+    context = {
+        'user_data': user_data,
+        'client': client,
+        'pets': pets
+    }
+    
+    return render(request, 'my_client_data.html', context)
