@@ -617,10 +617,8 @@ def add_prescription(request):
                 messages.error(request, "Kuantitas obat harus berupa angka yang valid")
                 return redirect('medications:prescription_list')
             
-            # Use transaction to ensure data integrity
             with transaction.atomic():
                 with connection.cursor() as cursor:
-                    # Check if prescription already exists - try with schema first
                     try:
                         cursor.execute("""
                             SELECT COUNT(*)
@@ -638,7 +636,6 @@ def add_prescription(request):
                         messages.error(request, "Resep untuk kombinasi perawatan dan obat ini sudah ada")
                         return redirect('medications:prescription_list')
                     
-                    # Insert prescription - triggers will handle ALL validation
                     try:
                         cursor.execute("""
                             INSERT INTO petclinic.perawatan_obat (kode_perawatan, kode_obat, kuantitas_obat)
@@ -654,13 +651,11 @@ def add_prescription(request):
                                 """, [kode_perawatan, kode_obat, kuantitas_obat])
                                 
                             except Exception as db_error2:
-                                # This is where trigger errors will be caught
                                 error_message = clean_error_message(str(db_error2))
                                 print(f"Database trigger error (no schema): {str(db_error2)}")
                                 messages.error(request, error_message)
                                 return redirect('medications:prescription_list')
                         else:
-                            # This is where trigger errors will be caught for schema version
                             error_message = clean_error_message(str(db_error))
                             print(f"Database trigger error (with schema): {str(db_error)}")
                             messages.error(request, error_message)

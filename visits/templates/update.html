@@ -314,8 +314,8 @@
                     
                     <div class="form-col">
                         <div class="form-group">
-                            <label for="waktu-selesai">Waktu Selesai Penanganan <span class="required">*</span></label>
-                            <input type="datetime-local" id="waktu-selesai" name="waktu_selesai" required 
+                            <label for="waktu-selesai">Waktu Selesai Penanganan</label> <!-- Remove span required -->
+                            <input type="datetime-local" id="waktu-selesai" name="waktu_selesai" 
                                 value="{{ visit.timestamp_akhir|date:'Y-m-d\TH:i' }}">
                         </div>
                     </div>
@@ -427,9 +427,11 @@
             const startTime = document.getElementById('waktu-mulai').value;
             const endTime = this.value;
             
-            if (startTime && endTime && new Date(endTime) <= new Date(startTime)) {
-                alert('Waktu selesai harus setelah waktu mulai penanganan!');
-                this.value = '';
+            if (startTime && endTime) {  // Only validate if end time is provided
+                if (new Date(endTime) <= new Date(startTime)) {
+                    alert('Waktu selesai harus setelah waktu mulai penanganan!');
+                    this.value = '';
+                }
             }
         });
 
@@ -438,9 +440,11 @@
             const startTime = this.value;
             const endTime = document.getElementById('waktu-selesai').value;
             
-            if (startTime && endTime && new Date(endTime) <= new Date(startTime)) {
-                alert('Waktu selesai harus setelah waktu mulai penanganan!');
-                document.getElementById('waktu-selesai').value = '';
+            if (startTime && endTime) {  // Only validate if end time is provided
+                if (new Date(endTime) <= new Date(startTime)) {
+                    alert('Waktu selesai harus setelah waktu mulai penanganan!');
+                    document.getElementById('waktu-selesai').value = '';
+                }
             }
         });
 

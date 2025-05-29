@@ -11,7 +11,7 @@ urlpatterns = [
     path('update-stock/<str:medicine_id>/', views.update_medicine_stock, name='update_medicine_stock'),
     path('delete/<str:medicine_id>/', views.delete_medicine, name='delete_medicine'),
     
-    # Prescription management
+    # # Prescription management
     path('prescriptions/', views.prescription_list, name='prescription_list'),
     path('prescriptions/add/', views.add_prescription, name='add_prescription'),
     path('prescription/delete/<str:kode_perawatan>/<str:kode_obat>/', views.delete_prescription, name='delete_prescription'),

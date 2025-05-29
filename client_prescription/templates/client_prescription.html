@@ -18,6 +18,8 @@
             --success-color: #28a745;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
+            --green-primary: #28a745;
+            --green-secondary: #20c997;
         }
 
         body {
@@ -30,16 +32,19 @@
             background: rgba(255, 255, 255, 1);
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 2px solid #e9ecef;
             margin: 20px;
             min-height: calc(100vh - 40px);
         }
 
         .header-section {
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            background: linear-gradient(135deg, var(--green-primary), var(--green-secondary));
             color: white;
             padding: 30px;
-            border-radius: 20px 20px 0 0;
+            border-radius: 18px 18px 0 0;
             text-align: center;
+            border: 3px solid rgba(40, 167, 69, 0.3);
+            border-bottom: none;
         }
 
         .header-title {
@@ -47,6 +52,7 @@
             font-weight: 700;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            -webkit-text-stroke: 1px rgba(255,255,255,0.2);
         }
 
         .header-subtitle {
@@ -56,37 +62,55 @@
 
         .content-section {
             padding: 30px;
+            border-left: 2px solid #e9ecef;
+            border-right: 2px solid #e9ecef;
+            border-bottom: 2px solid #e9ecef;
+            border-radius: 0 0 18px 18px;
         }
 
         .visit-card {
             background: white;
             border-radius: 15px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 2px solid #dee2e6;
             margin-bottom: 25px;
             overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
         .visit-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-color: var(--green-primary);
         }
 
-        .visit-header {
-            background: linear-gradient(135deg, #28a745, #20c997);
+         .visit-header {
+            background: linear-gradient(135deg, var(--green-primary), var(--success-color));
             color: white;
             padding: 20px;
             position: relative;
+            border: 3px solid rgba(40, 167, 69, 0.3);
+            border-bottom: none;
         }
 
         .visit-title {
             font-size: 1.4rem;
             font-weight: 600;
             margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .doctor-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
         }
 
         .treatment-section {
             padding: 20px;
+            border-left: 2px solid #dee2e6;
+            border-right: 2px solid #dee2e6;
+            border-bottom: 2px solid #dee2e6;
         }
 
         .treatment-header {
@@ -94,6 +118,7 @@
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
+            border: 2px solid rgba(108, 92, 231, 0.3);
             margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
@@ -103,12 +128,14 @@
         .treatment-name {
             font-size: 1.2rem;
             font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .treatment-cost {
             background: rgba(255,255,255,0.2);
             padding: 5px 12px;
             border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
             font-weight: 600;
         }
 
@@ -140,7 +167,7 @@
         }
 
         .medicine-card:hover {
-            border-color: var(--accent-color);
+            border-color: var(--green-primary);
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
@@ -148,8 +175,9 @@
         .medicine-name {
             font-size: 1.1rem;
             font-weight: 600;
-            color: var(--primary-color);
+            color: var(--green-primary);
             margin-bottom: 10px;
+            text-shadow: 0.5px 0.5px 1px rgba(0,0,0,0.1);
         }
 
         .medicine-details {
@@ -179,13 +207,15 @@
         .price-highlight {
             color: var(--success-color);
             font-weight: 700;
+            text-shadow: 0.5px 0.5px 1px rgba(0,0,0,0.1);
         }
 
         .total-section {
-            background: linear-gradient(135deg, #ffd700, #ffed4e);
-            color: #333;
+            background: linear-gradient(135deg, var(--green-primary), var(--green-secondary));
+            color: white;
             padding: 15px 20px;
             border-radius: 10px;
+            border: 2px solid rgba(40, 167, 69, 0.3);
             text-align: center;
             font-weight: 700;
             font-size: 1.1rem;
@@ -204,14 +234,22 @@
             color: white;
             padding: 20px;
             border-radius: 15px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
             text-align: center;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
         }
 
         .stat-number {
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .stat-label {
@@ -223,12 +261,33 @@
             text-align: center;
             padding: 60px 20px;
             color: #6c757d;
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
+            background: #f8f9fa;
         }
 
         .empty-icon {
             font-size: 4rem;
             color: #dee2e6;
             margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #f5c6cb;
         }
 
         @media (max-width: 768px) {
@@ -262,12 +321,19 @@
                 <i class="fas fa-prescription-bottle-alt"></i>
                 Resep Obat Saya
             </h1>
-            <p class="header-subtitle">Riwayat resep obat dari kunjungan perawatan hewan</p>
         </div>
 
         <div class="content-section">
+            <div id="loading" class="loading-spinner">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Memuat data resep obat...</p>
+            </div>
+
+            <div id="error-container" style="display: none;"></div>
+
             <div id="prescriptions-container">
-                <!-- Prescriptions will be loaded here -->
             </div>
 
             <div id="no-prescriptions" class="no-prescriptions" style="display: none;">
@@ -283,52 +349,35 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Sample data untuk demo
-        const prescriptionsData = [
-            {
-                visit_info: {
-                    id_kunjungan: "6ba7b818-9dad-11d1-80b4-00c04fd430c8",
-                    nama_hewan: "Shadow",
-                    nama_dokter: "dr. rina.fitriani",
-                    timestamp_awal: "2025-07-28T11:35:00Z",
-                    timestamp_akhir: "2025-07-28T12:10:00Z"
-                },
-                treatments: [
-                    {
-                        treatment_info: {
-                            nama_perawatan: "Perawatan Kulit dan Bulu",
-                            kode_perawatan: "TRM004",
-                            biaya_perawatan: 9750000
-                        },
-                        medicines: [
-                            {
-                                kode_obat: "MED008",
-                                nama_obat: "Ear Cleaner",
-                                dosis: "3-5 tetes, 1-2x/minggu",
-                                kuantitas_obat: 1,
-                                harga_obat: 40000,
-                                total_obat: 40000
-                            },
-                            {
-                                kode_obat: "MED009",
-                                nama_obat: "Enrofloxacin7",
-                                dosis: "7-10 mg/kg, 1x sehari",
-                                kuantitas_obat: 6,
-                                harga_obat: 70000,
-                                total_obat: 420000
-                            }
-                        ],
-                        medicine_total: 460000,
-                        treatment_total: 10210000
-                    }
-                ],
-                visit_total: 10210000
-            }
-        ];
+        let prescriptionsData = [];
+        
+        try {
+            prescriptionsData = {{ prescriptions|safe }};
+            console.log('Loaded prescriptions data:', prescriptionsData);
+        } catch (error) {
+            console.error('Error parsing prescriptions data:', error);
+            showError('Gagal memuat data resep obat');
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
+            hideLoading();
             loadPrescriptions(prescriptionsData);
         });
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Error:</strong> ${message}
+                </div>
+            `;
+            errorContainer.style.display = 'block';
+        }
 
         function loadPrescriptions(prescriptions) {
             const container = document.getElementById('prescriptions-container');
@@ -339,14 +388,12 @@
                 return;
             }
 
-            // Calculate statistics
             const totalVisits = prescriptions.length;
             const totalTreatments = prescriptions.reduce((sum, visit) => sum + visit.treatments.length, 0);
             const totalMedicines = prescriptions.reduce((sum, visit) => 
                 sum + visit.treatments.reduce((tSum, treatment) => tSum + treatment.medicines.length, 0), 0);
             const grandTotal = prescriptions.reduce((sum, visit) => sum + visit.visit_total, 0);
 
-            // Create statistics section
             const statsHTML = `
                 <div class="stats-row">
                     <div class="stat-card">
@@ -361,10 +408,6 @@
                         <div class="stat-number">${totalMedicines}</div>
                         <div class="stat-label">Total Obat</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number">Rp ${formatCurrency(grandTotal)}</div>
-                        <div class="stat-label">Total Biaya</div>
-                    </div>
                 </div>
             `;
 
@@ -375,7 +418,9 @@
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
-                    day: 'numeric'
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
                 });
 
                 html += `
@@ -385,7 +430,6 @@
                                 <i class="fas fa-paw"></i>
                                 Kunjungan ${visit.visit_info.nama_hewan}
                             </div>
-                            <p style="margin: 0; opacity: 0.9;">${visitDate}</p>
                         </div>
 
                         <div class="treatment-section">
@@ -398,51 +442,59 @@
                                 <div class="treatment-name">${treatment.treatment_info.nama_perawatan}</div>
                                 <small>Kode: ${treatment.treatment_info.kode_perawatan}</small>
                             </div>
-                            <div class="treatment-cost">
-                                Rp ${formatCurrency(treatment.treatment_total)}
-                            </div>
                         </div>
 
                         <div class="medicines-grid">
                     `;
 
-                    treatment.medicines.forEach(medicine => {
+                    if (treatment.medicines && treatment.medicines.length > 0) {
+                        treatment.medicines.forEach(medicine => {
+                            html += `
+                                <div class="medicine-card">
+                                    <div class="medicine-name">
+                                        <i class="fas fa-pills"></i>
+                                        ${medicine.nama_obat}
+                                    </div>
+                                    <div class="medicine-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Kode Obat:</span>
+                                            <span class="detail-value">${medicine.kode_obat}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Dosis:</span>
+                                            <span class="detail-value">${medicine.dosis || 'Sesuai petunjuk dokter'}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Jumlah:</span>
+                                            <span class="detail-value">${medicine.kuantitas_obat}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Harga Satuan:</span>
+                                            <span class="detail-value price-highlight">Rp ${formatCurrency(medicine.harga_obat)}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Total:</span>
+                                            <span class="detail-value price-highlight">Rp ${formatCurrency(medicine.total_obat)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
                         html += `
                             <div class="medicine-card">
                                 <div class="medicine-name">
-                                    <i class="fas fa-pills"></i>
-                                    ${medicine.nama_obat}
-                                </div>
-                                <div class="medicine-details">
-                                    <div class="detail-item">
-                                        <span class="detail-label">Dosis:</span>
-                                        <span class="detail-value">${medicine.dosis || 'Tidak disebutkan'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Jumlah:</span>
-                                        <span class="detail-value">${medicine.kuantitas_obat}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Harga Satuan:</span>
-                                        <span class="detail-value price-highlight">Rp ${formatCurrency(medicine.harga_obat)}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Total:</span>
-                                        <span class="detail-value price-highlight">Rp ${formatCurrency(medicine.total_obat)}</span>
-                                    </div>
+                                    <i class="fas fa-info-circle"></i>
+                                    Tidak ada obat untuk perawatan ini
                                 </div>
                             </div>
                         `;
-                    });
+                    }
 
                     html += `</div>`;
                 });
 
                 html += `
-                        </div>
-                        <div class="total-section">
-                            <i class="fas fa-calculator"></i>
-                            Total Biaya Kunjungan: Rp ${formatCurrency(visit.visit_total)}
                         </div>
                     </div>
                 `;
@@ -452,7 +504,17 @@
         }
 
         function formatCurrency(amount) {
+            if (amount === null || amount === undefined) return '0';
             return new Intl.NumberFormat('id-ID').format(amount);
+        }
+
+        function refreshPrescriptions() {
+            window.location.reload();
+        }
+
+        function handleAjaxError(xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+            showError('Gagal memuat data dari server. Silakan refresh halaman.');
         }
     </script>
 </body>
