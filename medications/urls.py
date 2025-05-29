@@ -1,19 +1,20 @@
+# medications/urls.py
 from django.urls import path
 from . import views
 
 app_name = 'medications'
 
 urlpatterns = [
-    # Medicine management routes
-    path('list/', views.medicine_list, name='list'),
-    path('add/', views.add_medicine, name='add'),
-    path('update/<str:kode>/', views.update_medicine, name='update'),
-    path('update_stock/<str:kode>/', views.update_stock, name='update_stock'),
-    path('delete/<str:kode>/', views.delete_medicine, name='delete'),
+    path('', views.medicine_list, name='medicine_list'),
+    path('add/', views.add_medicine, name='add_medicine'),
+    path('update/<str:medicine_id>/', views.update_medicine, name='update_medicine'),
+    path('update-stock/<str:medicine_id>/', views.update_medicine_stock, name='update_medicine_stock'),
+    path('delete/<str:medicine_id>/', views.delete_medicine, name='delete_medicine'),
     
-    path('prescription/list/', views.prescription_list, name='prescription_list'),
-    path('prescription/add/', views.add_prescription, name='add_prescription'),
-    path('prescription/delete/', views.delete_prescription, name='delete_prescription'),
-
-    path('my-prescriptions/', views.client_prescription, name='client_prescriptions')
+    # # Prescription management
+    path('prescriptions/', views.prescription_list, name='prescription_list'),
+    path('prescriptions/add/', views.add_prescription, name='add_prescription'),
+    path('prescription/delete/<str:kode_perawatan>/<str:kode_obat>/', views.delete_prescription, name='delete_prescription'),
+    # Optional: AJAX version
+    path('prescription/delete-ajax/<str:kode_perawatan>/<str:kode_obat>/', views.delete_prescription_ajax, name='delete_prescription_ajax'),
 ]

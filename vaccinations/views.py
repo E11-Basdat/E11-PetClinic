@@ -49,7 +49,8 @@ def get_list_vaccinations(request):
                    k.no_identitas_klien, k.no_dokter_hewan, v.kode as kode_vaksin
             FROM PETCLINIC.KUNJUNGAN k
             LEFT JOIN PETCLINIC.VAKSIN v ON k.kode_vaksin = v.kode
-            WHERE k.kode_vaksin IS NOT NULL
+            WHERE k.kode_vaksin IS NOT NULL 
+            AND timestamp_akhir IS NULL
             AND k.no_dokter_hewan = %s
             ORDER BY k.timestamp_awal DESC
         """, [doctor_id])
@@ -152,25 +153,19 @@ def get_nurse_id(request):
     return result[0] if result else None
 
 def get_vaccines_list(search=None):
-    """Get list of all vaccines with usage information"""
+    """Get list of all vaccines"""
     with connection.cursor() as cursor:
         if search:
             cursor.execute("""
-                SELECT v.kode, v.nama, v.harga, v.stok,
-                       CASE WHEN COUNT(k.id_kunjungan) > 0 THEN false ELSE true END as can_delete
+                SELECT v.kode, v.nama, v.harga, v.stok
                 FROM PETCLINIC.VAKSIN v
-                LEFT JOIN PETCLINIC.KUNJUNGAN k ON v.kode = k.kode_vaksin
                 WHERE LOWER(v.nama) LIKE LOWER(%s)
-                GROUP BY v.kode, v.nama, v.harga, v.stok
                 ORDER BY v.kode DESC
             """, [f'%{search}%'])
         else:
             cursor.execute("""
-                SELECT v.kode, v.nama, v.harga, v.stok,
-                       CASE WHEN COUNT(k.id_kunjungan) > 0 THEN false ELSE true END as can_delete
+                SELECT v.kode, v.nama, v.harga, v.stok
                 FROM PETCLINIC.VAKSIN v
-                LEFT JOIN PETCLINIC.KUNJUNGAN k ON v.kode = k.kode_vaksin
-                GROUP BY v.kode, v.nama, v.harga, v.stok
                 ORDER BY v.kode DESC
             """)
         
@@ -189,8 +184,7 @@ def get_vaccines_list(search=None):
                 'nama': row[1],
                 'harga': formatted_harga,
                 'harga_raw': original_harga,  
-                'stok': row[3],
-                'can_delete': row[4]
+                'stok': row[3]
             })
     
     return vaccine_list
@@ -671,6 +665,11 @@ def get_client_vaccinations(request):
     vaccine_filter = request.GET.get('vaccine_filter')
     
     query = """
+        SELECT k.id_kunjungan, k.nama_hewan, v.nama as nama_vaksin, v.kode as id_vaksin, 
+               v.harga, k.timestamp_awal
+        FROM PETCLINIC.KUNJUNGAN k
+        JOIN PETCLINIC.VAKSIN v ON k.kode_vaksin = v.kode
+        WHERE k.no_identitas_klien = %s AND k.kode_vaksin IS NOT NULL
     """
     
     params = [client_id]

@@ -2,7 +2,26 @@
 
 {% block content %}
 <div class="container mx-auto p-8">
-  <div class="border border-gray-300 rounded-lg p-6">
+  {# ───── ALERT BAR ───── #}
+  {% if messages %}
+  <div class="w-full flex justify-center mb-4">
+    <div class="space-y-2">
+      {% for m in messages %}
+        {% if 'hewan' in m.extra_tags %}
+          <div class="inline-block px-4 py-2 rounded shadow
+                    {% if 'error' in m.tags %} bg-red-500
+                    {% elif 'success' in m.tags %} bg-green-600
+                    {% else %} bg-blue-600
+                    {% endif %}
+                    text-white">
+          {{ m }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <div class="border border-white rounded-lg">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-xl font-bold">List Hewan Peliharaan</h2>
 

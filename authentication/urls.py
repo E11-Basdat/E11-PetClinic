@@ -13,4 +13,5 @@ urlpatterns = [
     path('update-profile/', views.update_profile, name='update_profile'),
     path('list-client/', views.list_client, name='list_client'),
     path('client-detail/<str:no_identitas>/', views.client_detail, name='client_detail'),
+    path('my-data/', views.my_client_data, name='my_client_data'),
 ]

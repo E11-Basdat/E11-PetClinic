@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from visits import views as visit_views
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
@@ -28,6 +29,7 @@ urlpatterns = [
     path('vaccinations/', include('vaccinations.urls')),
     path('visits/', include('visits.urls')),
     # path('treatments/', include('treatments.urls', namespace='treatments')),
-    path('treatment/', include('treatments.urls')),
+    path('treatments/', include('treatments.urls')),
+    path('client-prescription/', include('client_prescription.urls')),
+    path('get-animals/', visit_views.get_animals, name='get_animals'),
 ]
-

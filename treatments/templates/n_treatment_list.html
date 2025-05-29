@@ -1,41 +1,112 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-6">
+<style>
+    @keyframes highlightFade {
+        0% { background-color: #fef3c7; }  /* Light yellow */
+        100% { background-color: transparent; }
+    }
+
+    .highlight-row {
+        animation: highlightFade 2s ease-out;
+        background-color: #fef3c7;  /* Set initial background color */
+    }
+</style>
+
+<!-- Add text-sm class to container -->
+<div class="container mx-auto px-4 py-6 text-sm">
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}bg-red-100 border-l-4 border-red-500 text-red-700{% else %}bg-green-100 border-l-4 border-green-500 text-green-700{% endif %} p-4 mb-2">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold">List Treatments</h1>
+        <h1 class="text-2xl font-semibold">
+            {% if user_role == 'client' %}
+                Riwayat Perawatan Saya
+            {% else %}
+                List Treatments
+            {% endif %}
+        </h1>
 
         {% if user_role == 'doctor' %}
-        <a href="{% url 'treatments:n_create_treatment' %}" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-md flex items-center">
+        <a href="{% url 'treatments:n_create_treatment' %}" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded-md flex items-center text-sm">
             <span class="mr-1">+</span> Create New Treatment
         </a>
         {% endif %}
     </div>
 
+    {% if treatments %}
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white border border-gray-200">
             <thead>
-                <tr class="bg-gray-100 text-left text-gray-600 text-sm">
-                    <th class="py-3 px-4 border-b">No</th>
-                    <th class="py-3 px-4 border-b">Kunjungan</th>
-                    <th class="py-3 px-4 border-b">ID Klien</th>
-                    <th class="py-3 px-4 border-b">Nama Hewan</th>
-                    <th class="py-3 px-4 border-b">Perawat Hewan</th>
-                    <th class="py-3 px-4 border-b">Dokter Hewan</th>
-                    <th class="py-3 px-4 border-b">Front Desk Officer</th>
-                    <th class="py-3 px-4 border-b">Jenis Perawatan</th>
-                    <th class="py-3 px-4 border-b">Catatan Medis</th>
+                <tr class="bg-gray-100 text-gray-600 text-sm">
+                    <th class="py-2 px-3 border-b text-center font-medium">No</th>
+                    <th class="py-2 px-3 border-b text-center font-medium">ID Kunjungan</th>
+                    {% if user_role != 'client' %}
+                        <th class="py-2 px-3 border-b text-center font-medium">ID Klien</th>
+                    {% endif %}
+                    <th class="py-2 px-3 border-b text-center font-medium">Nama Hewan</th>
+                    <th class="py-2 px-3 border-b text-center font-medium">Perawat Hewan</th>
+                    <th class="py-2 px-3 border-b text-center font-medium">Dokter Hewan</th>
+                    <th class="py-2 px-3 border-b text-center font-medium">Front Desk Officer</th>
+                    <th class="py-2 px-3 border-b text-center font-medium">Jenis Perawatan</th>
                     {% if user_role == 'doctor' %}
-                        <th class="py-3 px-4 border-b">Action</th>
+                        <th class="py-2 px-3 border-b text-center font-medium">Action</th>
                     {% endif %}
                 </tr>
             </thead>
-            <tbody id="treatment-table-body">
-                <!-- Data will be populated by JavaScript -->
+            <tbody>
+                {% for treatment in treatments %}
+                <tr id="treatment-{{ treatment.id_kunjungan }}"
+                    {% if request.GET.highlight == treatment.id_kunjungan %}
+                    class="highlight-row"
+                    {% endif %}>
+
+                    <td class="py-2 px-3 border-b">{{ forloop.counter }}</td>
+                    <td class="py-2 px-3 border-b">{{ treatment.id_kunjungan }}</td>
+                    {% if user_role != 'client' %}
+                        <td class="py-2 px-3 border-b">{{ treatment.no_identitas_klien }}</td>
+                    {% endif %}
+                    <td class="py-2 px-3 border-b">{{ treatment.nama_hewan }}</td>
+                    <td class="py-2 px-3 border-b">{{ treatment.perawat_email }}</td>
+                    <td class="py-2 px-3 border-b">{{ treatment.dokter_email }}</td>
+                    <td class="py-2 px-3 border-b">{{ treatment.front_desk_email }}</td>
+                    <td class="py-2 px-3 border-b">{{ treatment.jenis_perawatan }}</td>
+                    {% if user_role == 'doctor' %}
+                        <td class="py-2 px-3 border-b">
+                            <div class="flex items-center space-x-2 justify-center">
+                                <a href="{% url 'treatments:n_update_treatment' treatment.compound_id %}" 
+                                   class="bg-blue-800 text-white px-3 py-1 rounded text-xs w-16">Update</a>
+                                <button type="button"
+                                        class="bg-red-500 text-white px-3 py-1 rounded text-xs w-16 delete-btn" 
+                                        onclick="showDeleteConfirmation('{{ treatment.compound_id }}', '{{ treatment.kode_perawatan }}')">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
-    
+    {% else %}
+    <div class="text-center py-8">
+        <div class="text-gray-500 text-lg mb-2">Tidak ada data perawatan</div>
+        <p class="text-gray-400 text-sm">
+            {% if user_role == 'client' %}
+                Anda belum memiliki riwayat perawatan.
+            {% else %}
+                Belum ada perawatan yang tercatat dalam sistem.
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center">
         <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
@@ -49,489 +120,66 @@
     </div>
 
     <script>
-
-        let treatmentsData;
-        const userRole = '{{ user_role }}';
         let currentKunjungan = '';
-
-        if (userRole === 'klien') {
-            treatmentsData = [
-                {
-                    no: 1,
-                    idKunjungan: '6ba7b82c-9dad-11d1-80b4-00c04fd430c9',
-                    idKlien: '6ba7b82c-9dad-11d1-80b4-00c04fd430c9',
-                    namaHewan: 'Snowy',
-                    perawat: 'Joko',
-                    dokter: 'Dr. Sri',
-                    frontDesk: 'Dian',
-                    jenisPerawatan: 'TRM002 - Grooming',
-                    catatanMedis: 'Pastikan hewan mendapatkan cukup air dan makanan!',
-                },
-                {
-                    no: 2,
-                    idKunjungan: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-                    idKlien: '6ba7b82c-9dad-11d1-80b4-00c04fd430c9',
-                    namaHewan: 'Cookie',
-                    perawat: 'Siti',
-                    dokter: 'Dr. Irma',
-                    frontDesk: 'Budi',
-                    jenisPerawatan: 'TRM001 - Perawatan Gigi',
-                    catatanMedis: 'Lakukan pemeriksaan kesehatan mata hewan secara berkala!',
-                }
-            ];
-        } else {
-            treatmentsData = [
-            {
-              no: 1,
-              idKunjungan: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c8",
-              namaHewan: "Blacky",
-              perawat: "Siti",
-              dokter: "Dr Agus",
-              frontDesk: "Budi",
-              jenisPerawatan: "TRM001 - Perawatan Gigi",
-              catatanMedis: "Hewan nya dijaga terus ya!",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'f47ac10b-58cc-4372-a567-0e02b2c3d479' %}"
-            },
-            {
-              no: 2,
-              idKunjungan: "550e8400-e29b-41d4-a716-446655440000",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c9",
-              namaHewan: "Snowy",
-              perawat: "Tri",
-              dokter: "Dr Sri",
-              frontDesk: "Dian",
-              jenisPerawatan: "TRM002 - Grooming",
-              catatanMedis: "Pastikan hewan mendapatkan cukup air dan makanan!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '550e8400-e29b-41d4-a716-446655440000' %}"
-            },
-            {
-              no: 3,
-              idKunjungan: "c3073b2a-9fc2-47b6-b358-1912aefc4442",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c10",
-              namaHewan: "Coco",
-              perawat: "Mega",
-              dokter: "Dr Bambang",
-              frontDesk: "Ahmad",
-              jenisPerawatan: "TRM003 - Pemeriksaan Telinga",
-              catatanMedis: "Jangan lupa beri obat sesuai jadwal!",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'c3073b2a-9fc2-47b6-b358-1912aefc4442' %}"
-            },
-            {
-              no: 4,
-              idKunjungan: "6a33b35c-9c8f-4ca0-9cf6-dce21e3d19a2",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c11",
-              namaHewan: "Luna",
-              perawat: "Rina",
-              dokter: "Dr Eko",
-              frontDesk: "Ratna",
-              jenisPerawatan: "TRM004 - Perawatan Kulit dan Bulu",
-              catatanMedis: "Jaga kebersihan kandang dan hewan ya!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '6a33b35c-9c8f-4ca0-9cf6-dce21e3d19a2' %}"
-            },
-            {
-              no: 5,
-              idKunjungan: "b6f8c3d2-e87a-4a1f-bc16-3c0a01837a8b",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c12",
-              namaHewan: "Bubbles",
-              perawat: "Indah",
-              dokter: "Dr Eko",
-              frontDesk: "Anwar",
-              jenisPerawatan: "TRM005 - Perawatan Luka Ringan",
-              catatanMedis: "Pemeliharaan tanda-tanda perubahan perilaku hewan!",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'b6f8c3d2-e87a-4a1f-bc16-3c0a01837a8b' %}"
-            },
-            {
-              no: 6,
-              idKunjungan: "d7d9097c-3c4a-40a-a84-b9ffc8302a36",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c13",
-              namaHewan: "Spike",
-              perawat: "Siti",
-              dokter: "Dr Agus",
-              frontDesk: "Budi",
-              jenisPerawatan: "TRM001 - Perawatan Gigi",
-              catatanMedis: "Cek kesehatan gigi hewan secara rutin ya!",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'd7d9097c-3c4a-40a-a84-b9ffc8302a36' %}"
-            },
-            {
-              no: 7,
-              idKunjungan: "01234567-89ab-cdef-0123-456789abcdef",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c14",
-              namaHewan: "Bella",
-              perawat: "Joao",
-              dokter: "Dr Sri",
-              frontDesk: "Dian",
-              jenisPerawatan: "TRM002 - Grooming",
-              catatanMedis: "Hewan perlu istirahat yang cukup setelah perawatan.",
-              updateUrl: "{% url 'treatments:n_update_treatment' '01234567-89ab-cdef-0123-456789abcdef' %}"
-            },
-            {
-              no: 8,
-              idKunjungan: "98765432-10fe-dcba-9876-54321fedcba",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c15",
-              namaHewan: "Sky",
-              perawat: "Mega",
-              dokter: "Dr Bambang",
-              frontDesk: "Ahmad",
-              jenisPerawatan: "TRM003 - Pemeriksaan Telinga",
-              catatanMedis: "Pastikan hewan tetap aktif dan bergerak!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '98765432-10fe-dcba-9876-54321fedcba' %}"
-            },
-            {
-              no: 9,
-              idKunjungan: "a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d0",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c16",
-              namaHewan: "Rocky",
-              perawat: "Rina",
-              dokter: "Dr Eko",
-              frontDesk: "Ratna",
-              jenisPerawatan: "TRM004 - Perawatan Kulit dan Bulu",
-              catatanMedis: "Jangan biarkan hewan makan antera kuras ekstrem!",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d0' %}"
-            },
-            {
-              no: 10,
-              idKunjungan: "87654321-fedc-ba98-7654-321fedcba98",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c17",
-              namaHewan: "Kiwi",
-              perawat: "Indah",
-              dokter: "Dr Eko",
-              frontDesk: "Anwar",
-              jenisPerawatan: "TRM005 - Perawatan Luka Ringan",
-              catatanMedis: "Pantau asupan perkembangan kondisi kesehatan hewan yaa",
-              updateUrl: "{% url 'treatments:n_update_treatment' '87654321-fedc-ba98-7654-321fedcba98' %}"
-            },
-            {
-              no: 11,
-              idKunjungan: "0ba7b810-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c18",
-              namaHewan: "Nemo",
-              perawat: "Siti",
-              dokter: "Dr Agus",
-              frontDesk: "Budi",
-              jenisPerawatan: "TRM001 - Perawatan Gigi",
-              catatanMedis: "Hewan perlu pemeriksaan rutin setiap 3 bulan sekali.",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b810-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 12,
-              idKunjungan: "0ba7b811-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c19",
-              namaHewan: "Axel",
-              perawat: "Joao",
-              dokter: "Dr Sri",
-              frontDesk: "Dian",
-              jenisPerawatan: "TRM002 - Grooming",
-              catatanMedis: "Jangan biarkan hewan mengonsumsi tubuhnya terlalu keras yaa",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b811-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 13,
-              idKunjungan: "0ba7b812-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c20",
-              namaHewan: "Milo",
-              perawat: "Mega",
-              dokter: "Dr Bambang",
-              frontDesk: "Ahmad",
-              jenisPerawatan: "TRM003 - Pemeriksaan Telinga",
-              catatanMedis: "Jaga kebersihan kulit dan bulu hewan!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b812-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 14,
-              idKunjungan: "0ba7b813-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c21",
-              namaHewan: "Polly",
-              perawat: "Hendra",
-              dokter: "Dr Rina",
-              frontDesk: "Ratna",
-              jenisPerawatan: "TRM004 - Perawatan Kulit dan Bulu",
-              catatanMedis: "Pastikan hewan mendapat vaksinasi yang diperlukan yaa",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b813-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 15,
-              idKunjungan: "0ba7b814-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c22",
-              namaHewan: "Puffy",
-              perawat: "Indah",
-              dokter: "Dr Eko",
-              frontDesk: "Anwar",
-              jenisPerawatan: "TRM005 - Perawatan Luka Ringan",
-              catatanMedis: "Hindari makanan yang dapat menyebabkan alergi pada hewan!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b814-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 16,
-              idKunjungan: "0ba7b815-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c23",
-              namaHewan: "Puffy",
-              perawat: "Siti",
-              dokter: "Dr Agus",
-              frontDesk: "Budi",
-              jenisPerawatan: "TRM001 - Perawatan Gigi",
-              catatanMedis: "Periksa kutu hewan secara rutin agar hewan tidak merasa dirinya ketika menggaruk tubuhnya.",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b815-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 17,
-              idKunjungan: "0ba7b816-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c24",
-              namaHewan: "Ginger",
-              perawat: "Joao",
-              dokter: "Dr Sri",
-              frontDesk: "Dian",
-              jenisPerawatan: "TRM002 - Grooming",
-              catatanMedis: "Jangan biarkan hewan terlalu lama di luar rumah!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b816-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 18,
-              idKunjungan: "0ba7b817-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c25",
-              namaHewan: "Quack",
-              perawat: "Mega",
-              dokter: "Dr Bambang",
-              frontDesk: "Ahmad",
-              jenisPerawatan: "TRM003 - Pemeriksaan Telinga",
-              catatanMedis: "Pastikan kandang hewan selalu bersih dan terang!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b817-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 19,
-              idKunjungan: "0ba7b818-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c26",
-              namaHewan: "Ranger",
-              perawat: "Rina",
-              dokter: "Dr Eko",
-              frontDesk: "Ratna",
-              jenisPerawatan: "TRM004 - Perawatan Kulit dan Bulu",
-              catatanMedis: "Pemeliharaan tanda-tanda stress pada hewan!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b818-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 20,
-              idKunjungan: "0ba7b819-9dad-11d1-80b4-00c04fd430c8",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c27",
-              namaHewan: "Rango",
-              perawat: "Indah",
-              dokter: "Dr Eko",
-              frontDesk: "Anwar",
-              jenisPerawatan: "TRM005 - Perawatan Luka Ringan",
-              catatanMedis: "Berikan makanan yang sesuai dengan usia hewan!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '0ba7b819-9dad-11d1-80b4-00c04fd430c8' %}"
-            },
-            {
-              no: 21,
-              idKunjungan: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c8",
-              namaHewan: "Finn",
-              perawat: "Siti",
-              dokter: "Dr Agus",
-              frontDesk: "Budi",
-              jenisPerawatan: "TRM001 - Perawatan Gigi",
-              catatanMedis: "Lakukan pemeriksaan kesehatan mulut hewan secara berkala!",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'f47ac10b-58cc-4372-a567-0e02b2c3d479' %}"
-            },
-            {
-              no: 22,
-              idKunjungan: "550e8400-e29b-41d4-a716-446655440000",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c9",
-              namaHewan: "Fin",
-              perawat: "Joao",
-              dokter: "Dr Sri",
-              frontDesk: "Dian",
-              jenisPerawatan: "TRM002 - Grooming",
-              catatanMedis: "Hewan perlu mendapatkan cukup waktu untuk bermain!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '550e8400-e29b-41d4-a716-446655440000' %}"
-            },
-            {
-              no: 23,
-              idKunjungan: "c3073b2a-9fc2-47b6-b358-1912aefc4442",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c10",
-              namaHewan: "Fresh",
-              perawat: "Mega",
-              dokter: "Dr Bambang",
-              frontDesk: "Ahmad",
-              jenisPerawatan: "TRM003 - Pemeriksaan Telinga",
-              catatanMedis: "Jangan biarkan hewan bermain dengan benda berbahaya!",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'c3073b2a-9fc2-47b6-b358-1912aefc4442' %}"
-            },
-            {
-              no: 24,
-              idKunjungan: "6a33b35c-9c8f-4ca0-9cf6-dce21e3d19a2",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c11",
-              namaHewan: "Skippy",
-              perawat: "Hendra",
-              dokter: "Dr Rina",
-              frontDesk: "Ratna",
-              jenisPerawatan: "TRM004 - Perawatan Kulit dan Bulu",
-              catatanMedis: "Periksa telinga hewan secara rutin!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '6a33b35c-9c8f-4ca0-9cf6-dce21e3d19a2' %}"
-            },
-            {
-              no: 25,
-              idKunjungan: "b6f8c3d2-e87a-4a1f-bc16-3c0a01837a8b",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c12",
-              namaHewan: "Flash",
-              perawat: "Indah",
-              dokter: "Dr Eko",
-              frontDesk: "Anwar",
-              jenisPerawatan: "TRM005 - Perawatan Luka Ringan",
-              catatanMedis: "Ketika hewan mendekati Anda dan pantingya, kamu segera bawa ke pet clinic yaa",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'b6f8c3d2-e87a-4a1f-bc16-3c0a01837a8b' %}"
-            },
-            {
-              no: 26,
-              idKunjungan: "d7d9097c-3c4a-40a-a84-b9ffc8302a36",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c13",
-              namaHewan: "Binky",
-              perawat: "Siti",
-              dokter: "Dr Agus",
-              frontDesk: "Budi",
-              jenisPerawatan: "TRM001 - Perawatan Gigi",
-              catatanMedis: "Hindari kontak hewan dengan hewan lain yang sakit!",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'd7d9097c-3c4a-40a-a84-b9ffc8302a36' %}"
-            },
-            {
-              no: 27,
-              idKunjungan: "01234567-89ab-cdef-0123-456789abcdef",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c14",
-              namaHewan: "Bruno",
-              perawat: "Joao",
-              dokter: "Dr Sri",
-              frontDesk: "Dian",
-              jenisPerawatan: "TRM002 - Grooming",
-              catatanMedis: "Pastikan hewan mendapatkan perawatan medis jika perlu!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '01234567-89ab-cdef-0123-456789abcdef' %}"
-            },
-            {
-              no: 28,
-              idKunjungan: "98765432-10fe-dcba-9876-54321fedcba",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c15",
-              namaHewan: "Buddy",
-              perawat: "Mega",
-              dokter: "Dr Bambang",
-              frontDesk: "Ahmad",
-              jenisPerawatan: "TRM003 - Pemeriksaan Telinga",
-              catatanMedis: "Pemeliharaan tanda-tanda kebersihan pada hewan!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '98765432-10fe-dcba-9876-54321fedcba' %}"
-            },
-            {
-              no: 29,
-              idKunjungan: "a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d0",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c16",
-              namaHewan: "Sally",
-              perawat: "Hendra",
-              dokter: "Dr Rina",
-              frontDesk: "Ratna",
-              jenisPerawatan: "TRM004 - Perawatan Kulit dan Bulu",
-              catatanMedis: "Jangan lupa memberikan perawatan gigi hewan secara teratur!",
-              updateUrl: "{% url 'treatments:n_update_treatment' 'a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d0' %}"
-            },
-            {
-              no: 30,
-              idKunjungan: "87654321-fedc-ba98-7654-321fedcba98",
-              idKlien: "6ba7b82c-9dad-11d1-80b4-00c04fd430c17",
-              namaHewan: "Rex",
-              perawat: "Indah",
-              dokter: "Dr Eko",
-              frontDesk: "Anwar",
-              jenisPerawatan: "TRM005 - Perawatan Luka Ringan",
-              catatanMedis: "Lakukan perawatan mental hewan dengan memberikan stimulasi yang cukup!",
-              updateUrl: "{% url 'treatments:n_update_treatment' '87654321-fedc-ba98-7654-321fedcba98' %}"
-            }
-          ];
-        }
         
-
         document.addEventListener('DOMContentLoaded', function() {
-            // Render the table initially
-            renderTreatmentTable();
-
-            // Get modal elements
-            const deleteModal = document.getElementById('deleteModal');
-            const deleteKunjunganEl = document.getElementById('deleteKunjungan');
-            const deletePerawatanEl = document.getElementById('deletePerawatan');
+            const urlParams = new URLSearchParams(window.location.search);
+            const highlightId = urlParams.get('highlight');
             
-            // Cancel delete button
+            if (highlightId) {
+                const highlightedRow = document.getElementById('treatment-' + highlightId);
+                if (highlightedRow) {
+                    highlightedRow.classList.add('highlight-row');
+                    setTimeout(() => {
+                        highlightedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                }
+            }
+        });
+            
             document.getElementById('cancelDelete').addEventListener('click', function() {
                 deleteModal.classList.add('hidden');
                 deleteModal.classList.remove('flex');
             });
             
-            // Confirm delete button
             document.getElementById('confirmDelete').addEventListener('click', function() {
-                // In a real app, you would make an AJAX request here
-                console.log(`Deleting treatment for kunjungan: ${currentKunjungan}`);
-                
-                // Remove from data array
-                const index = treatmentsData.findIndex(t => t.idKunjungan === currentKunjungan);
-                if (index !== -1) {
-                    treatmentsData.splice(index, 1);
-                    renderTreatmentTable(); // Re-render the table
+                if (currentKunjungan) {
+                    // Fixed URL - match the Django URL pattern
+                    fetch(`{% url 'treatments:n_delete_treatment' 'PLACEHOLDER' %}`.replace('PLACEHOLDER', encodeURIComponent(currentKunjungan)), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            window.location.reload();
+                        } else {
+                            alert('Gagal menghapus treatment: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat menghapus treatment');
+                    });
                 }
                 
-                // Hide the modal
                 deleteModal.classList.add('hidden');
                 deleteModal.classList.remove('flex');
-                
-                // Show success message
-                alert('Treatment berhasil dihapus!');
             });
-        });
-
-        function renderTreatmentTable() {
-            const tbody = document.getElementById('treatment-table-body');
-            tbody.innerHTML = '';
-
-            treatmentsData.forEach(treatment => {
-                const row = document.createElement('tr');
-                
-                row.innerHTML = `
-                    <td class="py-2 px-4 border-b">${treatment.no}</td>
-                    <td class="py-2 px-4 border-b">${treatment.idKunjungan}</td>
-                    <td class="py-2 px-4 border-b">${treatment.idKlien}</td>
-                    <td class="py-2 px-4 border-b">${treatment.namaHewan}</td>
-                    <td class="py-2 px-4 border-b">${treatment.perawat}</td>
-                    <td class="py-2 px-4 border-b">${treatment.dokter}</td>
-                    <td class="py-2 px-4 border-b">${treatment.frontDesk}</td>
-                    <td class="py-2 px-4 border-b">${treatment.jenisPerawatan}</td>
-                    <td class="py-2 px-4 border-b">${treatment.catatanMedis}</td>
-                    ${userRole === 'doctor' ? `<td class="py-2 px-4 border-b">
-                        <div class="flex space-x-2">
-                            <a href="${treatment.updateUrl}" class="bg-blue-800 text-white px-3 py-1 rounded-md text-sm">Update</a>
-                            <button 
-                                type="button"
-                                class="bg-red-500 text-white px-3 py-1 rounded-md text-sm delete-btn" 
-                                data-kunjungan="${treatment.idKunjungan}"
-                                data-perawatan="${treatment.jenisPerawatan.split(' - ')[0]}"
-                                onclick="showDeleteConfirmation('${treatment.idKunjungan}', '${treatment.jenisPerawatan.split(' - ')[0]}')"
-                            >Delete</button>
-                        </div>
-                    </td>` : ''}
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
-
-        // Function to show delete confirmation modal
         function showDeleteConfirmation(kunjunganId, perawatanId) {
-            // Set current kunjungan for delete operation
             currentKunjungan = kunjunganId;
             
-            // Update modal text
-            document.getElementById('deleteKunjungan').textContent = kunjunganId;
+            document.getElementById('deleteKunjungan').textContent = kunjunganId.split('|')[0];
             document.getElementById('deletePerawatan').textContent = perawatanId;
             
-            // Show the modal
             const deleteModal = document.getElementById('deleteModal');
             deleteModal.classList.remove('hidden');
             deleteModal.classList.add('flex');
         }
 
-        // Helper function to get CSRF token (for real AJAX requests)
+        // Helper function to get CSRF token (for AJAX requests)
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
