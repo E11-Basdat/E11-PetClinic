@@ -5,7 +5,44 @@
 {% block title %}List Kunjungan - Pet Clinic{% endblock %}
 
 {% block content %}
+<style>
+    @keyframes highlightFade {
+        0% { background-color: #fef3c7; }  /* Light yellow */
+        100% { background-color: transparent; }
+    }
+
+    .highlight-row {
+        animation: highlightFade 1s ease-out;
+    }
+
+    /* Message styles */
+    .message {
+        padding: 1rem;
+        margin: 0.5rem 2rem;
+        border-radius: 0.375rem;
+    }
+    .success {
+        background-color: #d1fae5;
+        border-left: 4px solid #059669;
+        color: #065f46;
+    }
+    .error {
+        background-color: #fee2e2;
+        border-left: 4px solid #dc2626;
+        color: #991b1b;
+    }
+</style>
+
 <div class="container mx-auto px-4 py-6 max-w-6xl text-sm">
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">
@@ -530,14 +567,25 @@ function showNotification(message, type) {
     
     setTimeout(() => notification.remove(), 3000);
 }
+
 document.addEventListener('DOMContentLoaded', function() {
     const tableBody = document.getElementById('visits-table-body');
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightId = urlParams.get('highlight');
     
     if (visitsData.visits && visitsData.visits.length > 0) {
         visitsData.visits.forEach((visit, index) => {
             const row = document.createElement('tr');
             row.setAttribute('data-id', visit.id_kunjungan);
             
+            // This will work for both new and updated visits
+            if (visit.id_kunjungan === highlightId) {
+                row.classList.add('highlight-row');
+                setTimeout(() => {
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+
             // Format timestamps
             const startTime = visit.timestamp_awal ? new Date(visit.timestamp_awal).toLocaleString('id-ID') : '-';
             const endTime = visit.timestamp_akhir ? new Date(visit.timestamp_akhir).toLocaleString('id-ID') : '-';

@@ -49,7 +49,8 @@ def get_list_vaccinations(request):
                    k.no_identitas_klien, k.no_dokter_hewan, v.kode as kode_vaksin
             FROM PETCLINIC.KUNJUNGAN k
             LEFT JOIN PETCLINIC.VAKSIN v ON k.kode_vaksin = v.kode
-            WHERE k.kode_vaksin IS NOT NULL
+            WHERE k.kode_vaksin IS NOT NULL 
+            AND timestamp_akhir IS NULL
             AND k.no_dokter_hewan = %s
             ORDER BY k.timestamp_awal DESC
         """, [doctor_id])
