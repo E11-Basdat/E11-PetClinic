@@ -1,8 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    @keyframes highlightFade {
+        0% { background-color: #fef3c7; }  /* Light yellow */
+        100% { background-color: transparent; }
+    }
+
+    .highlight-row {
+        animation: highlightFade 2s ease-out;
+        background-color: #fef3c7;  /* Set initial background color */
+    }
+</style>
+
 <!-- Add text-sm class to container -->
 <div class="container mx-auto px-4 py-6 text-sm">
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}bg-red-100 border-l-4 border-red-500 text-red-700{% else %}bg-green-100 border-l-4 border-green-500 text-green-700{% endif %} p-4 mb-2">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold">
             {% if user_role == 'client' %}
@@ -41,7 +62,11 @@
             </thead>
             <tbody>
                 {% for treatment in treatments %}
-                <tr>
+                <tr id="treatment-{{ treatment.id_kunjungan }}"
+                    {% if request.GET.highlight == treatment.id_kunjungan %}
+                    class="highlight-row"
+                    {% endif %}>
+
                     <td class="py-2 px-3 border-b">{{ forloop.counter }}</td>
                     <td class="py-2 px-3 border-b">{{ treatment.id_kunjungan }}</td>
                     {% if user_role != 'client' %}
@@ -98,9 +123,19 @@
         let currentKunjungan = '';
         
         document.addEventListener('DOMContentLoaded', function() {
-            const deleteModal = document.getElementById('deleteModal');
-            const deleteKunjunganEl = document.getElementById('deleteKunjungan');
-            const deletePerawatanEl = document.getElementById('deletePerawatan');
+            const urlParams = new URLSearchParams(window.location.search);
+            const highlightId = urlParams.get('highlight');
+            
+            if (highlightId) {
+                const highlightedRow = document.getElementById('treatment-' + highlightId);
+                if (highlightedRow) {
+                    highlightedRow.classList.add('highlight-row');
+                    setTimeout(() => {
+                        highlightedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                }
+            }
+        });
             
             document.getElementById('cancelDelete').addEventListener('click', function() {
                 deleteModal.classList.add('hidden');
