@@ -4,9 +4,11 @@ from django.db import connection
 import uuid
 from authentication.views import get_user_data
 from django.http import JsonResponse
+from django.db import DatabaseError
 from django.db import IntegrityError as DBIntegrityError
-import psycopg2            #  ← tambahkan
+import psycopg2            
 from psycopg2 import errors
+from psycopg2 import errors as pgerr
 
 
 # ===== JENIS HEWAN =====
@@ -65,7 +67,7 @@ def jenis_hewan_create(request):
             connection.rollback()                           # ← WAJIB
             # ambil pesan singkat (buang “ERROR:” & “CONTEXT:”)
             clean_msg = str(e).split('CONTEXT')[0]
-            messages.error(request, clean_msg.replace('ERROR:', '').strip())
+            messages.error(request, clean_msg, extra_tags='jenis_hewan')
             return redirect('animals:jenis_hewan_create')
     
     return render(request, 'jenis_hewan_form.html', {
@@ -479,33 +481,29 @@ def hewan_delete(request, nama, no_identitas_klien):
     if user_data['user_type'] != 'front_desk':
         messages.error(request, 'Anda tidak memiliki akses untuk menghapus hewan peliharaan.')
         return redirect('animals:hewan_list')
-    
+
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT COUNT(*) FROM petclinic.KUNJUNGAN 
-                WHERE nama_hewan = %s AND no_identitas_klien = %s AND timestamp_akhir IS NULL
-            """, [nama, no_identitas_klien])
-            active_visits = cursor.fetchone()[0]
-        
-        if active_visits > 0:
-            messages.error(request, 'Tidak dapat menghapus hewan peliharaan karena memiliki kunjungan aktif.')
-            return redirect('animals:hewan_list')
-        
         with connection.cursor() as cursor:
             cursor.execute(
                 "DELETE FROM petclinic.HEWAN WHERE nama = %s AND no_identitas_klien = %s",
                 [nama, no_identitas_klien]
             )
-        messages.success(request, 'Hewan peliharaan berhasil dihapus!')
-    
-    except errors.RaiseException as e:
-        messages.error(request, str(e).replace('ERROR:','').strip())
+        messages.success(request, 'Hewan peliharaan berhasil dihapus!', extra_tags='hewan')
 
+    except (pgerr.ModifyingSqlDataNotPermitted, pgerr.RaiseException, DatabaseError) as e:            
+        connection.rollback()
+
+        # ambil pesan utama & singkirkan “CONTEXT: …”
+        clean_msg = str(e).split('CONTEXT')[0]
+        messages.error(request, clean_msg, extra_tags='hewan')
+
+    # ------  error tak terduga lain  ------------------------------------------
     except Exception as e:
-        messages.error(request, f'Error: {e}')
-    
+        connection.rollback()
+        messages.error(request, f'Error: {e}', extra_tags='hewan')
+
     return redirect('animals:hewan_list')
+
 
 def hewan_confirm_delete(request, nama, no_identitas_klien):
     if not request.session.get('user_email'):
