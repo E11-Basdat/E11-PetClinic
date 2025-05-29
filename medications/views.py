@@ -730,7 +730,6 @@ def delete_prescription(request, kode_perawatan, kode_obat):
                     """, [kode_perawatan, kode_obat])
                     
                 except Exception as db_error:
-                    # If schema table doesn't exist, try without schema
                     if any(keyword in str(db_error).lower() for keyword in ['does not exist', 'relation', 'schema']):
                         try:
                             cursor.execute("""
@@ -739,29 +738,24 @@ def delete_prescription(request, kode_perawatan, kode_obat):
                             """, [kode_perawatan, kode_obat])
                             
                         except Exception as db_error2:
-                            # Handle any delete trigger errors dynamically
                             error_message = clean_error_message(str(db_error2))
                             print(f"Delete trigger error (no schema): {str(db_error2)}")
                             messages.error(request, f"Gagal menghapus resep: {error_message}")
                             return redirect('medications:prescription_list')
                     else:
-                        # Handle any delete trigger errors dynamically for schema version
                         error_message = clean_error_message(str(db_error))
                         print(f"Delete trigger error (with schema): {str(db_error)}")
                         messages.error(request, f"Gagal menghapus resep: {error_message}")
                         return redirect('medications:prescription_list')
                 
-                # Check if deletion was successful
                 if cursor.rowcount == 0:
                     messages.error(request, 'Resep tidak ditemukan atau sudah dihapus')
                     return redirect('medications:prescription_list')
         
-        # Success message
         messages.success(request, f"Resep {treatment_name} - {medicine_name} berhasil dihapus")
         return redirect('medications:prescription_list')
         
     except Exception as e:
-        # Handle any other unexpected errors
         error_message = clean_error_message(str(e))
         print(f"Unexpected error in delete_prescription: {str(e)}")
         messages.error(request, f"Gagal menghapus resep: {error_message}")
@@ -774,7 +768,6 @@ def delete_prescription_ajax(request, kode_perawatan, kode_obat):
     
     try:
         with connection.cursor() as cursor:
-            # Get prescription details
             try:
                 cursor.execute("""
                     SELECT po.kuantitas_obat, p.nama_perawatan, o.nama
@@ -796,7 +789,6 @@ def delete_prescription_ajax(request, kode_perawatan, kode_obat):
                 
             kuantitas_obat = result[0]
             
-            # Delete prescription
             try:
                 cursor.execute("""
                     DELETE FROM petclinic.perawatan_obat
@@ -808,7 +800,6 @@ def delete_prescription_ajax(request, kode_perawatan, kode_obat):
                     WHERE kode_perawatan = %s AND kode_obat = %s
                 """, [kode_perawatan, kode_obat])
             
-            # Restore stock
             try:
                 cursor.execute("""
                     UPDATE petclinic.obat 
