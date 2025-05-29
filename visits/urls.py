@@ -16,6 +16,7 @@ urlpatterns = [
     path('doctor/', views.doctor_view, name='doctor_view'),
     path('front-desk/', views.visit_list_fd, name='front_desk_view'),
     path('client/', views.client_view, name='client_view'),
+    path('nurse/', views.visit_list_nurse, name='nurse_view'),
     
     # API endpoints
     path('api/perawatan/', views.get_perawatan_options, name='get_perawatan_options'),

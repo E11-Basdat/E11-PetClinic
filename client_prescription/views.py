@@ -4,6 +4,9 @@ from django.db import connection
 from django.http import JsonResponse
 from django.core.serializers.json import DjangoJSONEncoder
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 def dictfetchall(cursor):
     """Convert cursor fetchall() to list of dictionaries"""
@@ -11,150 +14,127 @@ def dictfetchall(cursor):
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 def client_prescription(request):
-    """View for clients to see their own prescriptions based on treatments from their visits"""
+    """Fixed version of client prescription view"""
     user_email = request.session.get('user_email')
     user_type = request.session.get('user_type')
     
     if not user_email or user_type not in ['individu', 'perusahaan']:
         messages.error(request, 'Silakan login sebagai klien untuk melihat resep obat')
         return redirect('authentication:login')
-        
+    
     try:
         with connection.cursor() as cursor:
-            # Get client's prescriptions - hanya dari perawatan yang benar-benar dilakukan saat kunjungan
+            # Get client ID
+            cursor.execute("SELECT no_identitas FROM PETCLINIC.KLIEN WHERE email = %s", [user_email])
+            client_result = cursor.fetchone()
+            
+            if not client_result:
+                messages.error(request, 'Data klien tidak ditemukan')
+                return render(request, 'client_prescription.html', {
+                    'prescriptions': '[]',
+                    'user_email': user_email,
+                    'user_type': user_type
+                })
+            
+            client_no_identitas = client_result[0]
+            
             cursor.execute("""
-                SELECT 
+                SELECT DISTINCT
                     k.id_kunjungan,
                     k.nama_hewan,
                     k.timestamp_awal,
                     k.timestamp_akhir,
-                    
-                    -- Treatment information dari kunjungan keperawatan
-                    p.kode_perawatan,
+                    k.no_identitas_klien,
+                    kk.kode_perawatan,
                     p.nama_perawatan,
                     p.biaya_perawatan,
-                    
-                    -- Medicine information dari perawatan yang dipilih
-                    o.kode as kode_obat,
-                    o.nama as nama_obat,
-                    o.harga as harga_obat,
-                    o.stok as stok_obat,
-                    o.dosis,
-                    po.kuantitas_obat,
-                    
-                    -- Calculate total cost per medicine
-                    (o.harga * po.kuantitas_obat) as total_obat,
-                    
-                    -- Doctor information
-                    CASE 
-                        WHEN i_dokter.nama_depan IS NOT NULL THEN 
-                            CONCAT('dr. ', TRIM(CONCAT(
-                                COALESCE(i_dokter.nama_depan, ''), ' ', 
-                                COALESCE(i_dokter.nama_tengah, ''), ' ', 
-                                COALESCE(i_dokter.nama_belakang, '')
-                            )))
-                        WHEN per_dokter.nama_perusahaan IS NOT NULL THEN 
-                            CONCAT('dr. ', per_dokter.nama_perusahaan)
-                        ELSE CONCAT('dr. ', SPLIT_PART(u_dokter.email, '@', 1))
-                    END as nama_dokter,
-                    
-                    -- Visit status untuk memastikan kunjungan sudah selesai
-                    CASE 
-                        WHEN k.timestamp_akhir IS NOT NULL THEN 'selesai'
-                        ELSE 'berlangsung'
-                    END as status_kunjungan
-                    
+                    -- Doctor info (simplified)
+                    COALESCE(
+                        CONCAT('dr. ', i_dokter.nama_depan, ' ', COALESCE(i_dokter.nama_belakang, '')),
+                        CONCAT('dr. ', per_dokter.nama_perusahaan),
+                        'dr. Unknown'
+                    ) as nama_dokter
                 FROM PETCLINIC.KUNJUNGAN k
-                
-                -- Join dengan klien untuk filter berdasarkan email
-                JOIN PETCLINIC.KLIEN kl ON k.no_identitas_klien = kl.no_identitas
-                
-                -- Join dengan kunjungan keperawatan (perawatan yang dipilih klien)
                 JOIN PETCLINIC.KUNJUNGAN_KEPERAWATAN kk 
                     ON k.id_kunjungan = kk.id_kunjungan
                     AND k.nama_hewan = kk.nama_hewan
                     AND k.no_identitas_klien = kk.no_identitas_klien
-                
-                -- Join dengan perawatan untuk mendapatkan detail perawatan
                 JOIN PETCLINIC.PERAWATAN p
                     ON kk.kode_perawatan = p.kode_perawatan
-                
-                -- Join dengan perawatan_obat untuk mendapatkan obat yang terkait dengan perawatan tersebut
-                JOIN PETCLINIC.PERAWATAN_OBAT po
-                    ON p.kode_perawatan = po.kode_perawatan
-                
-                -- Join dengan obat untuk mendapatkan detail obat
-                JOIN PETCLINIC.OBAT o
-                    ON po.kode_obat = o.kode
-                
-                -- Joins untuk informasi dokter
+                -- Simplified doctor joins
                 LEFT JOIN PETCLINIC.DOKTER_HEWAN dh ON k.no_dokter_hewan = dh.no_dokter_hewan
-                LEFT JOIN PETCLINIC.TENAGA_MEDIS tm_dh ON dh.no_dokter_hewan = tm_dh.no_tenaga_medis
-                LEFT JOIN PETCLINIC.PEGAWAI p_dh ON tm_dh.no_tenaga_medis = p_dh.no_pegawai
-                LEFT JOIN PETCLINIC."USER" u_dokter ON p_dh.email_user = u_dokter.email
-                LEFT JOIN PETCLINIC.INDIVIDU i_dokter ON p_dh.no_pegawai = i_dokter.no_identitas_klien
-                LEFT JOIN PETCLINIC.PERUSAHAAN per_dokter ON p_dh.no_pegawai = per_dokter.no_identitas_klien
-                
-                -- Filter: hanya klien yang login dan kunjungan yang sudah selesai
-                WHERE kl.email = %s 
-                  AND k.timestamp_akhir IS NOT NULL  -- hanya kunjungan yang sudah selesai
-                  AND o.stok >= po.kuantitas_obat    -- pastikan stok obat mencukupi
-                
-                ORDER BY k.timestamp_awal DESC, p.nama_perawatan, o.nama
-            """, [user_email])
+                LEFT JOIN PETCLINIC.TENAGA_MEDIS tm ON dh.no_dokter_hewan = tm.no_tenaga_medis
+                LEFT JOIN PETCLINIC.PEGAWAI peg ON tm.no_tenaga_medis = peg.no_pegawai
+                LEFT JOIN PETCLINIC.INDIVIDU i_dokter ON peg.no_pegawai = i_dokter.no_identitas_klien
+                LEFT JOIN PETCLINIC.PERUSAHAAN per_dokter ON peg.no_pegawai = per_dokter.no_identitas_klien
+                WHERE k.no_identitas_klien = %s 
+                ORDER BY k.timestamp_awal DESC, p.nama_perawatan
+            """, [client_no_identitas])
             
-            prescriptions = dictfetchall(cursor)
+            treatments_data = dictfetchall(cursor)
             
-            # Group prescriptions by visit and treatment
-            grouped_prescriptions = {}
-            for prescription in prescriptions:
-                visit_key = f"{prescription['id_kunjungan']}-{prescription['nama_hewan']}"
-                treatment_key = prescription['kode_perawatan']
+            if not treatments_data:
+                return render(request, 'client_prescription.html', {
+                    'prescriptions': '[]',
+                    'user_email': user_email,
+                    'user_type': user_type
+                })
+            
+            prescription_dict = {}
+            
+            for treatment in treatments_data:
+                visit_key = f"{treatment['id_kunjungan']}-{treatment['nama_hewan']}"
+                treatment_key = treatment['kode_perawatan']
                 
-                if visit_key not in grouped_prescriptions:
-                    grouped_prescriptions[visit_key] = {
+                if visit_key not in prescription_dict:
+                    prescription_dict[visit_key] = {
                         'visit_info': {
-                            'id_kunjungan': prescription['id_kunjungan'],
-                            'nama_hewan': prescription['nama_hewan'],
-                            'timestamp_awal': prescription['timestamp_awal'],
-                            'timestamp_akhir': prescription['timestamp_akhir'],
-                            'nama_dokter': prescription['nama_dokter'],
-                            'status_kunjungan': prescription['status_kunjungan']
+                            'id_kunjungan': treatment['id_kunjungan'],
+                            'nama_hewan': treatment['nama_hewan'],
+                            'timestamp_awal': treatment['timestamp_awal'],
+                            'timestamp_akhir': treatment['timestamp_akhir'],
+                            'nama_dokter': treatment['nama_dokter'],
+                            'no_identitas_klien': treatment['no_identitas_klien']
                         },
                         'treatments': {}
                     }
                 
-                if treatment_key not in grouped_prescriptions[visit_key]['treatments']:
-                    grouped_prescriptions[visit_key]['treatments'][treatment_key] = {
+                if treatment_key not in prescription_dict[visit_key]['treatments']:
+                    prescription_dict[visit_key]['treatments'][treatment_key] = {
                         'treatment_info': {
-                            'kode_perawatan': prescription['kode_perawatan'],
-                            'nama_perawatan': prescription['nama_perawatan'],
-                            'biaya_perawatan': prescription['biaya_perawatan']
+                            'kode_perawatan': treatment['kode_perawatan'],
+                            'nama_perawatan': treatment['nama_perawatan'],
+                            'biaya_perawatan': treatment['biaya_perawatan']
                         },
                         'medicines': []
                     }
                 
-                # Add medicine to treatment
-                grouped_prescriptions[visit_key]['treatments'][treatment_key]['medicines'].append({
-                    'kode_obat': prescription['kode_obat'],
-                    'nama_obat': prescription['nama_obat'],
-                    'harga_obat': prescription['harga_obat'],
-                    'kuantitas_obat': prescription['kuantitas_obat'],
-                    'dosis': prescription['dosis'],
-                    'total_obat': prescription['total_obat'],
-                    'stok_tersedia': prescription['stok_obat']
-                })
+                cursor.execute("""
+                    SELECT 
+                        po.kode_obat,
+                        po.kuantitas_obat,
+                        o.nama as nama_obat,
+                        o.harga as harga_obat,
+                        o.dosis,
+                        o.stok as stok_tersedia,
+                        (o.harga * po.kuantitas_obat) as total_obat
+                    FROM PETCLINIC.PERAWATAN_OBAT po
+                    JOIN PETCLINIC.OBAT o ON po.kode_obat = o.kode
+                    WHERE po.kode_perawatan = %s
+                    ORDER BY o.nama
+                """, [treatment_key])
+                
+                medicines = dictfetchall(cursor)
+                prescription_dict[visit_key]['treatments'][treatment_key]['medicines'] = medicines
             
-            # Convert to list for template dengan perhitungan total yang benar
             prescription_list = []
-            for visit_key, visit_data in grouped_prescriptions.items():
+            for visit_key, visit_data in prescription_dict.items():
                 visit_total = 0
                 treatments_list = []
                 
                 for treatment_key, treatment_data in visit_data['treatments'].items():
-                    # Hitung total biaya treatment (biaya perawatan + biaya obat)
-                    treatment_cost = treatment_data['treatment_info']['biaya_perawatan']
-                    medicine_total = sum(med['total_obat'] for med in treatment_data['medicines'])
+                    treatment_cost = treatment_data['treatment_info']['biaya_perawatan'] or 0
+                    medicine_total = sum(med['total_obat'] or 0 for med in treatment_data['medicines'])
                     treatment_total = treatment_cost + medicine_total
                     
                     treatments_list.append({
@@ -173,20 +153,21 @@ def client_prescription(request):
                     'visit_total': visit_total
                 })
             
-            # Sort by most recent visits first
             prescription_list.sort(key=lambda x: x['visit_info']['timestamp_awal'], reverse=True)
             
-            # Convert to JSON for template
             prescriptions_json = json.dumps(prescription_list, cls=DjangoJSONEncoder)
+            
+            logger.info(f"Successfully processed {len(prescription_list)} visits for client {user_email}")
             
             return render(request, 'client_prescription.html', {
                 'prescriptions': prescriptions_json,
                 'user_email': user_email,
                 'user_type': user_type
             })
-
+    
     except Exception as e:
-        messages.error(request, f'Error loading prescriptions: {str(e)}')
+        logger.error(f'Error loading prescriptions for {user_email}: {str(e)}')
+        messages.error(request, f'Terjadi kesalahan saat memuat data resep obat: {str(e)}')
         return render(request, 'client_prescription.html', {
             'prescriptions': '[]',
             'user_email': user_email,
@@ -203,16 +184,27 @@ def get_prescription_detail(request):
     
     try:
         with connection.cursor() as cursor:
-            # Verify user owns this visit dan dapatkan detail lengkap
+            cursor.execute("""
+                SELECT no_identitas FROM PETCLINIC.KLIEN WHERE email = %s
+            """, [user_email])
+            
+            client_result = cursor.fetchone()
+            if not client_result:
+                return JsonResponse({'error': 'Data klien tidak ditemukan'}, status=404)
+            
+            client_no_identitas = client_result[0]
+            
             cursor.execute("""
                 SELECT 
                     k.id_kunjungan,
                     k.nama_hewan,
                     k.timestamp_awal,
                     k.timestamp_akhir,
+                    
                     p.nama_perawatan,
                     p.kode_perawatan,
                     p.biaya_perawatan,
+                    
                     o.nama as nama_obat,
                     o.kode as kode_obat,
                     o.dosis,
@@ -220,39 +212,69 @@ def get_prescription_detail(request):
                     po.kuantitas_obat,
                     (o.harga * po.kuantitas_obat) as total_obat,
                     
-                    -- Petunjuk penggunaan obat (bisa ditambahkan field ini di database)
+                    -- Usage instructions
                     CASE 
-                        WHEN o.dosis IS NOT NULL THEN 
-                            CONCAT('Dosis: ', o.dosis, ' per hari')
+                        WHEN o.dosis IS NOT NULL AND o.dosis != '' THEN 
+                            CONCAT('Dosis: ', o.dosis)
                         ELSE 'Ikuti petunjuk dokter'
-                    END as petunjuk_penggunaan
+                    END as petunjuk_penggunaan,
+                    
+                    -- Doctor name
+                    CASE 
+                        WHEN i_dokter.nama_depan IS NOT NULL THEN 
+                            CONCAT('dr. ', TRIM(CONCAT(
+                                COALESCE(i_dokter.nama_depan, ''), ' ', 
+                                COALESCE(i_dokter.nama_tengah, ''), ' ', 
+                                COALESCE(i_dokter.nama_belakang, '')
+                            )))
+                        WHEN per_dokter.nama_perusahaan IS NOT NULL THEN 
+                            CONCAT('dr. ', per_dokter.nama_perusahaan)
+                        ELSE CONCAT('dr. ', SPLIT_PART(u_dokter.email, '@', 1))
+                    END as nama_dokter
                     
                 FROM PETCLINIC.KUNJUNGAN k
-                JOIN PETCLINIC.KLIEN kl ON k.no_identitas_klien = kl.no_identitas
-                JOIN PETCLINIC.KUNJUNGAN_KEPERAWATAN kk ON k.id_kunjungan = kk.id_kunjungan
-                JOIN PETCLINIC.PERAWATAN p ON kk.kode_perawatan = p.kode_perawatan
-                JOIN PETCLINIC.PERAWATAN_OBAT po ON p.kode_perawatan = po.kode_perawatan
-                JOIN PETCLINIC.OBAT o ON po.kode_obat = o.kode
+                JOIN PETCLINIC.KUNJUNGAN_KEPERAWATAN kk 
+                    ON k.id_kunjungan = kk.id_kunjungan
+                JOIN PETCLINIC.PERAWATAN p 
+                    ON kk.kode_perawatan = p.kode_perawatan
+                JOIN PETCLINIC.PERAWATAN_OBAT po 
+                    ON p.kode_perawatan = po.kode_perawatan
+                JOIN PETCLINIC.OBAT o 
+                    ON po.kode_obat = o.kode
+                
+                -- Doctor information joins
+                LEFT JOIN PETCLINIC.DOKTER_HEWAN dh 
+                    ON k.no_dokter_hewan = dh.no_dokter_hewan
+                LEFT JOIN PETCLINIC.TENAGA_MEDIS tm_dh 
+                    ON dh.no_dokter_hewan = tm_dh.no_tenaga_medis
+                LEFT JOIN PETCLINIC.PEGAWAI p_dh 
+                    ON tm_dh.no_tenaga_medis = p_dh.no_pegawai
+                LEFT JOIN PETCLINIC."USER" u_dokter 
+                    ON p_dh.email_user = u_dokter.email
+                LEFT JOIN PETCLINIC.INDIVIDU i_dokter 
+                    ON p_dh.no_pegawai = i_dokter.no_identitas_klien
+                LEFT JOIN PETCLINIC.PERUSAHAAN per_dokter 
+                    ON p_dh.no_pegawai = per_dokter.no_identitas_klien
                 
                 WHERE k.id_kunjungan = %s 
-                  AND kl.email = %s
+                  AND k.no_identitas_klien = %s
                   AND k.timestamp_akhir IS NOT NULL
                 
                 ORDER BY p.nama_perawatan, o.nama
-            """, [visit_id, user_email])
+            """, [visit_id, client_no_identitas])
             
             results = dictfetchall(cursor)
             
             if not results:
                 return JsonResponse({'error': 'Data tidak ditemukan atau akses ditolak'}, status=404)
             
-            # Group by treatment
             treatments = {}
             visit_info = {
                 'id_kunjungan': results[0]['id_kunjungan'],
                 'nama_hewan': results[0]['nama_hewan'],
                 'timestamp_awal': results[0]['timestamp_awal'],
-                'timestamp_akhir': results[0]['timestamp_akhir']
+                'timestamp_akhir': results[0]['timestamp_akhir'],
+                'nama_dokter': results[0]['nama_dokter']
             }
             
             for row in results:
@@ -281,6 +303,7 @@ def get_prescription_detail(request):
             })
     
     except Exception as e:
+        logger.error(f'Error getting prescription detail: {str(e)}')
         return JsonResponse({'error': f'Terjadi kesalahan: {str(e)}'}, status=500)
 
 def get_prescription_summary(request):
@@ -292,7 +315,16 @@ def get_prescription_summary(request):
     
     try:
         with connection.cursor() as cursor:
-            # Get summary statistics
+            cursor.execute("""
+                SELECT no_identitas FROM PETCLINIC.KLIEN WHERE email = %s
+            """, [user_email])
+            
+            client_result = cursor.fetchone()
+            if not client_result:
+                return JsonResponse({'error': 'Data klien tidak ditemukan'}, status=404)
+            
+            client_no_identitas = client_result[0]
+            
             cursor.execute("""
                 SELECT 
                     COUNT(DISTINCT k.id_kunjungan) as total_kunjungan,
@@ -301,15 +333,18 @@ def get_prescription_summary(request):
                     COALESCE(SUM(p.biaya_perawatan + (o.harga * po.kuantitas_obat)), 0) as total_biaya
                     
                 FROM PETCLINIC.KUNJUNGAN k
-                JOIN PETCLINIC.KLIEN kl ON k.no_identitas_klien = kl.no_identitas
-                JOIN PETCLINIC.KUNJUNGAN_KEPERAWATAN kk ON k.id_kunjungan = kk.id_kunjungan
-                JOIN PETCLINIC.PERAWATAN p ON kk.kode_perawatan = p.kode_perawatan
-                JOIN PETCLINIC.PERAWATAN_OBAT po ON p.kode_perawatan = po.kode_perawatan
-                JOIN PETCLINIC.OBAT o ON po.kode_obat = o.kode
+                JOIN PETCLINIC.KUNJUNGAN_KEPERAWATAN kk 
+                    ON k.id_kunjungan = kk.id_kunjungan
+                JOIN PETCLINIC.PERAWATAN p 
+                    ON kk.kode_perawatan = p.kode_perawatan
+                JOIN PETCLINIC.PERAWATAN_OBAT po 
+                    ON p.kode_perawatan = po.kode_perawatan
+                JOIN PETCLINIC.OBAT o 
+                    ON po.kode_obat = o.kode
                 
-                WHERE kl.email = %s 
+                WHERE k.no_identitas_klien = %s 
                   AND k.timestamp_akhir IS NOT NULL
-            """, [user_email])
+            """, [client_no_identitas])
             
             summary = dictfetchall(cursor)[0]
             
@@ -319,4 +354,5 @@ def get_prescription_summary(request):
             })
     
     except Exception as e:
+        logger.error(f'Error getting prescription summary: {str(e)}')
         return JsonResponse({'error': f'Terjadi kesalahan: {str(e)}'}, status=500)

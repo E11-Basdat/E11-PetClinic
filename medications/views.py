@@ -617,10 +617,8 @@ def add_prescription(request):
                 messages.error(request, "Kuantitas obat harus berupa angka yang valid")
                 return redirect('medications:prescription_list')
             
-            # Use transaction to ensure data integrity
             with transaction.atomic():
                 with connection.cursor() as cursor:
-                    # Check if prescription already exists - try with schema first
                     try:
                         cursor.execute("""
                             SELECT COUNT(*)
@@ -638,7 +636,6 @@ def add_prescription(request):
                         messages.error(request, "Resep untuk kombinasi perawatan dan obat ini sudah ada")
                         return redirect('medications:prescription_list')
                     
-                    # Insert prescription - triggers will handle ALL validation
                     try:
                         cursor.execute("""
                             INSERT INTO petclinic.perawatan_obat (kode_perawatan, kode_obat, kuantitas_obat)
@@ -654,13 +651,11 @@ def add_prescription(request):
                                 """, [kode_perawatan, kode_obat, kuantitas_obat])
                                 
                             except Exception as db_error2:
-                                # This is where trigger errors will be caught
                                 error_message = clean_error_message(str(db_error2))
                                 print(f"Database trigger error (no schema): {str(db_error2)}")
                                 messages.error(request, error_message)
                                 return redirect('medications:prescription_list')
                         else:
-                            # This is where trigger errors will be caught for schema version
                             error_message = clean_error_message(str(db_error))
                             print(f"Database trigger error (with schema): {str(db_error)}")
                             messages.error(request, error_message)
@@ -718,11 +713,9 @@ def delete_prescription(request, kode_perawatan, kode_obat):
                     messages.error(request, 'Resep yang akan dihapus tidak ditemukan')
                     return redirect('medications:prescription_list')
                 
-                # Prepare names for success message
                 treatment_name = prescription_info[1] if len(prescription_info) >= 2 and prescription_info[1] else f'Treatment {kode_perawatan}'
                 medicine_name = prescription_info[2] if len(prescription_info) >= 3 and prescription_info[2] else f'Medicine {kode_obat}'
                 
-                # Delete prescription - any triggers for deletion will be handled here
                 try:
                     cursor.execute("""
                         DELETE FROM petclinic.perawatan_obat
@@ -730,7 +723,6 @@ def delete_prescription(request, kode_perawatan, kode_obat):
                     """, [kode_perawatan, kode_obat])
                     
                 except Exception as db_error:
-                    # If schema table doesn't exist, try without schema
                     if any(keyword in str(db_error).lower() for keyword in ['does not exist', 'relation', 'schema']):
                         try:
                             cursor.execute("""
@@ -739,29 +731,24 @@ def delete_prescription(request, kode_perawatan, kode_obat):
                             """, [kode_perawatan, kode_obat])
                             
                         except Exception as db_error2:
-                            # Handle any delete trigger errors dynamically
                             error_message = clean_error_message(str(db_error2))
                             print(f"Delete trigger error (no schema): {str(db_error2)}")
                             messages.error(request, f"Gagal menghapus resep: {error_message}")
                             return redirect('medications:prescription_list')
                     else:
-                        # Handle any delete trigger errors dynamically for schema version
                         error_message = clean_error_message(str(db_error))
                         print(f"Delete trigger error (with schema): {str(db_error)}")
                         messages.error(request, f"Gagal menghapus resep: {error_message}")
                         return redirect('medications:prescription_list')
                 
-                # Check if deletion was successful
                 if cursor.rowcount == 0:
                     messages.error(request, 'Resep tidak ditemukan atau sudah dihapus')
                     return redirect('medications:prescription_list')
         
-        # Success message
         messages.success(request, f"Resep {treatment_name} - {medicine_name} berhasil dihapus")
         return redirect('medications:prescription_list')
         
     except Exception as e:
-        # Handle any other unexpected errors
         error_message = clean_error_message(str(e))
         print(f"Unexpected error in delete_prescription: {str(e)}")
         messages.error(request, f"Gagal menghapus resep: {error_message}")
@@ -774,7 +761,6 @@ def delete_prescription_ajax(request, kode_perawatan, kode_obat):
     
     try:
         with connection.cursor() as cursor:
-            # Get prescription details
             try:
                 cursor.execute("""
                     SELECT po.kuantitas_obat, p.nama_perawatan, o.nama
@@ -796,7 +782,6 @@ def delete_prescription_ajax(request, kode_perawatan, kode_obat):
                 
             kuantitas_obat = result[0]
             
-            # Delete prescription
             try:
                 cursor.execute("""
                     DELETE FROM petclinic.perawatan_obat
@@ -808,7 +793,6 @@ def delete_prescription_ajax(request, kode_perawatan, kode_obat):
                     WHERE kode_perawatan = %s AND kode_obat = %s
                 """, [kode_perawatan, kode_obat])
             
-            # Restore stock
             try:
                 cursor.execute("""
                     UPDATE petclinic.obat 
