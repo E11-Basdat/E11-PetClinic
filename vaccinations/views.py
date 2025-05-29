@@ -15,7 +15,7 @@ def dokter_required(view_func):
         
         if not request.session.get('user_email'):
             messages.error(request, "Silakan login terlebih dahulu.")
-            return redirect('login')
+            return redirect('authentication:login')
         
         if request.session.get('user_type') != 'dokter':
             messages.error(request, "Anda tidak memiliki akses ke halaman ini.")
@@ -127,7 +127,7 @@ def perawat_required(view_func):
         
         if not request.session.get('user_email'):
             messages.error(request, "Silakan login terlebih dahulu.")
-            return redirect('login')
+            return redirect('authentication:login')
         
         if request.session.get('user_type') != 'perawat':
             messages.error(request, "Anda tidak memiliki akses ke halaman ini.")
@@ -541,7 +541,7 @@ def klien_required(view_func):
         
         if not request.session.get('user_email'):
             messages.error(request, "Silakan login terlebih dahulu.")
-            return redirect('login')
+            return redirect('authentication:login')
         
         user_type = request.session.get('user_type')
         if user_type != 'individu' and user_type != 'perusahaan':
