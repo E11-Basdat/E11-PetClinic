@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Saya{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="w-full">
+        <div class="bg-white/80 rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="bg-white/20 text-center">
+                <h1 class="text-stone-900 text-2xl font-bold pt-5 py-5">DATA KLIEN SAYA</h1>
+            </div>
+            
+            {% if messages %}
+            <div class="messages p-4">
+                {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}bg-red-100 border-l-4 border-red-500 text-red-700{% elif message.tags == 'success' %}bg-stone-100 border-l-4 border-stone-500 text-stone-700{% else %}bg-stone-50 border-l-4 border-stone-400 text-stone-600{% endif %} p-4 mb-3 rounded">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="p-5">
+                <div class="mb-6 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-stone-800">Informasi Pribadi</h2>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="font-semibold text-gray-700">Nomor Identitas</p>
+                        <p>{{ client.no_identitas }}</p>
+                    </div>
+                    <div>
+                        {% if client.jenis == 'Individu' %}
+                        <p class="font-semibold text-gray-700">Nama Lengkap</p>
+                        {% else %}
+                        <p class="font-semibold text-gray-700">Nama Perusahaan</p>
+                        {% endif %}
+                        <p>{{ client.nama }}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-700">Email</p>
+                        <p>{{ client.email }}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-700">Alamat</p>
+                        <p>{{ client.alamat }}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-700">Nomor Telepon</p>
+                        <p>{{ client.nomor_telepon }}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-700">Tanggal Registrasi</p>
+                        <p>{{ client.tanggal_registrasi }}</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold text-stone-800 mb-4">Daftar Hewan Peliharaan Saya</h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full border-collapse text-sm text-center">
+                            <thead>
+                                <tr>
+                                    <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">No</th>
+                                    <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Nama</th>
+                                    <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Jenis</th>
+                                    <th class="border border-stone-300 p-3 bg-stone-300/90 font-semibold text-center">Tanggal Lahir</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pet in pets %}
+                                <tr class="{% cycle '' 'bg-gray-50' %}">
+                                    <td class="border border-stone-300 p-3">{{ forloop.counter }}</td>
+                                    <td class="border border-stone-300 p-3">{{ pet.nama }}</td>
+                                    <td class="border border-stone-300 p-3">{{ pet.jenis }}</td>
+                                    <td class="border border-stone-300 p-3">{{ pet.tanggal_lahir }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center border border-stone-300 p-4">Anda belum memiliki hewan peliharaan yang terdaftar</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
